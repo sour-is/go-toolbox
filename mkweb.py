@@ -5,8 +5,6 @@ import sys
 import glob
 from pprint import pprint
 
-pfx = "sour.is/go/"
-
 tpl = """
 <!DOCTYPE html>
 <html>
@@ -32,15 +30,14 @@ def mk_github(name, source):
 
 
 lis = []
-with open("CANNONICAL_NAMES.txt", 'r') as fd:
-    for line in fd.readlines():
-        name, source = line.split()
-        subdirs = set()
-        for filename in glob.iglob(name[len(pfx):] + '/**/*.go', recursive=True):
-            subdirs.add(os.path.dirname(filename))
+name, source = "sour.is/go", "github.com/sour-is/go-toolbox"
 
-        for d in subdirs:
-            lis.append((pfx + d, name, source))
+subdirs = set()
+for filename in glob.iglob('**/*.go', recursive=True):
+    subdirs.add(os.path.dirname(filename))
+
+    for d in subdirs:
+        lis.append((name + "/" + d, name, source))
 
 for path, name, source in lis:
     os.makedirs(path, exist_ok=True)

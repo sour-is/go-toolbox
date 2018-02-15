@@ -74,6 +74,14 @@ type Asset struct {
 }
 
 func Migrate(a Asset) (err error) {
+	if viper.IsSet("database") {
+		pfx := "db." + viper.GetString("database")
+		if !viper.GetBool(pfx) {
+			log.Info("Migration is disabled.")
+			return
+		}
+	}
+
 	err = Transaction(func(tx *sql.Tx) (err error) {
 
 		if _, err = tx.Exec(sqlschema); err != nil {

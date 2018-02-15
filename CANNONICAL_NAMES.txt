@@ -1,5 +1,0 @@
-sour.is/go/dbm              github.com/sour-is/go-toolbox/dbm
-sour.is/go/httpsrv          github.com/sour-is/go-toolbox/httpsrv
-sour.is/go/ident            github.com/sour-is/go-toolbox/ident
-sour.is/go/log              github.com/sour-is/go-toolbox/log
-sour.is/go/uuid             github.com/sour-is/go-toolbox/uuid
