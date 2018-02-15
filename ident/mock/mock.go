@@ -1,9 +1,9 @@
-package mock
+package mock // sour.is/go/ident/mock
 
 import "fmt"
 import "net/http"
 import "hash/crc32"
-import "sour.is/x/ident"
+import "sour.is/go/ident"
 
 func init() {
 	ident.Register("mock", CheckMock)

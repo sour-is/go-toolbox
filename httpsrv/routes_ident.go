@@ -1,12 +1,10 @@
-package httpsrv
+package httpsrv // import "sour.is/go/httpsrv"
 
 import (
 	"net/http"
-	"sour.is/x/ident"
-	_ "sour.is/x/ident/header"
-	_ "sour.is/x/ident/mock"
-	_ "sour.is/x/ident/rubicon"
 	"strings"
+
+	"sour.is/go/ident"
 )
 
 type IdentRoute struct {

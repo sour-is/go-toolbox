@@ -1,4 +1,17 @@
-package dbm // import "sour.is/x/dbm"
+package dbm // import "sour.is/go/dbm"
+
+/*
+Include the driver in your main package.
+
+```
+import (
+	_ "github.com/go-sql-driver/mysql"
+	_ "github.com/lib/pq"
+	_ "github.com/mattn/go-sqlite3"
+)
+```
+
+*/
 
 import (
 	"database/sql"
@@ -10,13 +23,9 @@ import (
 	"strings"
 	"sync"
 
-	//	_ "github.com/go-sql-driver/mysql"
-	//	_ "github.com/lib/pq"
-	//	_ "github.com/mattn/go-sqlite3"
-
 	"github.com/spf13/viper"
-	"sour.is/x/log"
-	"sour.is/x/uuid"
+	"sour.is/go/log"
+	"sour.is/go/uuid"
 )
 
 var db *sql.DB

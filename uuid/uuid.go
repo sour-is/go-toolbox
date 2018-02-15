@@ -1,4 +1,4 @@
-package uuid // import "sour.is/x/uuid"
+package uuid // import "sour.is/go/uuid"
 
 import (
 	"crypto/rand"

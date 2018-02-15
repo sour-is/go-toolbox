@@ -1,13 +1,14 @@
-package httpsrv
+package httpsrv // import "sour.is/go/httpsrv"
 
 import (
-	"github.com/spf13/viper"
 	"net/http"
 	"os"
-	"sour.is/x/ident"
-	"sour.is/x/log"
-	"sour.is/x/uuid"
 	"time"
+
+	"github.com/spf13/viper"
+	"sour.is/go/ident"
+	"sour.is/go/log"
+	"sour.is/go/uuid"
 )
 
 var accessLog = log.New(os.Stdout, "", log.Ldate|log.Ltime|log.LUTC)

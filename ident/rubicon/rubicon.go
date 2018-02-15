@@ -1,13 +1,14 @@
-package rubicon
+package rubicon // sour.is/go/ident/rubicon
 
 import (
 	"encoding/json"
-	"github.com/patrickmn/go-cache"
 	"io/ioutil"
 	"net"
 	"net/http"
-	"sour.is/x/ident"
 	"time"
+
+	"github.com/patrickmn/go-cache"
+	"sour.is/go/ident"
 )
 
 var store *cache.Cache

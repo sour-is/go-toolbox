@@ -1,9 +1,22 @@
-package ident // import "sour.is/x/ident"
+package ident // import "sour.is/go/ident"
+
+/*
+Include the desired drivers for ident in your main package.
+
+import (
+	_ "sour.is/go/ident/header"
+	_ "sour.is/go/ident/mock"
+	_ "sour.is/go/ident/rubicon"
+	_ "sour.is/go/ident/session"
+)
+
+*/
 
 import (
 	"net/http"
-	"sour.is/x/log"
 	"strings"
+
+	"sour.is/go/log"
 )
 
 type Ident interface {
@@ -60,6 +73,7 @@ type NullUser struct {
 	Name   string `json:"name"`
 	Active bool   `json:"active"`
 }
+
 func NewNullUser(ident, aspect, name string, active bool) Ident {
 	return NullUser{ident, aspect, name, active}
 }

@@ -1,4 +1,4 @@
-package httpsrv // import "sour.is/x/httpsrv"
+package httpsrv // import "sour.is/go/httpsrv"
 
 import (
 	"fmt"

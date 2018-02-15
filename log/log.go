@@ -1,4 +1,4 @@
-package log // import "sour.is/x/log"
+package log // import "sour.is/go/log"
 
 import (
 	"fmt"
@@ -6,9 +6,9 @@ import (
 	"log"
 	"math/rand"
 	"os"
+	"strings"
 	"sync"
 	"time"
-	"strings"
 )
 
 const (
@@ -134,7 +134,6 @@ func Fatalf(format string, v ...interface{}) {
 	}
 	os.Exit(1)
 }
-
 
 // Panic is equivalent to Print() followed by a call to panic().
 func Panic(v ...interface{}) {
