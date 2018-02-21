@@ -9,9 +9,11 @@ import (
 	"sour.is/go/ident"
 	"sour.is/go/log"
 	"sour.is/go/uuid"
+
+	stdlog "log"
 )
 
-var accessLog = log.New(os.Stdout, "", log.Ldate|log.Ltime|log.LUTC)
+var accessLog = stdlog.New(os.Stdout, "", log.Ldate|log.Ltime|log.LUTC)
 
 func Wrapper(inner http.HandlerFunc, name string) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {

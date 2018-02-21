@@ -12,28 +12,47 @@ import (
 )
 
 const (
-	Ldate         = 1 << iota     // the date in the local time zone: 2009/01/23
-	Ltime                         // the time in the local time zone: 01:23:23
-	Lmicroseconds                 // microsecond resolution: 01:23:23.123123.  assumes Ltime.
-	Llongfile                     // full file name and line number: /a/b/c/d.go:23
-	Lshortfile                    // final file name element and line number: d.go:23. overrides Llongfile
-	LUTC                          // if Ldate or Ltime is set, use UTC rather than the local time zone
-	LstdFlags     = Ldate | Ltime // initial values for the standard logger
+	Ldate         = 1 << iota            // the date in the local time zone: 2009/01/23
+	Ltime                                // the time in the local time zone: 01:23:23
+	Lmicroseconds                        // microsecond resolution: 01:23:23.123123.  assumes Ltime.
+	Llongfile                            // full file name and line number: /a/b/c/d.go:23
+	Lshortfile                           // final file name element and line number: d.go:23. overrides Llongfile
+	LUTC                                 // if Ldate or Ltime is set, use UTC rather than the local time zone
+	LstdFlags     = Ldate | Ltime | LUTC // initial values for the standard logger
 )
 
 const (
-	Freset    = "\x1B[0m"
-	Fprefix   = "\x1B[90m"
-	Fdebug    = "\x1B[90mDBUG " + Fprefix + "] "
-	Finfo     = "\x1B[34mINFO " + Fprefix + "] "
-	Fnotice   = "\x1B[32mNOTE " + Freset + "] "
-	Fwarning  = "\x1B[93mWARN " + Fprefix + "] "
-	Ferror    = "\x1B[91mERR  " + Freset + "] "
-	Fcritical = "\x1B[7;91;49mCRIT " + Freset + "] "
-	Fcontinue = "\x1B[90m.... " + Fprefix + "] "
+	Tdebug    = "DBUG"
+	Tinfo     = "INFO"
+	Tnotice   = "NOTE"
+	Twarning  = "WARN"
+	Terror    = "ERR "
+	Tcritical = "CRIT"
+	Tcontinue = "...."
+
+	Creset    = "\x1B[0m"
+	Cprefix   = "\x1B[90m"
+	Cdebug    = "\x1B[90m" + Tdebug + " " + Cprefix + "] "
+	Cinfo     = "\x1B[34m" + Tinfo + " " + Cprefix + "] "
+	Cnotice   = "\x1B[32m" + Tnotice + " " + Creset + "] "
+	Cwarning  = "\x1B[93m" + Twarning + " " + Cprefix + "] "
+	Cerror    = "\x1B[91m" + Terror + " " + Creset + "] "
+	Ccritical = "\x1B[7;91;49m" + Tcritical + " " + Creset + "] "
+	Ccontinue = "\x1B[90m" + Tcontinue + " " + Cprefix + "] "
+
+	Mreset    = ""
+	Mprefix   = ""
+	Mdebug    = Tdebug + " ] "
+	Minfo     = Tinfo + " ] "
+	Mnotice   = Tnotice + " ] "
+	Mwarning  = Twarning + " ] "
+	Merror    = Terror + " ] "
+	Mcritical = Tcritical + " ] "
+	Mcontinue = Tcontinue + " ] "
 )
 
 const (
+	Vnone     = 0
 	Vcritical = 1 << iota
 	Verror
 	Vwarning
@@ -42,7 +61,17 @@ const (
 	Vdebug
 )
 
-var std = log.New(os.Stderr, Fprefix, Ldate|Ltime|LUTC)
+var Freset = Creset
+var Fprefix = Cprefix
+var Fdebug = Cdebug
+var Finfo = Cinfo
+var Fnotice = Cnotice
+var Fwarning = Cwarning
+var Ferror = Cerror
+var Fcritical = Ccritical
+var Fcontinue = Ccontinue
+
+var std = log.New(os.Stderr, Fprefix, LstdFlags)
 var mu = sync.Mutex{}
 var verb int = Vnotice
 
@@ -50,10 +79,6 @@ func init() {
 	rand.Seed(time.Now().UnixNano())
 	i := rand.Int()
 	Print(strings.Join(souris[i%len(souris)], "\n"))
-}
-
-func New(out io.Writer, prefix string, flag int) *log.Logger {
-	return log.New(out, prefix, flag)
 }
 
 // SetOutput sets the output destination for the standard logger.
@@ -65,21 +90,40 @@ func SetOutput(w io.Writer) {
 func SetFlags(flag int) {
 	std.SetFlags(flag)
 }
+func Flags() (flag int) {
+	return std.Flags()
+}
+
+func SetColor(on bool) {
+	mu.Lock()
+	defer mu.Unlock()
+	if on {
+		Freset = Creset
+		Fprefix = Cprefix
+		Fdebug = Cdebug
+		Finfo = Cinfo
+		Fnotice = Cnotice
+		Fwarning = Cwarning
+		Ferror = Cerror
+		Fcritical = Ccritical
+		Fcontinue = Ccontinue
+	} else {
+		Freset = Mreset
+		Fprefix = Mprefix
+		Fdebug = Mdebug
+		Finfo = Minfo
+		Fnotice = Mnotice
+		Fwarning = Mwarning
+		Ferror = Merror
+		Fcritical = Mcritical
+		Fcontinue = Mcontinue
+	}
+}
 
 func SetVerbose(v int) {
 	mu.Lock()
 	defer mu.Unlock()
 	verb = v
-}
-
-// Prefix returns the output prefix for the standard logger.
-func Prefix() string {
-	return std.Prefix()
-}
-
-// SetPrefix sets the output prefix for the standard logger.
-func SetPrefix(prefix string) {
-	std.SetPrefix(prefix)
 }
 
 // These functions write to the standard logger.

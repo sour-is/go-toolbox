@@ -33,7 +33,7 @@ type IdentConfigs map[string]IdentConfig
 type IdentHandler func(r *http.Request) Ident
 
 var IdentSet = make(map[string]IdentHandler)
-var Config = IdentConfigs{"mock": {"identity": "mockuser", "aspect": "mock", "display_name": "MockUser"}}
+var Config = IdentConfigs{}
 
 func Register(name string, id IdentHandler) {
 	name = strings.ToLower(name)
@@ -53,7 +53,7 @@ func GetIdent(authList string, r *http.Request) Ident {
 		var ok bool
 
 		if i, ok = IdentSet[name]; !ok {
-			log.Fatalf("GetIdentity Plugin [%s] does not exist!", name)
+			log.Errorf("GetIdentity Plugin [%s] does not exist!", name)
 			panic("GetIdentity Plugin does not exist!")
 		}
 
@@ -74,7 +74,7 @@ type NullUser struct {
 	Active bool   `json:"active"`
 }
 
-func NewNullUser(ident, aspect, name string, active bool) Ident {
+func NewNullUser(ident, aspect, name string, active bool) NullUser {
 	return NullUser{ident, aspect, name, active}
 }
 func (m NullUser) GetIdentity() string {
@@ -94,4 +94,9 @@ func (m NullUser) IsActive() bool {
 }
 func (m NullUser) GetDisplay() string {
 	return m.Name
+}
+func (m NullUser) MakeHandlerFunc() func(r *http.Request) Ident {
+	return func(r *http.Request) Ident {
+		return m
+	}
 }

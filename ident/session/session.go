@@ -50,7 +50,7 @@ func CheckSession(r *http.Request) ident.Ident {
 
 	if user, ok := store.Get(id); ok == true {
 		u := user.(User)
-		store.Set(id, u, cache.DefaultExpiration)
+		store.SetDefault(id, u)
 
 		return u
 	}
@@ -68,7 +68,7 @@ func NewSession(ident, aspect, display string) (id string) {
 		true,
 	}
 
-	store.Set(id, u, cache.DefaultExpiration)
+	store.SetDefault(id, u)
 
 	return
 }

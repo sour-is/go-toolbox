@@ -25,7 +25,7 @@ func CheckMock(r *http.Request) ident.Ident {
 
 	crc := crc32.ChecksumIEEE([]byte(r.RemoteAddr))
 
-	return MockUser{
+	return NewMock(
 		c["identity"],
 		c["aspect"],
 		fmt.Sprintf("%s-%s-%x",
@@ -33,9 +33,9 @@ func CheckMock(r *http.Request) ident.Ident {
 			r.RemoteAddr,
 			crc,
 		),
-		true,
-	}
+		true)
 }
+
 func (m MockUser) GetIdentity() string {
 	return m.ident
 }

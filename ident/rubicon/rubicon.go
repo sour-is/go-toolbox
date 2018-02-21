@@ -86,7 +86,7 @@ func NewRubicon(r *http.Request) ident.Ident {
 		}
 	}
 
-	store.Set(id, u, cache.DefaultExpiration)
+	store.SetDefault(id, u)
 
 	return User{
 		u.UserName,

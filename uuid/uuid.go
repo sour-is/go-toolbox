@@ -7,11 +7,13 @@ import (
 	"time"
 )
 
+const NilUuid = "00000000-0000-0000-0000-000000000000"
+
 func V4() string {
 	b := make([]byte, 16)
 	_, err := rand.Read(b)
 	if err != nil {
-		fmt.Println("error:", err)
+		return NilUuid
 	}
 
 	// this make sure that the 13th character is "4"
