@@ -1,4 +1,4 @@
-package httpsrv // import "sour.is/go/httpsrv"
+package httpsrv // import "sour.is/x/toolbox/httpsrv"
 
 import (
 	"fmt"
@@ -10,8 +10,8 @@ import (
 	"github.com/gorilla/mux"
 	"github.com/spf13/viper"
 	"golang.org/x/net/context"
-	"sour.is/go/ident"
-	"sour.is/go/log"
+	"sour.is/x/toolbox/ident"
+	"sour.is/x/toolbox/log"
 )
 
 // Example Usage
@@ -86,10 +86,11 @@ func NewRouter() *mux.Router {
 		}
 	}
 
-	if viper.IsSet("http.identity") {
-		identity := viper.GetString("http.identity")
-		idm := viper.GetStringMapString("idm." + identity)
-		ident.RegisterConfig(identity, idm)
+	if viper.IsSet("idm") {
+		lis := viper.GetStringMapString("idm")
+		for idm, _ := range lis {
+			ident.RegisterConfig(idm, viper.GetStringMapString("idm."+idm))
+		}
 	}
 
 	for name, fn := range modules {

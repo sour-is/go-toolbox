@@ -1,4 +1,4 @@
-package log // import "sour.is/go/log"
+package log // import "sour.is/x/toolbox/log"
 
 import (
 	"fmt"
@@ -73,9 +73,9 @@ var Fcontinue = Ccontinue
 
 var std = log.New(os.Stderr, Fprefix, LstdFlags)
 var mu = sync.Mutex{}
-var verb int = Vnotice
+var verb int = Vnone
 
-func init() {
+func StartupBanner() {
 	rand.Seed(time.Now().UnixNano())
 	i := rand.Int()
 	Print(strings.Join(souris[i%len(souris)], "\n"))

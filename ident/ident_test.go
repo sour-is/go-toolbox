@@ -1,4 +1,4 @@
-package ident // sour.is/go/ident
+package ident // import "sour.is/x/toolbox/ident"
 
 import (
 	"net/http"

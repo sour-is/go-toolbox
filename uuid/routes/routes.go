@@ -1,11 +1,11 @@
-package routes // sour.is/go/uuid/routes
+package routes // import "sour.is/x/toolbox/uuid/routes"
 
 import (
 	"fmt"
 	"net/http"
 
-	"sour.is/go/httpsrv"
-	"sour.is/go/uuid"
+	"sour.is/x/toolbox/httpsrv"
+	"sour.is/x/toolbox/uuid"
 )
 
 func init() {

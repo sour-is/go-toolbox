@@ -1,4 +1,4 @@
-package rubicon
+package rubicon // import "sour.is/x/toolbox/ident/rubicon"
 
 import (
 	"io"
@@ -8,11 +8,9 @@ import (
 	"strings"
 	"testing"
 
-	"sour.is/go/log"
-
 	"github.com/bouk/monkey"
 	. "github.com/smartystreets/goconvey/convey"
-	"sour.is/go/ident"
+	"sour.is/x/toolbox/ident"
 )
 
 func TestRubicon(t *testing.T) {
@@ -25,7 +23,6 @@ func TestRubicon(t *testing.T) {
 	clientURL := ""
 
 	monkey.PatchInstanceMethod(reflect.TypeOf(client), "Get", func(cl *http.Client, url string) (*http.Response, error) {
-		log.Print("HTTP GET ", url)
 		clientCalled = true
 		clientURL = url
 		return res, nil

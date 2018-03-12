@@ -1,11 +1,11 @@
-package routes // sour.is/go/httpsrv/routes
+package routes // import "sour.is/x/toolbox/httpsrv/routes"
 
 import (
 	"fmt"
 	"net/http"
 
-	"sour.is/go/httpsrv"
-	"sour.is/go/ident"
+	"sour.is/x/toolbox/httpsrv"
+	"sour.is/x/toolbox/ident"
 )
 
 func init() {

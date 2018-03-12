@@ -1,4 +1,4 @@
-package httpsrv // import "sour.is/go/httpsrv"
+package httpsrv // import "sour.is/x/toolbox/httpsrv"
 
 import (
 	"net/http"
@@ -6,9 +6,9 @@ import (
 	"time"
 
 	"github.com/spf13/viper"
-	"sour.is/go/ident"
-	"sour.is/go/log"
-	"sour.is/go/uuid"
+	"sour.is/x/toolbox/ident"
+	"sour.is/x/toolbox/log"
+	"sour.is/x/toolbox/uuid"
 
 	stdlog "log"
 )
@@ -56,7 +56,7 @@ func IdentWrapper(inner HandlerFunc, name string) http.Handler {
 		}
 		w.Header().Add("x-sequence", seq)
 
-		id := ident.GetIdent(viper.GetString("http.identity"), r)
+		id := ident.GetIdent(viper.GetString("http.idm"), r)
 
 		var nw = NewResponseWriter(w)
 		inner.ServeHTTP(nw, r, id)

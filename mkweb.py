@@ -30,7 +30,7 @@ def mk_github(name, source):
 
 
 lis = []
-name, source = "sour.is/go", "github.com/sour-is/go-toolbox"
+name, source = "sour.is/x/toolbox", "github.com/sour-is/go-toolbox"
 
 subdirs = set()
 for filename in glob.iglob('**/*.go', recursive=True):

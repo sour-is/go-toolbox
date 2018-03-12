@@ -1,4 +1,4 @@
-package httpsrv // import "sour.is/go/httpsrv"
+package httpsrv // import "sour.is/x/toolbox/httpsrv"
 
 import (
 	"net/http"

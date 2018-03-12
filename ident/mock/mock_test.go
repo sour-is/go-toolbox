@@ -1,11 +1,11 @@
-package mock
+package mock // import "sour.is/x/toolbox/ident/mock"
 
 import (
 	"net/http"
 	"testing"
 
 	. "github.com/smartystreets/goconvey/convey"
-	"sour.is/go/ident"
+	"sour.is/x/toolbox/ident"
 )
 
 func TestMock(t *testing.T) {
@@ -16,9 +16,9 @@ func TestMock(t *testing.T) {
 
 	Convey("Given a valid request with config options", t, func() {
 		ident.RegisterConfig("mock", map[string]string{
-			"identity":     "ident",
-			"aspect":       "aspect",
-			"display_name": "name",
+			"ident":  "ident",
+			"aspect": "aspect",
+			"name":   "name",
 		})
 
 		req := http.Request{}

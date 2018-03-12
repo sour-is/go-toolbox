@@ -1,4 +1,4 @@
-package ident // import "sour.is/go/ident"
+package ident // import "sour.is/x/toolbox/ident"
 
 /*
 Include the desired drivers for ident in your main package.
@@ -16,7 +16,7 @@ import (
 	"net/http"
 	"strings"
 
-	"sour.is/go/log"
+	"sour.is/x/toolbox/log"
 )
 
 type Ident interface {
@@ -36,6 +36,8 @@ var IdentSet = make(map[string]IdentHandler)
 var Config = IdentConfigs{}
 
 func Register(name string, id IdentHandler) {
+	log.Infof("IDENT: Registered handler for %s.", name)
+
 	name = strings.ToLower(name)
 	IdentSet[name] = id
 }

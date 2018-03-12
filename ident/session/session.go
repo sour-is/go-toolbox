@@ -1,4 +1,4 @@
-package session // sour.is/go/ident/session
+package session // import "sour.is/x/toolbox/ident/session"
 
 import (
 	"net/http"
@@ -6,8 +6,8 @@ import (
 	"time"
 
 	"github.com/patrickmn/go-cache"
-	"sour.is/go/ident"
-	"sour.is/go/uuid"
+	"sour.is/x/toolbox/ident"
+	"sour.is/x/toolbox/uuid"
 )
 
 var store *cache.Cache

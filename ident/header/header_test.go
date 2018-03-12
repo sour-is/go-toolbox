@@ -1,11 +1,11 @@
-package header
+package header // import "sour.is/x/toolbox/ident/header"
 
 import (
 	"net/http"
 	"testing"
 
 	. "github.com/smartystreets/goconvey/convey"
-	"sour.is/go/ident"
+	"sour.is/x/toolbox/ident"
 )
 
 func TestHeaderIdent(t *testing.T) {

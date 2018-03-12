@@ -1,4 +1,4 @@
-package log // sour.is/go/log
+package log // import "sour.is/x/toolbox/log"
 
 import (
 	"bufio"
@@ -16,6 +16,11 @@ func TestDefaultLog(t *testing.T) {
 
 	convey.Convey("Given the standard logger", t, func() {
 		SetOutput(w)
+
+		StartupBanner()
+		w.Flush()
+		convey.So(b.String(), convey.ShouldNotBeBlank)
+		b.Reset()
 
 		convey.Convey("Setting Flags", func() {
 			SetFlags(Ldate | Ltime | Lmicroseconds)

@@ -1,9 +1,9 @@
-package mock // sour.is/go/ident/mock
+package mock // import "sour.is/x/toolbox/ident/mock"
 
 import "fmt"
 import "net/http"
 import "hash/crc32"
-import "sour.is/go/ident"
+import "sour.is/x/toolbox/ident"
 
 func init() {
 	ident.Register("mock", CheckMock)
@@ -26,10 +26,10 @@ func CheckMock(r *http.Request) ident.Ident {
 	crc := crc32.ChecksumIEEE([]byte(r.RemoteAddr))
 
 	return NewMock(
-		c["identity"],
+		c["ident"],
 		c["aspect"],
 		fmt.Sprintf("%s-%s-%x",
-			c["display_name"],
+			c["name"],
 			r.RemoteAddr,
 			crc,
 		),

@@ -1,4 +1,4 @@
-package routes // sour.is/go/uuid/routes
+package routes // import "sour.is/x/toolbox/uuid/routes"
 
 import (
 	"net/http"
@@ -6,7 +6,7 @@ import (
 	"testing"
 
 	. "github.com/smartystreets/goconvey/convey"
-	"sour.is/go/uuid"
+	"sour.is/x/toolbox/uuid"
 )
 
 func TestRoutes(t *testing.T) {

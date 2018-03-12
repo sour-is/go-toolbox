@@ -1,4 +1,4 @@
-package session
+package session // import "sour.is/x/toolbox/ident/session"
 
 import (
 	"io"
@@ -6,7 +6,7 @@ import (
 	"testing"
 
 	. "github.com/smartystreets/goconvey/convey"
-	"sour.is/go/ident"
+	"sour.is/x/toolbox/ident"
 )
 
 func TestSession(t *testing.T) {

@@ -1,4 +1,4 @@
-package dbm // import "sour.is/go/dbm"
+package dbm // import "sour.is/x/toolbox/dbm"
 
 /*
 Include the driver in your main package.
@@ -24,8 +24,8 @@ import (
 	"sync"
 
 	"github.com/spf13/viper"
-	"sour.is/go/log"
-	"sour.is/go/uuid"
+	"sour.is/x/toolbox/log"
+	"sour.is/x/toolbox/uuid"
 )
 
 var db *sql.DB

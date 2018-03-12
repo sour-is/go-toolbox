@@ -1,9 +1,9 @@
-package header // sour.is/go/ident/header
+package header // import "sour.is/x/toolbox/ident/header"
 
 import (
 	"net/http"
 
-	"sour.is/go/ident"
+	"sour.is/x/toolbox/ident"
 )
 
 func init() {
