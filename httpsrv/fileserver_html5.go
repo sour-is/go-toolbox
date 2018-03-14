@@ -4,7 +4,6 @@ import (
 	"net/http"
 	"os"
 	"strings"
-	"sour.is/x/toolbox/log"
 )
 
 // This function will return the app for subdirectories
