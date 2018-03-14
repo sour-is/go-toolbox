@@ -12,6 +12,7 @@ import (
 	"golang.org/x/net/context"
 	"sour.is/x/toolbox/ident"
 	"sour.is/x/toolbox/log"
+	"sort"
 )
 
 // Example Usage
@@ -75,16 +76,22 @@ func NewRouter() *mux.Router {
 		}
 	}
 
-	for setName, assets := range AssetSet {
-		for _, route := range assets {
-			name := setName + "::" + route.Name
-
-			fn := AssetWrapper(name, route.Path, route.HandlerFunc)
-			log.Infof("Registered ASSET: %s for %s", name, route.Path)
-
-			router.PathPrefix(route.Path).Name(name).Handler(fn)
+	var assets AssetRoutes
+	for setName, assetRoutes := range AssetSet {
+		for _, route := range assetRoutes {
+			route.Name = setName + "::" + route.Name
+			assets = append(assets, route)
 		}
 	}
+	sort.Sort(assets)
+
+	for _, route := range assets {
+		fn := AssetWrapper(route.Name, route.Path, route.HandlerFunc)
+		log.Infof("Registered ASSET: %s for %s", route.Name, route.Path)
+
+		router.PathPrefix(route.Path).Name(route.Name).Handler(fn)
+	}
+
 
 	if viper.IsSet("idm") {
 		lis := viper.GetStringMapString("idm")
