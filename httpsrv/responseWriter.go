@@ -19,9 +19,10 @@ type ResponseWriter struct {
 	R *responseWriter
 }
 
-func NewResponseWriter(w http.ResponseWriter) (r ResponseWriter) {
+func wrapResponseWriter(w http.ResponseWriter) (r ResponseWriter) {
 	r.W = w
 	r.R = new(responseWriter)
+	r.R.StartTime = time.Now()
 
 	return
 }

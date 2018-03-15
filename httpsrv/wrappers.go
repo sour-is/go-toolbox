@@ -4,13 +4,11 @@ import (
 	"github.com/spf13/viper"
 	"net/http"
 	"sour.is/x/toolbox/ident"
-	"time"
 )
 
 func identWrapper(name string, hdlr HandlerFunc) http.HandlerFunc {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		var nw = NewResponseWriter(w)
-		nw.R.StartTime = time.Now()
+		var nw = wrapResponseWriter(w)
 
 		runMiddleware(EventPreAuth, name, nw, r, ident.NullUser{})
 
