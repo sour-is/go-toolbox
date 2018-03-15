@@ -14,25 +14,32 @@ import (
 )
 
 var accessLog = stdlog.New(os.Stdout, "", log.Ldate|log.Ltime|log.LUTC)
+var logFormat = "%s %- 16s\t%- 6s %- 30s\t%12s %d %s"
+var sessionId = "session-id"
+
+func addSessionID(w http.ResponseWriter, r *http.Request) (seq string) {
+	if seq = r.URL.Query().Get(sessionId); seq == "" {
+		if seq = r.Header.Get(sessionId); seq == "" {
+			seq = uuid.V4() + ":0000:0000"
+			r.Header.Set(sessionId, seq)
+		}
+	}
+	w.Header().Add(sessionId, seq)
+
+	return
+}
 
 func Wrapper(inner http.HandlerFunc, name string) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		start := time.Now()
 
-		var seq string
-		if seq = r.URL.Query().Get("x-sequence"); seq == "" {
-			if seq = r.Header.Get("x-sequence"); seq == "" {
-				seq = uuid.V4()
-				r.Header.Set("x-sequence", seq)
-			}
-		}
-		w.Header().Add("x-sequence", seq)
-
 		var nw = NewResponseWriter(w)
+		seq := addSessionID(w, r)
+
 		inner.ServeHTTP(nw, r)
 
 		accessLog.Printf(
-			"%s %- 16s\t%- 6s %- 30s\t%12s %d %s",
+			logFormat,
 			seq,
 			"-",
 			r.Method,
@@ -47,22 +54,15 @@ func IdentWrapper(inner HandlerFunc, name string) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		start := time.Now()
 
-		var seq string
-		if seq = r.URL.Query().Get("x-sequence"); seq == "" {
-			if seq = r.Header.Get("x-sequence"); seq == "" {
-				seq = uuid.V4()
-				r.Header.Set("x-sequence", seq)
-			}
-		}
-		w.Header().Add("x-sequence", seq)
+		var nw = NewResponseWriter(w)
+		seq := addSessionID(w, r)
 
 		id := ident.GetIdent(viper.GetString("http.idm"), r)
 
-		var nw = NewResponseWriter(w)
 		inner.ServeHTTP(nw, r, id)
 
 		accessLog.Printf(
-			"%s %- 16s\t%- 6s %- 30s\t%12s %d %s",
+			logFormat,
 			seq,
 			id.GetAspect()+"/"+
 				id.GetIdentity(),
@@ -80,16 +80,9 @@ func AssetWrapper(name, prefix string, hdlr http.FileSystem) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		start := time.Now()
 
-		var seq string
-		if seq = r.URL.Query().Get("x-sequence"); seq == "" {
-			if seq = r.Header.Get("x-sequence"); seq == "" {
-				seq = uuid.V4()
-				r.Header.Set("x-sequence", seq)
-			}
-		}
-		w.Header().Add("x-sequence", seq)
-
 		var nw = NewResponseWriter(w)
+		seq := addSessionID(w, r)
+
 		fn.ServeHTTP(nw, r)
 
 		accessLog.Printf(
