@@ -3,7 +3,6 @@ package httpsrv
 import (
 	"net/http"
 	"sour.is/x/toolbox/ident"
-	"sour.is/x/toolbox/log"
 )
 
 type Event int
