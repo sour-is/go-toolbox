@@ -18,12 +18,12 @@ build = "SNAPSHOT"
 
 [http]
 listen   = ":8060"
-idm = "mock"
+idm      = "mock"
 
 [idm.mock]
-ident = "user"
+ident  = "user"
 aspect = "default"
-name = "User Name"
+name   = "User Name"
 `
 
 func init() {

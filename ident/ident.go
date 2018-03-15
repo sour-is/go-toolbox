@@ -36,13 +36,15 @@ var IdentSet = make(map[string]IdentHandler)
 var Config = IdentConfigs{}
 
 func Register(name string, id IdentHandler) {
-	log.Infof("IDENT: Registered handler for %s.", name)
-
 	name = strings.ToLower(name)
 	IdentSet[name] = id
 }
 
 func RegisterConfig(name string, config map[string]string) {
+	if _, ok := IdentSet[name]; !ok {
+		log.Fatalf("IDENT: No handler registered for %s", name)
+	}
+
 	log.Infof("IDENT: Registered config for %s.", name)
 
 	name = strings.ToLower(name)

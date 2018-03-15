@@ -93,9 +93,15 @@ func NewRouter() *mux.Router {
 		router.PathPrefix(route.Path).Name(route.Name).Handler(fn)
 	}
 
+	for e, lis := range MiddlewareSet {
+		for _, m := range lis {
+			log.Infof("Registered Middleware: %s for %s", m.Name, e)
+		}
+	}
+
 	if viper.IsSet("idm") {
 		lis := viper.GetStringMapString("idm")
-		for idm, _ := range lis {
+		for idm := range lis {
 			ident.RegisterConfig(idm, viper.GetStringMapString("idm."+idm))
 		}
 	}
