@@ -19,8 +19,8 @@ func AssetRegister(name string, routes AssetRoutes) {
 	AssetSet[name] = routes
 }
 
-func (a AssetRoutes) Len() int           { return len(a) }
-func (a AssetRoutes) Swap(i, j int)      { a[i], a[j] = a[j], a[i] }
+func (a AssetRoutes) Len() int      { return len(a) }
+func (a AssetRoutes) Swap(i, j int) { a[i], a[j] = a[j], a[i] }
 func (a AssetRoutes) Less(i, j int) bool {
 	if len(a[i].Path) == len(a[j].Path) {
 		return a[i].Path >= a[j].Path

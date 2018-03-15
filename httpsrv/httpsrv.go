@@ -7,12 +7,13 @@ import (
 	"sync"
 	"time"
 
+	"encoding/json"
 	"github.com/gorilla/mux"
 	"github.com/spf13/viper"
 	"golang.org/x/net/context"
+	"sort"
 	"sour.is/x/toolbox/ident"
 	"sour.is/x/toolbox/log"
-	"sort"
 )
 
 // Example Usage
@@ -46,7 +47,7 @@ func NewRouter() *mux.Router {
 		for _, route := range routes {
 			name := setName + "::" + route.Name
 
-			handler := Wrapper(route.HandlerFunc, name)
+			handler := identWrapper(name, stdWrapper(route.HandlerFunc))
 
 			log.Infof("Registered HTTP: %s for %s %s",
 				name, route.Method, route.Pattern)
@@ -63,7 +64,7 @@ func NewRouter() *mux.Router {
 		for _, route := range routes {
 			name := setName + "::" + route.Name
 
-			handler := IdentWrapper(route.HandlerFunc, name)
+			handler := identWrapper(name, route.HandlerFunc)
 
 			log.Infof("Registered IDENT: %s for %s %s",
 				name, route.Method, route.Pattern)
@@ -86,12 +87,11 @@ func NewRouter() *mux.Router {
 	sort.Sort(assets)
 
 	for _, route := range assets {
-		fn := AssetWrapper(route.Name, route.Path, route.HandlerFunc)
+		fn := assetWrapper(route.Name, route.Path, route.HandlerFunc)
 		log.Infof("Registered ASSET: %s for %s", route.Name, route.Path)
 
 		router.PathPrefix(route.Path).Name(route.Name).Handler(fn)
 	}
-
 
 	if viper.IsSet("idm") {
 		lis := viper.GetStringMapString("idm")
@@ -154,7 +154,6 @@ func Run() {
 func Shutdown() {
 	close(SignalShutdown)
 
-	/* TODO This requires Go 1.8+ */
 	ctx, cancel := context.WithTimeout(context.Background(), 50*time.Millisecond)
 	defer cancel()
 
@@ -162,7 +161,7 @@ func Shutdown() {
 
 	select {
 	case <-ctx.Done():
-		fmt.Println(ctx.Err()) // prints "context deadline exceeded"
+		log.Error(ctx.Err()) // prints "context deadline exceeded"
 		server.Close()
 	}
 
@@ -171,11 +170,12 @@ func Shutdown() {
 
 func init() {
 	HttpRegister("info", HttpRoutes{
-		{"GetAppInfo", "GET", "/app-info", GetAppInfo},
+		{"GetAppInfo", "GET", "/app-info", getAppInfo},
+		{"GetAppInfo", "GET", "/v1/app-info", v1GetAppInfo},
 	})
 }
 
-func GetAppInfo(w http.ResponseWriter, r *http.Request) {
+func getAppInfo(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 	s := fmt.Sprintf("%s (%s %s)",
 		viper.GetString("app.name"),
@@ -183,4 +183,11 @@ func GetAppInfo(w http.ResponseWriter, r *http.Request) {
 		viper.GetString("app.build"))
 
 	w.Write([]byte(s))
+}
+
+func v1GetAppInfo(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	app := viper.GetStringMapString("app")
+	json.NewEncoder(w).Encode(app)
 }

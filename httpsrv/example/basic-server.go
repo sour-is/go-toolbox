@@ -11,6 +11,11 @@ import (
 )
 
 var defaultConfig = `
+[app]
+name = "My Example App"
+version = "1.0.0"
+build = "SNAPSHOT"
+
 [http]
 listen   = ":8060"
 idm = "mock"
