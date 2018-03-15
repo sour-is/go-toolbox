@@ -11,6 +11,7 @@ import (
 	"sour.is/x/toolbox/uuid"
 
 	stdlog "log"
+	"strings"
 )
 
 var accessLog = stdlog.New(os.Stdout, "", log.Ldate|log.Ltime|log.LUTC)
@@ -20,13 +21,13 @@ var sessionId = "session-id"
 func addSessionID(w http.ResponseWriter, r *http.Request) (seq string) {
 	if seq = r.URL.Query().Get(sessionId); seq == "" {
 		if seq = r.Header.Get(sessionId); seq == "" {
-			seq = uuid.V4() + ":0000:0000"
+			seq = uuid.V4() + "::"
 			r.Header.Set(sessionId, seq)
 		}
 	}
 	w.Header().Add(sessionId, seq)
 
-	return
+	return 
 }
 
 func Wrapper(inner http.HandlerFunc, name string) http.Handler {
