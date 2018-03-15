@@ -27,6 +27,7 @@ func TestNullUser(t *testing.T) {
 
 func TestGetIdent(t *testing.T) {
 
+	Register("null", func(r *http.Request) Ident { return NullUser{} })
 	RegisterConfig("null", map[string]string{"foo": "bar"})
 
 	req := new(http.Request)

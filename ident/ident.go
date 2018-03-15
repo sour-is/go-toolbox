@@ -35,9 +35,9 @@ type IdentHandler func(r *http.Request) Ident
 var IdentSet = make(map[string]IdentHandler)
 var Config = IdentConfigs{}
 
-func Register(name string, id IdentHandler) {
+func Register(name string, fn IdentHandler) {
 	name = strings.ToLower(name)
-	IdentSet[name] = id
+	IdentSet[name] = fn
 }
 
 func RegisterConfig(name string, config map[string]string) {
