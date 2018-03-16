@@ -10,6 +10,8 @@ import (
 var httpPipe chan httpData
 
 func init() {
+	stats.AppStart = time.Now()
+
 	httpPipe = make(chan httpData)
 	go recordStats(httpPipe)
 
@@ -28,8 +30,6 @@ var stats struct{
 		TotalBytesWritten int
 	}
 }
-
-
 
 func getStats(w http.ResponseWriter, r *http.Request, id ident.Ident) {
 	httpsrv.WriteObject(w, http.StatusOK, stats)
