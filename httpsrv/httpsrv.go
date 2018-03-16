@@ -14,9 +14,9 @@ import (
 	"sort"
 	"sour.is/x/toolbox/ident"
 	"sour.is/x/toolbox/log"
-	"flag"
 	"os"
 	"os/signal"
+	"flag"
 )
 
 // Example Usage
@@ -152,9 +152,7 @@ func Run() {
 
 	log.Notice("Listen and Serve on ", listen)
 
-	var wait time.Duration
-	flag.DurationVar(&wait, "graceful-timeout", time.Second * 15, "the duration for which the server gracefully wait for existing connections to finish - e.g. 15s or 1m")
-	flag.Parse()
+	wait := time.Second * 15
 
 	srv := &http.Server{
 		Addr:         listen,
