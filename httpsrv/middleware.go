@@ -11,6 +11,7 @@ const (
 	EventPreAuth Event = iota
 	EventPreHandle
 	EventPostHandle
+	EventComplete
 	EventUnknown = 1<<63 - 1
 )
 
@@ -22,6 +23,8 @@ func (e Event) String() string {
 		return "EventPreHandle"
 	case EventPostHandle:
 		return "EventPostHandle"
+	case EventComplete:
+		return "EventComplete"
 	case EventUnknown:
 		fallthrough
 	default:

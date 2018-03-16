@@ -19,6 +19,10 @@ func identWrapper(name string, hdlr HandlerFunc) http.HandlerFunc {
 		hdlr.ServeHTTP(nw, r, id)
 
 		runMiddleware(EventPostHandle, name, nw, r, id)
+
+		nw.StopTime()
+
+		runMiddleware(EventComplete, name, nw, r, id)
 	})
 }
 

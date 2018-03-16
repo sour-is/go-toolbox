@@ -9,9 +9,11 @@ import (
 // able to display it. The default ResponseWriter is passed by value so after
 // ServeHTTP completes the value remains unchanged.
 type responseWriter struct {
-	ResponseCode int
-	HeadersSent  bool
-	StartTime    time.Time
+	ResponseCode   int
+	HeadersSent    bool
+	StartTime      time.Time
+	Duration       time.Duration
+	BytesOut       int
 }
 
 type ResponseWriter struct {
@@ -49,6 +51,7 @@ func (w ResponseWriter) Write(b []byte) (int, error) {
 		w.R.HeadersSent = true
 	}
 
+	w.R.BytesOut += len(b)
 	return w.W.Write(b)
 }
 
@@ -58,4 +61,12 @@ func (w ResponseWriter) GetCode() int {
 
 func (w ResponseWriter) Since() time.Duration {
 	return time.Since(w.R.StartTime)
+}
+
+func (w ResponseWriter) StopTime() time.Duration {
+	if w.R.Duration == 0 {
+		w.R.Duration = w.Since()
+	}
+
+	return w.R.Duration
 }

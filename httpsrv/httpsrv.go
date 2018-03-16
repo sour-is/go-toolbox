@@ -147,7 +147,7 @@ func Run() {
 	router := NewRouter()
 	listen := viper.GetString("http.listen")
 
-	log.Notice("Listen and Serve on", listen)
+	log.Notice("Listen and Serve on ", listen)
 
 	server = new(http.Server)
 	server.Addr = listen
@@ -197,3 +197,27 @@ func v1GetAppInfo(w http.ResponseWriter, r *http.Request) {
 	app := viper.GetStringMapString("app")
 	json.NewEncoder(w).Encode(app)
 }
+
+
+
+type ErrorMessage struct {
+	Code int    `json:"code"`
+	Msg  string `json:"msg"`
+}
+
+func WriteMsg(w http.ResponseWriter, code int, msg string) {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(code)
+	json.NewEncoder(w).Encode(ErrorMessage{code, msg})
+}
+func WriteObject(w http.ResponseWriter, code int, o interface{}) {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(code)
+	json.NewEncoder(w).Encode(o)
+}
+func WriteText(w http.ResponseWriter, code int, o string) {
+	w.Header().Set("Content-Type", "text/plain")
+	w.WriteHeader(code)
+	w.Write([]byte(o))
+}
+

@@ -38,15 +38,13 @@ func doAccessLog(name string, w ResponseWriter, r *http.Request, id ident.Ident)
 		user,
 		r.Method,
 		name,
-		w.Since(),
+		w.StopTime(),
 		w.GetCode(),
 		r.RequestURI,
 	)
 }
 
 func init() {
-	log.Notice("Setting up Middleware")
-	wl := []string{"default::Index"}
-	NewMiddleware("session-id", doSessionID).SetBlacklist(wl).Register(EventPreAuth)
-	NewMiddleware("access-log", doAccessLog).SetWhitelist(wl).Register(EventPostHandle)
+	NewMiddleware("session-id", doSessionID).Register(EventPreAuth)
+	NewMiddleware("access-log", doAccessLog).Register(EventComplete)
 }
