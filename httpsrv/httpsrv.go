@@ -16,7 +16,6 @@ import (
 	"sour.is/x/toolbox/log"
 	"os"
 	"os/signal"
-	"flag"
 )
 
 // Example Usage
