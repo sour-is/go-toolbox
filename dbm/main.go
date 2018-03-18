@@ -26,9 +26,14 @@ import (
 	"github.com/spf13/viper"
 	"sour.is/x/toolbox/log"
 	"sour.is/x/toolbox/uuid"
+
+	"github.com/jmoiron/sqlx"
+
+	sq "github.com/Masterminds/squirrel"
 )
 
 var db *sql.DB
+var dbType string
 
 // GetDB eturns a database connection.
 // Depricated: Use Transaction instead.
@@ -46,11 +51,11 @@ func Config() {
 		pfx := "db." + viper.GetString("database")
 		var err error
 
-		name := viper.GetString(pfx + ".type")
+		dbType = viper.GetString(pfx + ".type")
 		connect := viper.GetString(pfx + ".connect")
 		max_conn := viper.GetInt(pfx + ".max_conn")
 
-		if db, err = sql.Open(name, connect); err != nil {
+		if db, err = sql.Open(dbType, connect); err != nil {
 			log.Fatal(err)
 		}
 
@@ -60,6 +65,10 @@ func Config() {
 
 		if err = db.Ping(); err != nil {
 			log.Fatal(err)
+		}
+
+		if dbType == "postgres" {
+
 		}
 
 		re := regexp.MustCompile(`:.*@`)
@@ -179,6 +188,35 @@ func Transaction(txFunc func(*sql.Tx) error) (err error) {
 	err = txFunc(tx)
 	return err
 }
+func Transactionx(txFunc func(*sqlx.Tx) error) (err error) {
+	dbx := sqlx.NewDb(db, dbType)
+
+	tx, err := dbx.Beginx()
+	if err != nil {
+		log.Error(err.Error())
+		return
+	}
+	defer func() {
+		if p := recover(); p != nil {
+			switch p := p.(type) {
+			case error:
+				err = p
+			default:
+				err = fmt.Errorf("%s", p)
+			}
+		}
+		if err != nil {
+			tx.Rollback()
+			log.Error(err.Error())
+
+			debug.PrintStack()
+			return
+		}
+		err = tx.Commit()
+	}()
+	err = txFunc(tx)
+	return err
+}
 
 var txMap = make(map[string]*sql.Tx)
 var txMutex = sync.Mutex{}
@@ -250,4 +288,14 @@ func TransactionContinue(TxID string, txFunc func(*sql.Tx, string) error) (err e
 
 	err = txFunc(tx, TxID)
 	return err
+}
+
+
+func Sq() sq.StatementBuilderType {
+	sb := sq.StatementBuilder
+	if dbType == "postgres" {
+		sb.PlaceholderFormat(sq.Dollar)
+	}
+
+	return sb
 }

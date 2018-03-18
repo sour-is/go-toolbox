@@ -44,3 +44,11 @@
 [prune]
   go-tests = true
   unused-packages = true
+
+[[constraint]]
+  name = "github.com/jmoiron/sqlx"
+  version = "sqlx-v1.1"
+
+[[constraint]]
+  branch = "v1"
+  name = "github.com/Masterminds/squirrel"
