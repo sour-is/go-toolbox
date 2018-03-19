@@ -290,3 +290,48 @@ func TransactionContinue(TxID string, txFunc func(*sql.Tx, string) error) (err e
 	err = txFunc(tx, TxID)
 	return err
 }
+
+func Count(tx *sql.Tx, table string, where sq.Eq) (count uint64, err error) {
+
+	s := sq.Select("count(1)")
+	s = s.From(table)
+	if where != nil {
+		s = s.Where(where)
+	}
+	s = s.RunWith(tx)
+
+	err = s.QueryRow().Scan(&count)
+
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return 0, nil
+		}
+
+		log.Debug(err.Error())
+		return
+	}
+
+	return count, nil
+}
+
+type FetchMap func(row *sql.Rows) error
+
+func Fetch(tx *sql.Tx, table string, cols []string, where sq.Eq, limit, offset uint64, fn FetchMap) (err error) {
+
+	s := sq.Select(cols...)
+	s = s.From(table)
+	s = s.Limit(limit)
+	s = s.Offset(offset)
+	if where != nil {
+		s = s.Where(where)
+	}
+	s = s.PlaceholderFormat(sq.Dollar)
+	s = s.RunWith(tx)
+
+	rows, err := s.Query()
+	if err != nil {
+		return
+	}
+	defer rows.Close()
+	return fn(rows)
+}
