@@ -79,7 +79,9 @@ func getStats(w http.ResponseWriter, r *http.Request, id ident.Ident) {
 		UpTime       string `json:"uptime"`
 		Http     struct {
 			httpStatsType
-			AvgTime      int            `json:"req_avg"`
+			AvgTimeNano      int            `json:"req_avg_nano"`
+			AvgTime      string            `json:"req_avg"`
+
 			CurrentCount httpSeriesType `json:"req_counts"`
 			LastCount    httpSeriesType `json:"req_counts_last"`
 		} `json:"http"`
@@ -89,12 +91,16 @@ func getStats(w http.ResponseWriter, r *http.Request, id ident.Ident) {
 		time.Since(appStart).String(),
 		struct {
 			httpStatsType
-			AvgTime      int            `json:"req_avg"`
+			AvgTimeNano  int            `json:"req_avg_nano"`
+			AvgTime  string            `json:"req_avg"`
+
 			CurrentCount httpSeriesType `json:"req_counts"`
 			LastCount    httpSeriesType `json:"req_counts_last"`
 		}{
 			httpStats,
 			avgTime,
+			time.Duration(avgTime).String(),
+
 			httpCollect,
 			httpSeries,
 		},
