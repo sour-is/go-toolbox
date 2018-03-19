@@ -14,10 +14,9 @@ import (
 var httpPipe chan httpData
 
 func init() {
-	appStart = time.Now()
+	appStart = time.Now().In(time.UTC)
 	httpPipe = make(chan httpData)
 	dbHooks = make(map[string]*dbstats.CounterHook)
-
 	go recordStats(httpPipe)
 
 	httpsrv.NewMiddleware("gather-stats", doStats).Register(httpsrv.EventComplete)
@@ -281,25 +280,25 @@ func getRuntime() (s runtimeStats) {
 var dbHooks map[string]*dbstats.CounterHook
 
 type dbStats struct {
-	OpenConns     int
-	TotalConns    int
-	OpenStmts     int
-	TotalStmts    int
-	OpenTxs       int
-	TotalTxs      int
-	CommittedTxs  int
-	RolledbackTxs int
-	Queries       int
-	Execs         int
-	RowsIterated  int
+	OpenConns     int `json:"conns_open"`
+	TotalConns    int `json:"conns_total"`
+	OpenStmts     int `json:"stmts_open"`
+	TotalStmts    int `json:"stmts_total"`
+	OpenTxs       int `json:"txs_open"`
+	TotalTxs      int `json:"txs_total"`
+	CommittedTxs  int `json:"txs_committed"`
+	RolledbackTxs int `json:"txs_rolledback"`
+	Queries       int `json:"queries"`
+	Execs         int `json:"execs"`
+	RowsIterated  int `json:"rows_inserted"`
 
-	ConnErrs    int
-	StmtErrs    int
-	TxOpenErrs  int
-	TxCloseErrs int
-	QueryErrs   int
-	ExecErrs    int
-	RowErrs     int
+	ConnErrs    int `json:"errs_conn"`
+	StmtErrs    int `json:"errs_stmt"`
+	TxOpenErrs  int `json:"errs_tx_open"`
+	TxCloseErrs int `json:"errs_tx_close"`
+	QueryErrs   int `json:"errs_query"`
+	ExecErrs    int `json:"errs_exec"`
+	RowErrs     int `json:"errs_row"`
 }
 
 func WrapDB(name string, fn dbstats.OpenFunc) {
