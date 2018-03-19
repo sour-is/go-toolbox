@@ -1,8 +1,6 @@
 package stats
 
 import (
-	"bufio"
-	"bytes"
 	"net/http"
 	"sour.is/x/toolbox/httpsrv"
 	"sour.is/x/toolbox/ident"
@@ -35,9 +33,6 @@ type httpStatsType struct {
 	Http5xx int `json:"http_5xx"`
 
 	AnonRequests int `json:"reqs_anon"`
-
-	HeaderBytesOut  int `json:"bytes_out_header"`
-	ContentBytesOut int `json:"bytes_out_content"`
 
 	BytesOut int `json:"bytes_out"`
 }
@@ -170,15 +165,7 @@ func recordStats(pipe chan httpData) {
 				httpStats.AnonRequests += 1
 			}
 
-			var b bytes.Buffer
-			var w = bufio.NewWriter(&b)
-			h.W.W.Header().Write(w)
-
 			httpStats.BytesOut += h.W.R.BytesOut
-			httpStats.BytesOut += w.Size()
-
-			httpStats.ContentBytesOut += h.W.R.BytesOut
-			httpStats.HeaderBytesOut += w.Size()
 
 		case <-httpsrv.SignalShutdown:
 			log.Debug("Shutting Down Stats")
