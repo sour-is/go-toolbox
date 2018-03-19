@@ -44,6 +44,7 @@ type httpStatsType struct{
 var httpStats httpStatsType
 
 var httpSeries struct{
+	Request1m int
 	Request5m int
 	Request10m int
 	Request25m int
@@ -51,6 +52,7 @@ var httpSeries struct{
 }
 
 var httpCollect struct{
+	Request1m int
 	Request5m int
 	Request10m int
 	Request25m int
@@ -66,48 +68,41 @@ func getStats(w http.ResponseWriter, r *http.Request, id ident.Ident) {
 
 	stats := struct{
 		AppStart time.Time `json:"app_start"`
-		HttpTotals httpStatsType `json:"http_total"`
-		HttpPerf struct{
-			Request5m int
-			Request10m int
-			Request25m int
-			Request60m int
-			RequestTime time.Duration
-			AvgTime int
-		}
+		UpTime time.Duration `json:"uptime"`
+		HttpTotals httpStatsType `json:"totals"`
+		Request1m int `json:"reqs_1m"`
+		Request5m int `json:"reqs_5m"`
+		Request10m int `json:"reqs_10m"`
+		Request25m int `json:"reqs_25m"`
+		Request60m int `json:"reqs_60m"`
+		AvgTime int `json:"req_avg_time"`
 	}{
 		appStart,
+		time.Since(appStart),
 		httpStats,
-		struct{
-			Request5m int
-			Request10m int
-			Request25m int
-			Request60m int
-			RequestTime time.Duration
-			AvgTime int
-		}{
-			httpSeries.Request5m,
-			httpSeries.Request10m,
-			httpSeries.Request25m,
-			httpSeries.Request60m,
-			httpStats.RequestTime,
-			avgTime,
-		},
+		httpSeries.Request1m,
+		httpSeries.Request5m,
+		httpSeries.Request10m,
+		httpSeries.Request25m,
+		httpSeries.Request60m,
+		avgTime,
 	}
-	if stats.HttpPerf.Request5m == 0 {
-		stats.HttpPerf.Request5m = httpCollect.Request5m
+	
+	if stats.Request1m == 0 {
+		stats.Request1m = httpCollect.Request1m
 	}
-	if stats.HttpPerf.Request10m == 0 {
-		stats.HttpPerf.Request10m = httpCollect.Request10m
+	if stats.Request5m == 0 {
+		stats.Request5m = httpCollect.Request5m
 	}
-	if stats.HttpPerf.Request25m == 0 {
-		stats.HttpPerf.Request25m = httpCollect.Request25m
+	if stats.Request10m == 0 {
+		stats.Request10m = httpCollect.Request10m
 	}
-	if stats.HttpPerf.Request60m == 0 {
-		stats.HttpPerf.Request60m = httpCollect.Request60m
+	if stats.Request25m == 0 {
+		stats.Request25m = httpCollect.Request25m
 	}
-
-
+	if stats.Request60m == 0 {
+		stats.Request60m = httpCollect.Request60m
+	}
 
 	httpsrv.WriteObject(w, http.StatusOK, stats)
 }
@@ -123,24 +118,40 @@ type httpData struct{
 }
 
 func recordStats(pipe chan httpData) {
+	ticker1m := time.NewTicker(time.Minute)
+	defer ticker1m.Stop()
+	ticker5m := time.NewTicker(time.Minute * 5)
+	defer ticker5m.Stop()
+	ticker10m := time.NewTicker(time.Minute * 10)
+	defer ticker10m.Stop()
+	ticker25m := time.NewTicker(time.Minute * 25)
+	defer ticker25m.Stop()
+	ticker60m := time.NewTicker(time.Minute * 60)
+	defer ticker60m.Stop()
+
 	for {
 		select {
-		case <- time.After(time.Minute * 5):
+		case <- ticker1m.C:
+			log.Debug("Rolling 1m stats")
+			httpSeries.Request5m = httpCollect.Request5m
+			httpCollect.Request5m = 0
+
+		case <- ticker5m.C:
 			log.Debug("Rolling 5m stats")
 			httpSeries.Request5m = httpCollect.Request5m
 			httpCollect.Request5m = 0
 
-		case <- time.After(time.Minute * 10):
+		case <-ticker10m.C:
 			log.Debug("Rolling 5m stats")
 			httpSeries.Request10m = httpCollect.Request10m
 			httpCollect.Request10m = 0
 
-		case <- time.After(time.Minute * 25):
+		case <- ticker25m.C:
 			log.Debug("Rolling 5m stats")
 			httpSeries.Request25m = httpCollect.Request25m
 			httpCollect.Request25m = 0
 
-		case <- time.After(time.Minute * 60):
+		case <- ticker60m.C:
 			log.Debug("Rolling 5m stats")
 			httpSeries.Request60m = httpCollect.Request60m
 			httpCollect.Request60m = 0
