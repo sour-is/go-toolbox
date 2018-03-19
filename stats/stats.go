@@ -73,7 +73,6 @@ func getStats(w http.ResponseWriter, r *http.Request, id ident.Ident) {
 		avgTime = int(httpStats.RequestTime) / httpStats.Requests
 	}
 
-	// swagger:model Stats
 	stats := struct {
 		AppStart time.Time     `json:"app_start"`
 		UpTime   time.Duration `json:"uptime"`
