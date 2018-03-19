@@ -7,13 +7,13 @@ import (
 	"time"
 	"bufio"
 	"bytes"
+	"sour.is/x/toolbox/log"
 )
 
 var httpPipe chan httpData
 
 func init() {
 	appStart = time.Now()
-
 	httpPipe = make(chan httpData)
 	go recordStats(httpPipe)
 
@@ -59,6 +59,11 @@ var httpCollect struct{
 
 func getStats(w http.ResponseWriter, r *http.Request, id ident.Ident) {
 
+	avgTime := 0
+	if httpStats.Requests > 0 {
+		avgTime = int(httpStats.RequestTime) / httpStats.Requests
+	}
+
 	stats := struct{
 		AppStart time.Time `json:"app_start"`
 		HttpTotals httpStatsType `json:"http_total"`
@@ -68,7 +73,7 @@ func getStats(w http.ResponseWriter, r *http.Request, id ident.Ident) {
 			Request25m int
 			Request60m int
 			RequestTime time.Duration
-			AvgTime time.Duration
+			AvgTime int
 		}
 	}{
 		appStart,
@@ -79,16 +84,30 @@ func getStats(w http.ResponseWriter, r *http.Request, id ident.Ident) {
 			Request25m int
 			Request60m int
 			RequestTime time.Duration
-			AvgTime time.Duration
+			AvgTime int
 		}{
 			httpSeries.Request5m,
 			httpSeries.Request10m,
 			httpSeries.Request25m,
 			httpSeries.Request60m,
 			httpStats.RequestTime,
-			time.Duration(int(httpStats.RequestTime) / httpStats.Requests),
+			avgTime,
 		},
 	}
+	if stats.HttpPerf.Request5m == 0 {
+		stats.HttpPerf.Request5m = httpCollect.Request5m
+	}
+	if stats.HttpPerf.Request10m == 0 {
+		stats.HttpPerf.Request10m = httpCollect.Request10m
+	}
+	if stats.HttpPerf.Request25m == 0 {
+		stats.HttpPerf.Request25m = httpCollect.Request25m
+	}
+	if stats.HttpPerf.Request60m == 0 {
+		stats.HttpPerf.Request60m = httpCollect.Request60m
+	}
+
+
 
 	httpsrv.WriteObject(w, http.StatusOK, stats)
 }
@@ -107,20 +126,24 @@ func recordStats(pipe chan httpData) {
 	for {
 		select {
 		case <- time.After(time.Minute * 5):
+			log.Debug("Rolling 5m stats")
 			httpSeries.Request5m = httpCollect.Request5m
 			httpCollect.Request5m = 0
 
 		case <- time.After(time.Minute * 10):
-			httpSeries.Request5m = httpCollect.Request5m
-			httpCollect.Request5m = 0
+			log.Debug("Rolling 5m stats")
+			httpSeries.Request10m = httpCollect.Request10m
+			httpCollect.Request10m = 0
 
 		case <- time.After(time.Minute * 25):
-			httpSeries.Request5m = httpCollect.Request5m
-			httpCollect.Request5m = 0
+			log.Debug("Rolling 5m stats")
+			httpSeries.Request25m = httpCollect.Request25m
+			httpCollect.Request25m = 0
 
 		case <- time.After(time.Minute * 60):
-			httpSeries.Request5m = httpCollect.Request5m
-			httpCollect.Request5m = 0
+			log.Debug("Rolling 5m stats")
+			httpSeries.Request60m = httpCollect.Request60m
+			httpCollect.Request60m = 0
 
 		case h := <-pipe:
 				httpStats.Requests += 1
