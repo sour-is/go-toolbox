@@ -34,6 +34,7 @@ import (
 
 var db *sql.DB
 var dbType string
+var Placeholder sq.PlaceholderFormat
 
 // GetDB eturns a database connection.
 // Depricated: Use Transaction instead.
@@ -46,7 +47,6 @@ func GetDB() (*sql.Tx, error) {
 }
 
 func Config() {
-
 	if viper.IsSet("database") {
 		pfx := "db." + viper.GetString("database")
 		var err error
@@ -54,6 +54,11 @@ func Config() {
 		dbType = viper.GetString(pfx + ".type")
 		connect := viper.GetString(pfx + ".connect")
 		max_conn := viper.GetInt(pfx + ".max_conn")
+
+		Placeholder = sq.Question
+		if dbType == "postgres" {
+			Placeholder = sq.Dollar
+		}
 
 		if db, err = sql.Open(dbType, connect); err != nil {
 			log.Fatal(err)
@@ -65,10 +70,6 @@ func Config() {
 
 		if err = db.Ping(); err != nil {
 			log.Fatal(err)
-		}
-
-		if dbType == "postgres" {
-
 		}
 
 		re := regexp.MustCompile(`:.*@`)
@@ -193,7 +194,7 @@ func Transactionx(txFunc func(*sqlx.Tx) error) (err error) {
 
 	tx, err := dbx.Beginx()
 	if err != nil {
-		log.Error(err.Error())
+		log.Error("dbm.Transaction ", err.Error())
 		return
 	}
 	defer func() {
@@ -288,14 +289,4 @@ func TransactionContinue(TxID string, txFunc func(*sql.Tx, string) error) (err e
 
 	err = txFunc(tx, TxID)
 	return err
-}
-
-
-func Sq() sq.StatementBuilderType {
-	sb := sq.StatementBuilder
-	if dbType == "postgres" {
-		sb.PlaceholderFormat(sq.Dollar)
-	}
-
-	return sb
 }

@@ -100,7 +100,7 @@ func recordStats(pipe chan httpData) {
 
 
 				if !h.ID.IsActive() {
-					httpStats.TotalAnonRequests += 1
+					httpStats.AnonRequests += 1
 				}
 
 				var b bytes.Buffer
