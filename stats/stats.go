@@ -91,7 +91,7 @@ func getStats(w http.ResponseWriter, r *http.Request, id ident.Ident) {
 			LastCount    httpSeriesType `json:"req_counts_last"`
 		} `json:"http"`
 		Runtime runtimeStats `json:"runtime"`
-		DBstats map[string]*dbstats.CounterHook `json:"db"`
+		DBstats map[string]dbStats `json:"db"`
 	}{
 		appStart,
 		time.Since(appStart),
@@ -112,7 +112,7 @@ func getStats(w http.ResponseWriter, r *http.Request, id ident.Ident) {
 			httpSeries,
 		},
 		getRuntime(),
-		dbHooks,
+		getDBstats(),
 	}
 
 	httpsrv.WriteObject(w, http.StatusOK, stats)
@@ -207,22 +207,100 @@ func recordStats(pipe chan httpData) {
 	}
 }
 
-type runtimeStats struct{
-	NumCPU int
-	GoRutines int
-	runtime.MemStats
-}
+type runtimeStats struct {
+	NumCPU    int `json:"num_cpu"`
+	GoRoutines int `json:"go_routines"`
 
+	Alloc        uint64  `json:"alloc"`
+	TotalAlloc   uint64 `json:"total_alloc"`
+	Sys          uint64 `json:"sys"`
+	Lookups      uint64 `json:"lookups"`
+	Mallocs      uint64 `json:"mallocs"`
+	Frees        uint64 `json:"frees"`
+	HeapAlloc    uint64 `json:"heap_alloc"`
+	HeapSys      uint64 `json:"heap_sys"`
+	HeapIdle     uint64 `json:"heap_idle"`
+	HeapInuse    uint64 `json:"heap_inuse"`
+	HeapReleased uint64 `json:"heap_released"`
+	HeapObjects  uint64 `json:"heap_objects"`
+	StackInuse   uint64 `json:"stack_inuse"`
+	StackSys     uint64 `json:"stack_sys"`
+	MSpanInuse   uint64 `json:"mspan_inuse"`
+	MSpanSys     uint64 `json:"mspan_sys"`
+	MCacheInuse  uint64 `json:"mcache_inuse"`
+	MCacheSys    uint64 `json:"mcache_sys"`
+	BuckHashSys  uint64 `json:"buckhash_sys"`
+	GCSys        uint64 `json:"gc_sys"`
+	OtherSys     uint64 `json:"other_sys"`
+	NextGC       uint64 `json:"gc_next"`
+	LastGC       uint64 `json:"gc_last"`
+	PauseTotalNs uint64 `json:"gc_pause_total"`
+
+	NumGC         uint32 `json:"gc_num"`
+	NumForcedGC   uint32 `json:"gc_forced_num"`
+	GCCPUFraction float64 `json:"gc_cpu_frac"`
+	EnableGC      bool `json:"gc_enable"`
+	DebugGC       bool `json:"gc_debug"`
+}
 
 func getRuntime() (s runtimeStats) {
 	s.NumCPU = runtime.NumCPU()
-	s.GoRutines = runtime.NumGoroutine()
-	runtime.ReadMemStats(&s.MemStats)
+	s.GoRoutines = runtime.NumGoroutine()
+
+	var m runtime.MemStats
+	runtime.ReadMemStats(&m)
+
+	s.Alloc = m.Alloc
+	s.TotalAlloc = m.TotalAlloc
+	s.Sys = m.Sys
+	s.Lookups = m.Lookups
+	s.Mallocs = m.Mallocs
+	s.Frees = m.Frees
+	s.HeapAlloc = m.HeapAlloc
+	s.HeapSys = m.HeapSys
+	s.HeapIdle = m.HeapIdle
+	s.HeapInuse = m.HeapInuse
+	s.HeapReleased = m.HeapReleased
+	s.HeapObjects = m.HeapObjects
+	s.StackInuse = m.StackInuse
+	s.StackSys = m.StackSys
+	s.MSpanInuse = m.MSpanInuse
+	s.MSpanSys = m.MSpanSys
+	s.MCacheInuse = m.MCacheInuse
+	s.MCacheSys = m.MCacheSys
+	s.BuckHashSys = m.BuckHashSys
+	s.GCSys = m.GCSys
+	s.OtherSys = m.OtherSys
+	s.NextGC = m.NextGC
+	s.LastGC = m.LastGC
+	s.PauseTotalNs = m.PauseTotalNs
 
 	return
 }
 
 var dbHooks map[string]*dbstats.CounterHook
+
+type dbStats struct {
+	OpenConns     int
+	TotalConns    int
+	OpenStmts     int
+	TotalStmts    int
+	OpenTxs       int
+	TotalTxs      int
+	CommittedTxs  int
+	RolledbackTxs int
+	Queries       int
+	Execs         int
+	RowsIterated  int
+
+	ConnErrs    int
+	StmtErrs    int
+	TxOpenErrs  int
+	TxCloseErrs int
+	QueryErrs   int
+	ExecErrs    int
+	RowErrs     int
+}
 
 func WrapDB(name string, fn dbstats.OpenFunc) {
 	h := &dbstats.CounterHook{}
@@ -230,4 +308,30 @@ func WrapDB(name string, fn dbstats.OpenFunc) {
 	s.AddHook(h)
 	sql.Register(name, s)
 	dbHooks[name] = h
+}
+
+func getDBstats() (m map[string]dbStats) {
+	for k, v := range dbHooks {
+		s := dbStats{}
+		s.OpenConns = v.OpenConns()
+		s.TotalConns = v.TotalConns()
+		s.OpenStmts = v.OpenStmts()
+		s.TotalStmts = v.TotalStmts()
+		s.OpenTxs = v.OpenTxs()
+		s.TotalTxs = v.TotalTxs()
+		s.CommittedTxs = v.CommittedTxs()
+		s.RolledbackTxs = v.RolledbackTxs()
+		s.Queries = v.Queries()
+		s.Execs = v.Execs()
+		s.RowsIterated = v.RowsIterated()
+		s.ConnErrs = v.ConnErrs()
+		s.StmtErrs = v.StmtErrs()
+		s.TxOpenErrs = v.TxOpenErrs()
+		s.TxCloseErrs = v.TxCloseErrs()
+		s.QueryErrs = v.QueryErrs()
+		s.ExecErrs = v.ExecErrs()
+		s.RowErrs = v.RowErrs()
+		m[k] = s
+	}
+	return m
 }
