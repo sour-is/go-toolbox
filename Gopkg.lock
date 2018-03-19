@@ -20,6 +20,12 @@
   revision = "5df1f207ff77e025801505ae4d903133a0b4353f"
 
 [[projects]]
+  branch = "master"
+  name = "github.com/cgilling/dbstats"
+  packages = ["."]
+  revision = "c9db8cf218e67da0c12f60591e9ac438d1573a85"
+
+[[projects]]
   name = "github.com/fsnotify/fsnotify"
   packages = ["."]
   revision = "c2828203cd70a50dcccfb2761f8b1f8ceef9a8e9"
@@ -197,6 +203,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "6763f8e1c99744cc6791253d56d8b5e8e6b72ed0edd4cba42a15b3d27d5e8c41"
+  inputs-digest = "971b0b82797c71fb2ac13dce914dd3137aa5788a4bd570a15a3baa50a06ae05b"
   solver-name = "gps-cdcl"
   solver-version = 1

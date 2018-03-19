@@ -6,6 +6,9 @@ import (
 	"sour.is/x/toolbox/ident"
 	"sour.is/x/toolbox/log"
 	"time"
+	"runtime"
+	"database/sql"
+	"github.com/cgilling/dbstats"
 )
 
 var httpPipe chan httpData
@@ -13,6 +16,8 @@ var httpPipe chan httpData
 func init() {
 	appStart = time.Now()
 	httpPipe = make(chan httpData)
+	dbHooks = make(map[string]*dbstats.CounterHook)
+
 	go recordStats(httpPipe)
 
 	httpsrv.NewMiddleware("gather-stats", doStats).Register(httpsrv.EventComplete)
@@ -85,6 +90,8 @@ func getStats(w http.ResponseWriter, r *http.Request, id ident.Ident) {
 			CurrentCount httpSeriesType `json:"req_counts"`
 			LastCount    httpSeriesType `json:"req_counts_last"`
 		} `json:"http"`
+		Runtime runtimeStats `json:"runtime"`
+		DBstats map[string]*dbstats.CounterHook `json:"db"`
 	}{
 		appStart,
 		time.Since(appStart),
@@ -104,6 +111,8 @@ func getStats(w http.ResponseWriter, r *http.Request, id ident.Ident) {
 			httpCollect,
 			httpSeries,
 		},
+		getRuntime(),
+		dbHooks,
 	}
 
 	httpsrv.WriteObject(w, http.StatusOK, stats)
@@ -196,4 +205,29 @@ func recordStats(pipe chan httpData) {
 			return
 		}
 	}
+}
+
+type runtimeStats struct{
+	NumCPU int
+	GoRutines int
+	runtime.MemStats
+}
+
+
+func getRuntime() (s runtimeStats) {
+	s.NumCPU = runtime.NumCPU()
+	s.GoRutines = runtime.NumGoroutine()
+	runtime.ReadMemStats(&s.MemStats)
+
+	return
+}
+
+var dbHooks map[string]*dbstats.CounterHook
+
+func WrapDB(name string, fn dbstats.OpenFunc) {
+	h := &dbstats.CounterHook{}
+	s := dbstats.New(fn)
+	s.AddHook(h)
+	sql.Register(name, s)
+	dbHooks[name] = h
 }
