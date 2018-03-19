@@ -9,11 +9,11 @@ import (
 // able to display it. The default ResponseWriter is passed by value so after
 // ServeHTTP completes the value remains unchanged.
 type responseWriter struct {
-	ResponseCode   int
-	HeadersSent    bool
-	StartTime      time.Time
-	Duration       time.Duration
-	BytesOut       int
+	ResponseCode int
+	HeadersSent  bool
+	StartTime    time.Time
+	Duration     time.Duration
+	BytesOut     int
 }
 
 type ResponseWriter struct {

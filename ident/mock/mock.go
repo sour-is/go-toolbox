@@ -5,8 +5,8 @@ import "net/http"
 import "hash/crc32"
 import "sour.is/x/toolbox/ident"
 
- func init() {
- 	ident.Register("mock", CheckMock)
+func init() {
+	ident.Register("mock", CheckMock)
 }
 
 type MockUser struct {

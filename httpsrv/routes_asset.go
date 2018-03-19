@@ -2,8 +2,8 @@ package httpsrv // import "sour.is/x/toolbox/httpsrv"
 
 import (
 	"net/http"
-	"strings"
 	"os"
+	"strings"
 )
 
 type AssetRoute struct {
@@ -29,7 +29,6 @@ func (a AssetRoutes) Less(i, j int) bool {
 
 	return len(a[i].Path) > len(a[j].Path)
 }
-
 
 // This function will return the app for subdirectories
 // of the application so it can remove the /#/ urls.

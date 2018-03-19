@@ -11,11 +11,11 @@ import (
 	"github.com/gorilla/mux"
 	"github.com/spf13/viper"
 	"golang.org/x/net/context"
+	"os"
+	"os/signal"
 	"sort"
 	"sour.is/x/toolbox/ident"
 	"sour.is/x/toolbox/log"
-	"os"
-	"os/signal"
 )
 
 // Example Usage
@@ -154,12 +154,12 @@ func Run() {
 	wait := time.Second * 15
 
 	srv := &http.Server{
-		Addr:         listen,
+		Addr: listen,
 		// Good practice to set timeouts to avoid Slowloris attacks.
 		WriteTimeout: time.Second * 15,
 		ReadTimeout:  time.Second * 15,
 		IdleTimeout:  time.Second * 60,
-		Handler: router, // Pass our instance of gorilla/mux in.
+		Handler:      router, // Pass our instance of gorilla/mux in.
 	}
 
 	// Run our server in a goroutine so that it doesn't block.
@@ -169,7 +169,6 @@ func Run() {
 		}
 	}()
 	close(SignalStartup)
-
 
 	c := make(chan os.Signal, 1)
 	// We'll accept graceful shutdowns when quit via SIGINT (Ctrl+C)
@@ -217,8 +216,6 @@ func v1GetAppInfo(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(app)
 }
 
-
-
 type ErrorMessage struct {
 	Code int    `json:"code"`
 	Msg  string `json:"msg"`
@@ -239,4 +236,3 @@ func WriteText(w http.ResponseWriter, code int, o string) {
 	w.WriteHeader(code)
 	w.Write([]byte(o))
 }
-

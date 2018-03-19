@@ -4,11 +4,11 @@ import (
 	"net/http"
 	"testing"
 
+	"github.com/bouk/monkey"
 	. "github.com/smartystreets/goconvey/convey"
+	"github.com/spf13/viper"
 	"net/http/httptest"
 	"sour.is/x/toolbox/ident"
-	"github.com/bouk/monkey"
-	"github.com/spf13/viper"
 )
 
 func TestIdentWrapper(t *testing.T) {
@@ -24,19 +24,17 @@ func TestIdentWrapper(t *testing.T) {
 	})
 
 	monkey.Patch(viper.GetString, func(str string) string {
-		t.Log("GOT "+str)
+		t.Log("GOT " + str)
 		return "something"
 	})
 
 	monkey.Patch(ident.GetIdent, func(str string, r *http.Request) ident.Ident {
-		t.Log("GOT "+str)
+		t.Log("GOT " + str)
 
-		return ident.NullUser{"IDENT","ASPECT", "NAME", true}
+		return ident.NullUser{"IDENT", "ASPECT", "NAME", true}
 	})
 
 	defer monkey.UnpatchAll()
-
-
 
 	Convey("Given a HTTP Request validate ident handler completes", t, func() {
 		r := httptest.NewRequest("GET", "/", nil)
@@ -55,12 +53,11 @@ func TestIdentWrapper(t *testing.T) {
 	})
 }
 
-
 func doNothing(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(200)
 	w.Write([]byte("NOTHING"))
 }
 
 func doHello(w http.ResponseWriter, r *http.Request, id ident.Ident) {
-	w.Write([]byte("HELLO "+ id.GetDisplay()))
+	w.Write([]byte("HELLO " + id.GetDisplay()))
 }
