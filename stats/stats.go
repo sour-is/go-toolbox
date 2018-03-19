@@ -311,6 +311,7 @@ func WrapDB(name string, fn dbstats.OpenFunc) {
 }
 
 func getDBstats() (m map[string]dbStats) {
+	m = make(map[string]dbStats)
 	for k, v := range dbHooks {
 		s := dbStats{}
 		s.OpenConns = v.OpenConns()
