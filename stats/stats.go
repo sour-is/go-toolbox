@@ -87,7 +87,7 @@ func getStats(w http.ResponseWriter, r *http.Request, id ident.Ident) {
 		httpSeries.Request60m,
 		avgTime,
 	}
-	
+
 	if stats.Request1m == 0 {
 		stats.Request1m = httpCollect.Request1m
 	}
@@ -118,6 +118,8 @@ type httpData struct{
 }
 
 func recordStats(pipe chan httpData) {
+	log.Notice("Begin collecting HTTP stats")
+
 	ticker1m := time.NewTicker(time.Minute)
 	defer ticker1m.Stop()
 	ticker5m := time.NewTicker(time.Minute * 5)
