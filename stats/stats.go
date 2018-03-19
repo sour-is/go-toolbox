@@ -70,39 +70,35 @@ func getStats(w http.ResponseWriter, r *http.Request, id ident.Ident) {
 	stats := struct {
 		AppStart   time.Time     `json:"app_start"`
 		UpTime     time.Duration `json:"uptime"`
-		HttpTotals httpStatsType `json:"totals"`
-		Request1m  int           `json:"reqs_1m"`
-		Request5m  int           `json:"reqs_5m"`
-		Request10m int           `json:"reqs_10m"`
-		Request25m int           `json:"reqs_25m"`
-		Request60m int           `json:"reqs_60m"`
+		httpStatsType
 		AvgTime    int           `json:"req_avg_time"`
+
+		Last1m     int `json:"reqs_1m_last"`
+		Request1m  int `json:"reqs_1m"`
+		Last5m     int `json:"reqs_5m_last"`
+		Request5m  int `json:"reqs_5m"`
+		Last10m    int `json:"reqs_10m_last"`
+		Request10m int `json:"reqs_10m"`
+		Last25m    int `json:"reqs_25m_last"`
+		Request25m int `json:"reqs_25m"`
+		Last60m    int `json:"reqs_60m_last"`
+		Request60m int `json:"reqs_60m"`
 	}{
 		appStart,
 		time.Since(appStart),
 		httpStats,
-		httpSeries.Request1m,
-		httpSeries.Request5m,
-		httpSeries.Request10m,
-		httpSeries.Request25m,
-		httpSeries.Request60m,
 		avgTime,
-	}
 
-	if stats.Request1m == 0 {
-		stats.Request1m = httpCollect.Request1m
-	}
-	if stats.Request5m == 0 {
-		stats.Request5m = httpCollect.Request5m
-	}
-	if stats.Request10m == 0 {
-		stats.Request10m = httpCollect.Request10m
-	}
-	if stats.Request25m == 0 {
-		stats.Request25m = httpCollect.Request25m
-	}
-	if stats.Request60m == 0 {
-		stats.Request60m = httpCollect.Request60m
+		httpSeries.Request1m,
+		httpCollect.Request1m,
+		httpSeries.Request5m,
+		httpCollect.Request5m,
+		httpSeries.Request10m,
+		httpCollect.Request10m,
+		httpSeries.Request25m,
+		httpCollect.Request25m,
+		httpSeries.Request60m,
+		httpCollect.Request60m,
 	}
 
 	httpsrv.WriteObject(w, http.StatusOK, stats)
@@ -140,8 +136,8 @@ func recordStats(pipe chan httpData) {
 		select {
 		case <-ticker1m.C:
 			log.Debug("Rolling 1m stats")
-			httpSeries.Request5m = httpCollect.Request5m
-			httpCollect.Request5m = 0
+			httpSeries.Request1m = httpCollect.Request5m
+			httpCollect.Request1m = 0
 
 		case <-ticker5m.C:
 			log.Debug("Rolling 5m stats")
@@ -166,7 +162,6 @@ func recordStats(pipe chan httpData) {
 		case h := <-pipe:
 			httpStats.Requests += 1
 			httpCollect.Request1m += 1
-
 			httpCollect.Request5m += 1
 			httpCollect.Request10m += 1
 			httpCollect.Request25m += 1
