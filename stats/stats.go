@@ -27,6 +27,7 @@ var appStart time.Time
 
 type httpStatsType struct{
 	Requests int `json:"requests"`
+	RequestTime time.Duration `json:"request_time"`
 
 	Http2xx int `json:"http_2xx"`
 	Http3xx int `json:"http_3xx"`
@@ -47,8 +48,13 @@ var httpSeries struct{
 	Request10m int
 	Request25m int
 	Request60m int
+}
 
-
+var httpCollect struct{
+	Request5m int
+	Request10m int
+	Request25m int
+	Request60m int
 }
 
 func getStats(w http.ResponseWriter, r *http.Request, id ident.Ident) {
@@ -56,10 +62,32 @@ func getStats(w http.ResponseWriter, r *http.Request, id ident.Ident) {
 	stats := struct{
 		AppStart time.Time `json:"app_start"`
 		HttpTotals httpStatsType `json:"http_total"`
-
+		HttpPerf struct{
+			Request5m int
+			Request10m int
+			Request25m int
+			Request60m int
+			RequestTime time.Duration
+			AvgTime time.Duration
+		}
 	}{
 		appStart,
 		httpStats,
+		struct{
+			Request5m int
+			Request10m int
+			Request25m int
+			Request60m int
+			RequestTime time.Duration
+			AvgTime time.Duration
+		}{
+			httpSeries.Request5m,
+			httpSeries.Request10m,
+			httpSeries.Request25m,
+			httpSeries.Request60m,
+			httpStats.RequestTime,
+			time.Duration(int(httpStats.RequestTime) / httpStats.Requests),
+		},
 	}
 
 	httpsrv.WriteObject(w, http.StatusOK, stats)
@@ -78,8 +106,30 @@ type httpData struct{
 func recordStats(pipe chan httpData) {
 	for {
 		select {
-			case h := <-pipe:
+		case <- time.After(time.Minute * 5):
+			httpSeries.Request5m = httpCollect.Request5m
+			httpCollect.Request5m = 0
+
+		case <- time.After(time.Minute * 10):
+			httpSeries.Request5m = httpCollect.Request5m
+			httpCollect.Request5m = 0
+
+		case <- time.After(time.Minute * 25):
+			httpSeries.Request5m = httpCollect.Request5m
+			httpCollect.Request5m = 0
+
+		case <- time.After(time.Minute * 60):
+			httpSeries.Request5m = httpCollect.Request5m
+			httpCollect.Request5m = 0
+
+		case h := <-pipe:
 				httpStats.Requests += 1
+				httpCollect.Request5m += 1
+				httpCollect.Request10m += 1
+				httpCollect.Request25m += 1
+				httpCollect.Request60m += 1
+
+				httpStats.RequestTime = h.W.StopTime()
 
 				code := h.W.GetCode()
 				switch {
@@ -94,10 +144,8 @@ func recordStats(pipe chan httpData) {
 					httpStats.Http4xx += 1
 
 				case code >= 500:
-					httpStats.Http4xx += 1
-
+					httpStats.Http5xx += 1
 				}
-
 
 				if !h.ID.IsActive() {
 					httpStats.AnonRequests += 1
