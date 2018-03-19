@@ -44,7 +44,7 @@ type httpStatsType struct {
 
 var httpStats httpStatsType
 
-var httpSeries struct {
+type httpSeriesType struct {
 	Request1m  int
 	Request5m  int
 	Request10m int
@@ -52,13 +52,8 @@ var httpSeries struct {
 	Request60m int
 }
 
-var httpCollect struct {
-	Request1m  int
-	Request5m  int
-	Request10m int
-	Request25m int
-	Request60m int
-}
+var httpSeries httpSeriesType
+var httpCollect httpSeriesType
 
 func getStats(w http.ResponseWriter, r *http.Request, id ident.Ident) {
 
@@ -68,37 +63,28 @@ func getStats(w http.ResponseWriter, r *http.Request, id ident.Ident) {
 	}
 
 	stats := struct {
-		AppStart   time.Time     `json:"app_start"`
-		UpTime     time.Duration `json:"uptime"`
-		httpStatsType
-		AvgTime    int           `json:"req_avg_time"`
-
-		Last1m     int `json:"reqs_1m_last"`
-		Request1m  int `json:"reqs_1m"`
-		Last5m     int `json:"reqs_5m_last"`
-		Request5m  int `json:"reqs_5m"`
-		Last10m    int `json:"reqs_10m_last"`
-		Request10m int `json:"reqs_10m"`
-		Last25m    int `json:"reqs_25m_last"`
-		Request25m int `json:"reqs_25m"`
-		Last60m    int `json:"reqs_60m_last"`
-		Request60m int `json:"reqs_60m"`
+		AppStart time.Time     `json:"app_start"`
+		UpTime   time.Duration `json:"uptime"`
+		Http     struct {
+			httpStatsType
+			AvgTime      int            `json:"req_avg_time"`
+			CurrentCount httpSeriesType `json:"req_counts"`
+			LastCount    httpSeriesType `json:"req_counts_last"`
+		} `json:"http"`
 	}{
 		appStart,
 		time.Since(appStart),
-		httpStats,
-		avgTime,
-
-		httpSeries.Request1m,
-		httpCollect.Request1m,
-		httpSeries.Request5m,
-		httpCollect.Request5m,
-		httpSeries.Request10m,
-		httpCollect.Request10m,
-		httpSeries.Request25m,
-		httpCollect.Request25m,
-		httpSeries.Request60m,
-		httpCollect.Request60m,
+		struct {
+			httpStatsType
+			AvgTime      int            `json:"req_avg_time"`
+			CurrentCount httpSeriesType `json:"req_counts"`
+			LastCount    httpSeriesType `json:"req_counts_last"`
+		}{
+			httpStats,
+			avgTime,
+			httpCollect,
+			httpSeries,
+		},
 	}
 
 	httpsrv.WriteObject(w, http.StatusOK, stats)
@@ -167,7 +153,7 @@ func recordStats(pipe chan httpData) {
 			httpCollect.Request25m += 1
 			httpCollect.Request60m += 1
 
-			httpStats.RequestTime = h.W.StopTime()
+			httpStats.RequestTime += h.W.StopTime()
 
 			code := h.W.GetCode()
 			switch {
