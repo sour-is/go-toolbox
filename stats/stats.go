@@ -26,18 +26,18 @@ func init() {
 var appStart time.Time
 
 type httpStatsType struct {
-	Requests    int           `json:"requests"`
-	RequestTime time.Duration `json:"request_time"`
+	Requests    int           `json:"reqs"`
+	RequestTime time.Duration `json:"req_time"`
 
 	Http2xx int `json:"http_2xx"`
 	Http3xx int `json:"http_3xx"`
 	Http4xx int `json:"http_4xx"`
 	Http5xx int `json:"http_5xx"`
 
-	AnonRequests int `json:"anonymous_requests"`
+	AnonRequests int `json:"reqs_anon"`
 
-	HeaderBytesOut  int `json:"header_bytes_out"`
-	ContentBytesOut int `json:"content_bytes_out"`
+	HeaderBytesOut  int `json:"bytes_out_header"`
+	ContentBytesOut int `json:"bytes_out_content"`
 
 	BytesOut int `json:"bytes_out"`
 }
@@ -175,6 +175,10 @@ func recordStats(pipe chan httpData) {
 			h.W.W.Header().Write(w)
 
 			httpStats.BytesOut += h.W.R.BytesOut
+			httpStats.BytesOut += w.Size()
+
+			httpStats.ContentBytesOut += h.W.R.BytesOut
+			httpStats.HeaderBytesOut += w.Size()
 
 		case <-httpsrv.SignalShutdown:
 			log.Debug("Shutting Down Stats")
