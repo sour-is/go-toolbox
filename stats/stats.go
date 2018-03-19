@@ -50,6 +50,22 @@ type httpSeriesType struct {
 var httpSeries httpSeriesType
 var httpCollect httpSeriesType
 
+// swagger:operation GET /v1/stats stats getStats
+//
+// Get Stats
+//
+// ---
+// produces:
+//   - "application/json"
+// responses:
+//   "200":
+//     description: Success
+//     schema:
+//       "$ref": "#/definitions/Stats"
+//   "5xx":
+//     description: unexpected error
+//     schema:
+//       "$ref": "#/definitions/ResultError"
 func getStats(w http.ResponseWriter, r *http.Request, id ident.Ident) {
 
 	avgTime := 0
@@ -57,6 +73,7 @@ func getStats(w http.ResponseWriter, r *http.Request, id ident.Ident) {
 		avgTime = int(httpStats.RequestTime) / httpStats.Requests
 	}
 
+	// swagger:model Stats
 	stats := struct {
 		AppStart time.Time     `json:"app_start"`
 		UpTime   time.Duration `json:"uptime"`
