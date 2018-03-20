@@ -54,6 +54,23 @@ type httpSeriesType struct {
 var httpSeries httpSeriesType
 var httpCollect httpSeriesType
 
+type Stats struct {
+	AppStart time.Time     `json:"app_start"`
+	UpTimeNano   time.Duration `json:"uptime_nano"`
+	UpTime       string `json:"uptime"`
+	Http     struct {
+		httpStatsType
+		AvgTimeNano      int            `json:"req_avg_nano"`
+		AvgTime      string            `json:"req_avg"`
+
+		CurrentCount httpSeriesType `json:"req_counts"`
+		LastCount    httpSeriesType `json:"req_counts_last"`
+	} `json:"http"`
+	Runtime runtimeStats `json:"runtime"`
+	DBstats map[string]dbStats `json:"db"`
+}
+
+
 // swagger:operation GET /v1/stats stats getStats
 //
 // Get Stats
@@ -65,11 +82,9 @@ var httpCollect httpSeriesType
 //   "200":
 //     description: Success
 //     schema:
-//       "$ref": "#/definitions/Stats"
-//   "5xx":
-//     description: unexpected error
-//     schema:
-//       "$ref": "#/definitions/ResultError"
+//       type: object
+//       properties:
+//          items:
 func getStats(w http.ResponseWriter, r *http.Request, id ident.Ident) {
 
 	avgTime := 0
@@ -77,21 +92,7 @@ func getStats(w http.ResponseWriter, r *http.Request, id ident.Ident) {
 		avgTime = int(httpStats.RequestTime) / httpStats.Requests
 	}
 
-	stats := struct {
-		AppStart time.Time     `json:"app_start"`
-		UpTimeNano   time.Duration `json:"uptime_nano"`
-		UpTime       string `json:"uptime"`
-		Http     struct {
-			httpStatsType
-			AvgTimeNano      int            `json:"req_avg_nano"`
-			AvgTime      string            `json:"req_avg"`
-
-			CurrentCount httpSeriesType `json:"req_counts"`
-			LastCount    httpSeriesType `json:"req_counts_last"`
-		} `json:"http"`
-		Runtime runtimeStats `json:"runtime"`
-		DBstats map[string]dbStats `json:"db"`
-	}{
+	stats := Stats{
 		appStart,
 		time.Since(appStart),
 		time.Since(appStart).String(),
