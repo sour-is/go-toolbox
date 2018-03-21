@@ -13,7 +13,7 @@ import (
 func TestDoSession(t *testing.T) {
 	Convey("Given a HTTP Request validate session-id sets header", t, func() {
 		r := httptest.NewRequest("GET", "/", nil)
-		w := wrapResponseWriter(httptest.NewRecorder())
+		w := WrapResponseWriter(httptest.NewRecorder())
 
 		doSessionID("", w, r, ident.NullUser{})
 
@@ -25,7 +25,7 @@ func TestDoSession(t *testing.T) {
 		r := httptest.NewRequest("GET", "/", nil)
 		r.Header.Set(sessionId, "SOMEVALUE")
 
-		w := wrapResponseWriter(httptest.NewRecorder())
+		w := WrapResponseWriter(httptest.NewRecorder())
 
 		doSessionID("", w, r, ident.NullUser{})
 
@@ -44,7 +44,7 @@ func TestDoAccessLog(t *testing.T) {
 	accessLog.SetOutput(l)
 	Convey("Given a request access log writes to stdout", t, func() {
 		r := httptest.NewRequest("GET", "/some-url", nil)
-		w := wrapResponseWriter(httptest.NewRecorder())
+		w := WrapResponseWriter(httptest.NewRecorder())
 		w.WriteHeader(200)
 
 		doAccessLog("NAME", w, r, ident.NullUser{"IDENT", "ASPECT", "name", true})

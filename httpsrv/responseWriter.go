@@ -5,6 +5,7 @@ import (
 	"time"
 )
 
+
 // Custom ResponseWriter that saves the response code so the access log is
 // able to display it. The default ResponseWriter is passed by value so after
 // ServeHTTP completes the value remains unchanged.
@@ -21,7 +22,7 @@ type ResponseWriter struct {
 	R *responseWriter
 }
 
-func wrapResponseWriter(w http.ResponseWriter) (r ResponseWriter) {
+func WrapResponseWriter(w http.ResponseWriter) (r ResponseWriter) {
 	r.W = w
 	r.R = new(responseWriter)
 	r.R.StartTime = time.Now()
@@ -69,4 +70,17 @@ func (w ResponseWriter) StopTime() time.Duration {
 	}
 
 	return w.R.Duration
+}
+
+func (w ResponseWriter) WriteWindow(code int, results, limit, offset uint64, o interface{}) {
+	WriteWindow(w, code, results, limit, offset, o)
+}
+func (w ResponseWriter) WriteText(code int, str string) {
+	WriteText(w, code, str)
+}
+func (w ResponseWriter) WriteError(code int, msg string) {
+	WriteError(w, code, msg)
+}
+func (w ResponseWriter) WriteObject(code int, o interface{}) {
+	WriteObject(w, code, o)
 }

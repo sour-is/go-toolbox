@@ -35,6 +35,6 @@ func init() {
 //       default: genericError
 //       200: someResponse
 //       422: validationError
-func Index(w http.ResponseWriter, r *http.Request, i ident.Ident) {
+func Index(w httpsrv.ResponseWriter, r *http.Request, i ident.Ident) {
 	fmt.Fprintf(w, "Welcome, %s (%s)!\n", i.GetDisplay(), i.GetIdentity())
 }

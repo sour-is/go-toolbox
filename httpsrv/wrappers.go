@@ -8,7 +8,7 @@ import (
 
 func identWrapper(name string, hdlr HandlerFunc) http.HandlerFunc {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		var nw = wrapResponseWriter(w)
+		var nw = WrapResponseWriter(w)
 
 		var ok = true
 		var id ident.Ident
@@ -32,7 +32,7 @@ func identWrapper(name string, hdlr HandlerFunc) http.HandlerFunc {
 }
 
 func stdWrapper(hdlr http.HandlerFunc) HandlerFunc {
-	return HandlerFunc(func(w http.ResponseWriter, r *http.Request, i ident.Ident) {
+	return HandlerFunc(func(w ResponseWriter, r *http.Request, i ident.Ident) {
 		hdlr.ServeHTTP(w, r)
 	})
 }

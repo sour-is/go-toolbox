@@ -15,7 +15,7 @@ func TestIdentWrapper(t *testing.T) {
 
 	Convey("Given a HTTP Request validate handler completes", t, func() {
 		r := httptest.NewRequest("GET", "/", nil)
-		w := wrapResponseWriter(httptest.NewRecorder())
+		w := WrapResponseWriter(httptest.NewRecorder())
 
 		fn := identWrapper("TEST", stdWrapper(doNothing))
 		fn.ServeHTTP(w, r)
@@ -39,7 +39,7 @@ func TestIdentWrapper(t *testing.T) {
 	Convey("Given a HTTP Request validate ident handler completes", t, func() {
 		r := httptest.NewRequest("GET", "/", nil)
 		ww := httptest.NewRecorder()
-		w := wrapResponseWriter(ww)
+		w := WrapResponseWriter(ww)
 
 		fn := identWrapper("TEST", doHello)
 		fn.ServeHTTP(w, r)
@@ -58,6 +58,6 @@ func doNothing(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte("NOTHING"))
 }
 
-func doHello(w http.ResponseWriter, r *http.Request, id ident.Ident) {
+func doHello(w ResponseWriter, r *http.Request, id ident.Ident) {
 	w.Write([]byte("HELLO " + id.GetDisplay()))
 }

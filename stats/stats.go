@@ -84,7 +84,7 @@ type Stats struct {
 //       type: object
 //       properties:
 //          items:
-func getStats(w http.ResponseWriter, r *http.Request, id ident.Ident) {
+func getStats(w httpsrv.ResponseWriter, r *http.Request, id ident.Ident) {
 
 	avgTime := 0
 	if httpStats.Requests > 0 {

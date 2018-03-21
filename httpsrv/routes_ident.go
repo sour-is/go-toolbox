@@ -22,9 +22,9 @@ func IdentRegister(name string, routes IdentRoutes) {
 	IdentRouteSet[name] = routes
 }
 
-type HandlerFunc func(http.ResponseWriter, *http.Request, ident.Ident)
+type HandlerFunc func(ResponseWriter, *http.Request, ident.Ident)
 
-func (f HandlerFunc) ServeHTTP(w http.ResponseWriter, r *http.Request, i ident.Ident) {
+func (f HandlerFunc) ServeHTTP(w ResponseWriter, r *http.Request, i ident.Ident) {
 	h := w.Header()
 	h.Add("x-user-ident", i.GetIdentity())
 	h.Add("x-user-aspect", i.GetAspect())

@@ -7,6 +7,7 @@ import (
 
 	. "github.com/smartystreets/goconvey/convey"
 	"sour.is/x/toolbox/ident"
+	"sour.is/x/toolbox/httpsrv"
 )
 
 func TestDefaultRoutes(t *testing.T) {
@@ -15,7 +16,8 @@ func TestDefaultRoutes(t *testing.T) {
 		w := httptest.NewRecorder()
 		i := ident.NewNullUser("user", "default", "name", true)
 
-		Index(w, r, i)
+		W := httpsrv.WrapResponseWriter(w)
+		Index(W, r, i)
 		txt := w.Body.String()
 
 		So(txt, ShouldContainSubstring, "Welcome")
