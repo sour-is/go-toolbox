@@ -3,6 +3,7 @@ package httpsrv
 import (
 	"net/http"
 	"sour.is/x/toolbox/ident"
+	"sour.is/x/toolbox/log"
 )
 
 type Event int
@@ -48,19 +49,46 @@ func runMiddleware(e Event, name string, w ResponseWriter, r *http.Request, id i
 	ok = true
 
 	for _, m := range MiddlewareSet[e] {
-		if _, ck := m.Blacklist[name]; len(m.Whitelist) > 0 && ck {
-			ok = m.ProcessHTTP(name, w, r, id)
-			if !ok {
+
+		// WL0  WL?  BL0  BL? :: RUN
+		//  Y    -    Y    -  ::  Y
+		//  Y    -    N    N  ::  Y
+		//  Y    -    N    Y  ::  N
+
+		if len(m.Whitelist) == 0 {
+			if _, ck := m.Blacklist[name]; ck {
+				log.Debugf("Event %s is in blacklist: %v", name, m.Blacklist)
 				return
 			}
 		}
 
-		if _, ck := m.Whitelist[name]; len(m.Whitelist) == 0 || ck {
-			ok = m.ProcessHTTP(name, w, r, id)
-			if !ok {
+		//  Y    -    Y    -  ::  Y
+		//  Y    -    N    N  ::  Y
+		//  N    N    Y    -  ::  N
+		//  N    N    N    N  ::  N
+		//  N    N    N    Y  ::  N
+
+		if len(m.Whitelist) > 0 {
+			if _, ck := m.Whitelist[name]; !ck {
+				log.Debugf("Event %s is NOT in whitelist: %v", name, m.Whitelist)
 				return
 			}
 		}
+
+		//  Y    -    Y    -  ::  Y
+		//  Y    -    N    N  ::  Y
+		//  N    Y    Y    -  ::  Y
+		//  N    Y    N    N  ::  Y
+		//  N    Y    N    Y  ::  N
+
+		if _, ck := m.Blacklist[name]; ck {
+			log.Debugf("Event %s is in blacklist: %v", name, m.Blacklist)
+
+			return
+		}
+
+		log.Debugf("Event %s passes white/black lists", name)
+		ok = m.ProcessHTTP(name, w, r, id)
 	}
 	return
 }
@@ -68,24 +96,24 @@ func runMiddleware(e Event, name string, w ResponseWriter, r *http.Request, id i
 func NewMiddleware(name string, hdlr MiddlewareFunc) (m Middleware) {
 	m.Name = name
 	m.ProcessHTTP = hdlr
+	m.Whitelist = make(map[string]bool)
+	m.Blacklist = make(map[string]bool)
 	return m
 }
 
 func (m Middleware) SetWhitelist(whitelist []string) Middleware {
-	lis := make(map[string]bool)
-	for s := range lis {
-		lis[s] = true
+	for _, s := range whitelist {
+		m.Whitelist[s] = true
 	}
-	m.Whitelist = lis
+
 	return m
 }
 
 func (m Middleware) SetBlacklist(whitelist []string) Middleware {
-	lis := make(map[string]bool)
-	for s := range lis {
-		lis[s] = true
+	for _, s := range whitelist {
+		m.Blacklist[s] = true
 	}
-	m.Blacklist = lis
+
 	return m
 }
 

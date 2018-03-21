@@ -51,14 +51,4 @@ func doAccessLog(name string, w ResponseWriter, r *http.Request, id ident.Ident)
 func init() {
 	NewMiddleware("session-id", doSessionID).Register(EventPreAuth)
 	NewMiddleware("access-log", doAccessLog).Register(EventComplete)
-	NewMiddleware("forbidden", doForbidden).SetWhitelist([]string{"docs::Assets","stats::GetStats"}).Register(EventComplete)
-}
-
-func doForbidden(name string, w ResponseWriter, r *http.Request, id ident.Ident) bool {
-	if !id.IsActive() {
-		WriteMsg(w, http.StatusForbidden, "Access Denied")
-		return false
-	}
-
-	return true
 }
