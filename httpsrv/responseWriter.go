@@ -5,7 +5,6 @@ import (
 	"time"
 )
 
-
 // Custom ResponseWriter that saves the response code so the access log is
 // able to display it. The default ResponseWriter is passed by value so after
 // ServeHTTP completes the value remains unchanged.

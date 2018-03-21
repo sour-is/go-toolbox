@@ -43,6 +43,6 @@ func Config() {
 		connect = regexp.MustCompile(`:.*@`).ReplaceAllString(connect, ":****@")
 		connect = regexp.MustCompile(`password=.[[:graph:]]+`).ReplaceAllString(connect, "password=****")
 
-		log.Notice("DBM: Database Connected: ")
+		log.Notice("DBM: Database Connected: ", connect)
 	}
 }

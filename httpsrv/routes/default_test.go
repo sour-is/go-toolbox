@@ -6,8 +6,8 @@ import (
 	"testing"
 
 	. "github.com/smartystreets/goconvey/convey"
-	"sour.is/x/toolbox/ident"
 	"sour.is/x/toolbox/httpsrv"
+	"sour.is/x/toolbox/ident"
 )
 
 func TestDefaultRoutes(t *testing.T) {
