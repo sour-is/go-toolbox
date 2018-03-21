@@ -219,6 +219,8 @@ func Debugf(format string, v ...interface{}) {
 		std.Output(2, Fcontinue+l+Freset)
 	}
 }
+func NoDebug(v ...interface{}) {}
+func NoDebugf(format string, v ...interface{}) {}
 
 func Info(v ...interface{}) {
 	if verb < Vinfo {
