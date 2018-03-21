@@ -117,8 +117,9 @@ func getStats(w http.ResponseWriter, r *http.Request, id ident.Ident) {
 	httpsrv.WriteObject(w, http.StatusOK, stats)
 }
 
-func doStats(_ string, w httpsrv.ResponseWriter, r *http.Request, id ident.Ident) {
+func doStats(_ string, w httpsrv.ResponseWriter, r *http.Request, id ident.Ident) bool {
 	httpPipe <- httpData{w, r, id}
+	return true
 }
 
 type httpData struct {
