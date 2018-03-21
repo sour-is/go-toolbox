@@ -3,7 +3,6 @@ package httpsrv
 import (
 	"net/http"
 	"sour.is/x/toolbox/ident"
-	"sour.is/x/toolbox/log"
 )
 
 type Event int
@@ -57,7 +56,7 @@ func runMiddleware(e Event, name string, w ResponseWriter, r *http.Request, id i
 
 		if len(m.Whitelist) == 0 {
 			if _, ck := m.Blacklist[name]; ck {
-				log.Debugf("Event %s is in blacklist: %v", name, m.Blacklist)
+				//log.Debugf("Event %s is in blacklist: %v", name, m.Blacklist)
 				return
 			}
 		}
@@ -70,7 +69,7 @@ func runMiddleware(e Event, name string, w ResponseWriter, r *http.Request, id i
 
 		if len(m.Whitelist) > 0 {
 			if _, ck := m.Whitelist[name]; !ck {
-				log.Debugf("Event %s is NOT in whitelist: %v", name, m.Whitelist)
+				//log.Debugf("Event %s is NOT in whitelist: %v", name, m.Whitelist)
 				return
 			}
 		}
@@ -82,12 +81,11 @@ func runMiddleware(e Event, name string, w ResponseWriter, r *http.Request, id i
 		//  N    Y    N    Y  ::  N
 
 		if _, ck := m.Blacklist[name]; ck {
-			log.Debugf("Event %s is in blacklist: %v", name, m.Blacklist)
-
+			// log.Debugf("Event %s is in blacklist: %v", name, m.Blacklist)
 			return
 		}
 
-		log.Debugf("Event %s passes white/black lists", name)
+		//log.Debugf("Event %s passes white/black lists", name)
 		ok = m.ProcessHTTP(name, w, r, id)
 	}
 	return

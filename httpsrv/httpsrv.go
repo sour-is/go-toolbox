@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"net/http"
 	"strings"
-	"sync"
 	"time"
 
 	"encoding/json"
@@ -36,11 +35,9 @@ import (
 type ModuleHandler func(map[string]string)
 
 var modules = make(map[string]ModuleHandler)
-var server *http.Server
 
 var SignalStartup = make(chan struct{})
 var SignalShutdown = make(chan struct{})
-var WaitShutdown sync.WaitGroup
 
 func NewRouter() *mux.Router {
 	router := mux.NewRouter().StrictSlash(true)
@@ -199,7 +196,21 @@ func init() {
 	})
 }
 
-func getAppInfo(w http.ResponseWriter, r *http.Request) {
+// swagger:operation GET /app-info appInfo getAppInfo
+//
+// Get App Info
+//
+// ---
+// produces:
+//   - "application/json"
+// responses:
+//   "200":
+//     description: Success
+//     schema:
+//       type: object
+//       properties:
+//          items:
+func getAppInfo(w http.ResponseWriter, _ *http.Request) {
 	w.WriteHeader(http.StatusOK)
 	s := fmt.Sprintf("%s (%s %s)",
 		viper.GetString("app.name"),
@@ -209,22 +220,47 @@ func getAppInfo(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte(s))
 }
 
-func v1GetAppInfo(w http.ResponseWriter, r *http.Request) {
+// swagger:operation GET /v1/app-info appInfo v1GetAppInfo
+//
+// Get App Info
+//
+// ---
+// produces:
+//   - "application/json"
+// responses:
+//   "200":
+//     description: Success
+//     schema:
+//       type: object
+//       properties:
+//          items:
+func v1GetAppInfo(w http.ResponseWriter, _ *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 	app := viper.GetStringMapString("app")
 	json.NewEncoder(w).Encode(app)
 }
 
-type ErrorMessage struct {
+// swagger:model ResultError
+type ResultError struct {
 	Code int    `json:"code"`
 	Msg  string `json:"msg"`
 }
 
-func WriteMsg(w http.ResponseWriter, code int, msg string) {
+// swagger:model ResultWindow
+type ResultWindow struct {
+	Code    int         `json:"code"`
+	Msg     string      `json:"msg"`
+	Results uint64      `json:"results"`
+	Limit   uint64      `json:"limit"`
+	Offset  uint64      `json:"offset"`
+	Items   interface{} `json:"items"`
+}
+
+func WriteError(w http.ResponseWriter, code int, msg string) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(code)
-	json.NewEncoder(w).Encode(ErrorMessage{code, msg})
+	json.NewEncoder(w).Encode(ResultError{code, msg})
 }
 func WriteObject(w http.ResponseWriter, code int, o interface{}) {
 	w.Header().Set("Content-Type", "application/json")
@@ -235,4 +271,16 @@ func WriteText(w http.ResponseWriter, code int, o string) {
 	w.Header().Set("Content-Type", "text/plain")
 	w.WriteHeader(code)
 	w.Write([]byte(o))
+}
+func WriteWindow(w http.ResponseWriter, code int, results, limit, offset uint64, o interface{}) {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(code)
+	json.NewEncoder(w).Encode(
+		ResultWindow{
+			code,
+			"OK",
+			results,
+			limit,
+			offset,
+			o})
 }

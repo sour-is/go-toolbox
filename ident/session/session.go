@@ -44,6 +44,7 @@ func GetSessionId(r *http.Request) string {
 func CheckSession(r *http.Request) ident.Ident {
 
 	id := GetSessionId(r)
+
 	if id == "" {
 		return User{}
 	}
