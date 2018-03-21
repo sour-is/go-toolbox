@@ -424,7 +424,7 @@ func Replace(
 	where sq.Eq,
 	update sq.UpdateBuilder,
 	insert sq.InsertBuilder,
-) (found bool, id int64, err error) {
+) (found bool, id uint64, err error) {
 
 	var num uint64
 	if num, err = Count(tx, table, where); err == nil && num == 0 {
@@ -467,12 +467,14 @@ func Replace(
 				log.Debug(err.Error())
 				return
 			}
-
-			id, err = result.LastInsertId()
+			var lastId int64
+			lastId, err = result.LastInsertId()
 			if err != nil {
 				log.Debug(err.Error())
 				return
 			}
+
+			id = uint64(lastId)
 		}
 	}
 
