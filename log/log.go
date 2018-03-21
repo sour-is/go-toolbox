@@ -219,8 +219,6 @@ func Debugf(format string, v ...interface{}) {
 		std.Output(2, Fcontinue+l+Freset)
 	}
 }
-func NoDebug(v ...interface{}) {}
-func NoDebugf(format string, v ...interface{}) {}
 
 func Info(v ...interface{}) {
 	if verb < Vinfo {
@@ -326,6 +324,25 @@ func Criticalf(format string, v ...interface{}) {
 		std.Output(2, Fcontinue+l+Freset)
 	}
 }
+
+// These functions do nothing. It makes it easy to comment out
+// debug lines without having to remove the import.
+func NilPrint(v ...interface{}) {}
+func NilPrintf(format string, v ...interface{}) {}
+func NilPrintln(v ...interface{}) {}
+func NilDebug(v ...interface{}) {}
+func NilDebugf(format string, v ...interface{}) {}
+func NilInfo(v ...interface{}) {}
+func NilInfof(format string, v ...interface{}) {}
+func NilNotice(v ...interface{}) {}
+func NilNoticef(format string, v ...interface{}) {}
+func NilWarning(v ...interface{}) {}
+func NilWarningf(format string, v ...interface{}) {}
+func NilError(v ...interface{}) {}
+func NilErrorf(format string, v ...interface{}) {}
+func NilCritical(v ...interface{}) {}
+func NilCriticalf(format string, v ...interface{}) {}
+
 
 var souris = [][]string{
 	{

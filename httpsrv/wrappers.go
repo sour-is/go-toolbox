@@ -4,6 +4,7 @@ import (
 	"github.com/spf13/viper"
 	"net/http"
 	"sour.is/x/toolbox/ident"
+	"sour.is/x/toolbox/log"
 )
 
 func identWrapper(name string, hdlr HandlerFunc) http.HandlerFunc {
@@ -13,20 +14,20 @@ func identWrapper(name string, hdlr HandlerFunc) http.HandlerFunc {
 		var ok = true
 		var id ident.Ident
 
-		//log.Debug("EventPreAuth")
+		log.NilDebug("EventPreAuth")
 		if ok = runMiddleware(EventPreAuth, name, nw, r, ident.NullUser{}); ok {
-			//log.Debug("EventAuth")
+			log.NilDebug("EventAuth")
 			id = ident.GetIdent(viper.GetString("http.idm"), r)
-			//log.Debug("EventPreHandle", id)
+			log.NilDebug("EventPreHandle", id)
 			if ok = runMiddleware(EventPreHandle, name, nw, r, id); ok {
 				hdlr.ServeHTTP(nw, r, id)
-				//log.Debug("EventPreHandle")
+				log.NilDebug("EventPreHandle")
 				runMiddleware(EventPostHandle, name, nw, r, id)
 			}
 		}
 
 		nw.StopTime()
-		//log.Debug("EventComplete")
+		log.NilDebug("EventComplete")
 		runMiddleware(EventComplete, name, nw, r, id)
 	})
 }
