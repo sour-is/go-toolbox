@@ -10,7 +10,9 @@ func identWrapper(name string, hdlr HandlerFunc) http.HandlerFunc {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		var nw = wrapResponseWriter(w)
 
-		runMiddleware(EventPreAuth, name, nw, r, ident.NullUser{})
+		if ok := runMiddleware(EventPreAuth, name, nw, r, ident.NullUser{}); !ok {
+			return
+		}
 
 		id := ident.GetIdent(viper.GetString("http.idm"), r)
 

@@ -32,7 +32,7 @@ func (e Event) String() string {
 	}
 }
 
-type MiddlewareFunc func(name string, w ResponseWriter, r *http.Request, id ident.Ident)
+type MiddlewareFunc func(name string, w ResponseWriter, r *http.Request, id ident.Ident) bool
 
 type Middleware struct {
 	Name        string
@@ -44,16 +44,25 @@ type MiddlewareList []Middleware
 
 var MiddlewareSet = make(map[Event][]Middleware)
 
-func runMiddleware(e Event, name string, w ResponseWriter, r *http.Request, id ident.Ident) {
+func runMiddleware(e Event, name string, w ResponseWriter, r *http.Request, id ident.Ident) (ok bool) {
+	ok = true
+
 	for _, m := range MiddlewareSet[e] {
-		if _, ok := m.Blacklist[name]; len(m.Whitelist) > 0 && ok {
-			m.ProcessHTTP(name, w, r, id)
+		if _, ck := m.Blacklist[name]; len(m.Whitelist) > 0 && ck {
+			ok = m.ProcessHTTP(name, w, r, id)
+			if !ok {
+				return
+			}
 		}
 
-		if _, ok := m.Whitelist[name]; len(m.Whitelist) == 0 || ok {
-			m.ProcessHTTP(name, w, r, id)
+		if _, ck := m.Whitelist[name]; len(m.Whitelist) == 0 || ck {
+			ok = m.ProcessHTTP(name, w, r, id)
+			if !ok {
+				return
+			}
 		}
 	}
+	return
 }
 
 func NewMiddleware(name string, hdlr MiddlewareFunc) (m Middleware) {
