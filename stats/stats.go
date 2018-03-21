@@ -1,14 +1,14 @@
 package stats
 
 import (
+	"database/sql"
+	"github.com/cgilling/dbstats"
 	"net/http"
+	"runtime"
 	"sour.is/x/toolbox/httpsrv"
 	"sour.is/x/toolbox/ident"
 	"sour.is/x/toolbox/log"
 	"time"
-	"runtime"
-	"database/sql"
-	"github.com/cgilling/dbstats"
 )
 
 var httpPipe chan httpData
@@ -55,21 +55,20 @@ var httpSeries httpSeriesType
 var httpCollect httpSeriesType
 
 type Stats struct {
-	AppStart time.Time     `json:"app_start"`
-	UpTimeNano   time.Duration `json:"uptime_nano"`
-	UpTime       string `json:"uptime"`
-	Http     struct {
+	AppStart   time.Time     `json:"app_start"`
+	UpTimeNano time.Duration `json:"uptime_nano"`
+	UpTime     string        `json:"uptime"`
+	Http       struct {
 		httpStatsType
-		AvgTimeNano      int            `json:"req_avg_nano"`
-		AvgTime      string            `json:"req_avg"`
+		AvgTimeNano int    `json:"req_avg_nano"`
+		AvgTime     string `json:"req_avg"`
 
 		CurrentCount httpSeriesType `json:"req_counts"`
 		LastCount    httpSeriesType `json:"req_counts_last"`
 	} `json:"http"`
-	Runtime runtimeStats `json:"runtime"`
+	Runtime runtimeStats       `json:"runtime"`
 	DBstats map[string]dbStats `json:"db"`
 }
-
 
 // swagger:operation GET /v1/stats stats getStats
 //
@@ -98,8 +97,8 @@ func getStats(w http.ResponseWriter, r *http.Request, id ident.Ident) {
 		time.Since(appStart).String(),
 		struct {
 			httpStatsType
-			AvgTimeNano  int            `json:"req_avg_nano"`
-			AvgTime  string            `json:"req_avg"`
+			AvgTimeNano int    `json:"req_avg_nano"`
+			AvgTime     string `json:"req_avg"`
 
 			CurrentCount httpSeriesType `json:"req_counts"`
 			LastCount    httpSeriesType `json:"req_counts_last"`
@@ -208,10 +207,10 @@ func recordStats(pipe chan httpData) {
 }
 
 type runtimeStats struct {
-	NumCPU    int `json:"num_cpu"`
+	NumCPU     int `json:"num_cpu"`
 	GoRoutines int `json:"go_routines"`
 
-	Alloc        uint64  `json:"alloc"`
+	Alloc        uint64 `json:"alloc"`
 	TotalAlloc   uint64 `json:"total_alloc"`
 	Sys          uint64 `json:"sys"`
 	Lookups      uint64 `json:"lookups"`
@@ -236,11 +235,11 @@ type runtimeStats struct {
 	LastGC       uint64 `json:"gc_last"`
 	PauseTotalNs uint64 `json:"gc_pause_total"`
 
-	NumGC         uint32 `json:"gc_num"`
-	NumForcedGC   uint32 `json:"gc_forced_num"`
+	NumGC         uint32  `json:"gc_num"`
+	NumForcedGC   uint32  `json:"gc_forced_num"`
 	GCCPUFraction float64 `json:"gc_cpu_frac"`
-	EnableGC      bool `json:"gc_enable"`
-	DebugGC       bool `json:"gc_debug"`
+	EnableGC      bool    `json:"gc_enable"`
+	DebugGC       bool    `json:"gc_debug"`
 }
 
 func getRuntime() (s runtimeStats) {
