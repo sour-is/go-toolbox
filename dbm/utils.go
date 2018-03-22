@@ -86,30 +86,12 @@ func Replace(
 
 		log.Debug(insert.ToSql())
 
-		var result sql.Result
-		result, err = insert.Exec()
-		if err != nil {
-			log.Warning(err.Error())
-			return
-		}
-
-		var affected int64
-		if affected, err = result.RowsAffected(); err != nil {
-			return
-		}
-		if affected == 0 {
-			err = fmt.Errorf("update Failed. %d rows affected", num)
-		}
-
-	} else if err == nil && num > 0 {
-
-		found = true
-
-		log.Debug(update.ToSql())
-
 		if tx.Returns {
-			result := update.QueryRow()
+			var result sq.RowScanner
+			result = insert.QueryRow()
+			log.Debug(result)
 			err = result.Scan(&id)
+
 			if err != nil {
 				log.Debug(err.Error())
 				return
@@ -117,7 +99,7 @@ func Replace(
 
 		} else {
 			var result sql.Result
-			result, err = update.Exec()
+			result, err = insert.Exec()
 			if err != nil {
 				log.Debug(err.Error())
 				return
@@ -130,6 +112,29 @@ func Replace(
 			}
 
 			id = uint64(lastId)
+		}
+
+	} else if err == nil && num > 0 {
+
+		found = true
+		update = update.Where(where)
+
+		log.Debug(update.ToSql())
+		var result sql.Result
+
+		result, err = update.Exec()
+		if err != nil {
+			log.Warning(err.Error())
+			return
+		}
+
+		var affected int64
+		if affected, err = result.RowsAffected(); err != nil {
+			return
+		}
+
+		if affected == 0 {
+			err = fmt.Errorf("update Failed. %d rows affected", num)
 		}
 	}
 
