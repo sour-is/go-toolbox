@@ -15,17 +15,79 @@ import (
 
 import (
 	"database/sql"
-	"fmt"
+	"github.com/spf13/viper"
+	"strings"
+	"regexp"
+	"sour.is/x/toolbox/log"
+
+	sq "github.com/Masterminds/squirrel"
 )
 
-var db *sql.DB
+type DB struct{
+	Conn *sql.DB
+	DbType string
+	Placeholder sq.PlaceholderFormat
+	Returns bool
+}
 
-// GetDB eturns a database connection.
-// Depricated: Use Transaction instead.
-func GetDB() (*sql.Tx, error) {
-	if db == nil {
-		return nil, fmt.Errorf("database is not configured")
+
+// GetDB returns a database connection.
+func GetDB(pfx string) (db DB, err error) {
+
+	dbType := viper.GetString(pfx + ".type")
+	connect := viper.GetString(pfx + ".connect")
+	maxConn := viper.GetInt(pfx + ".max_conn")
+
+	if dbType == "" {
+		log.Fatal("Database Type is not set!")
+	}
+	if connect == "" {
+		log.Fatal("Database Connect is not set!")
 	}
 
-	return db.Begin()
+	var conn *sql.DB
+	if conn, err = sql.Open(dbType, connect); err != nil {
+		log.Error(err)
+		return
+	}
+
+	if maxConn != 0 {
+		conn.SetMaxOpenConns(maxConn)
+	}
+
+	if err = conn.Ping(); err != nil {
+		log.Error(err)
+		return
+	}
+
+	db.Conn = conn
+	db.DbType = dbType
+	db.Placeholder = sq.Question
+	if strings.Contains(db.DbType, "postgres") {
+		db.Placeholder = sq.Dollar
+		db.Returns = true
+	}
+
+	connect = regexp.MustCompile(`:.*@`).ReplaceAllString(connect, ":****@")
+	connect = regexp.MustCompile(`password=.[[:graph:]]+`).ReplaceAllString(connect, "password=****")
+
+	log.Notice("DBM: Database Connected: ", connect)
+
+	return
+}
+
+
+var stdDB DB
+
+func Config() {
+	if viper.IsSet("database") {
+		pfx := "db." + viper.GetString("database")
+
+		var err error
+
+		stdDB, err = GetDB(pfx)
+		if err != nil {
+			log.Fatal(err.Error())
+		}
+	}
 }

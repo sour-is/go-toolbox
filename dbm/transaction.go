@@ -19,19 +19,23 @@ type Tx struct {
 	Returns     bool
 }
 
-func NewTx(db *sql.DB, dbType string, placeholder sq.PlaceholderFormat, returns bool) (tx *Tx, err error) {
+func (db DB) NewTx() (tx *Tx, err error) {
 	tx = new(Tx)
-	tx.Tx, err = db.Begin()
-	tx.Placeholder = placeholder
-	tx.DbType = dbType
-	tx.Returns = returns
+	tx.Tx, err = db.Conn.Begin()
+	tx.Placeholder = db.Placeholder
+	tx.DbType = db.DbType
+	tx.Returns = db.Returns
 
 	return
 }
 
-// Transaction starts a new database transction and executes the supplied func.
+
 func Transaction(txFunc func(*Tx) error) (err error) {
-	tx, err := NewTx(db, dbType, placeholder, returns)
+	return stdDB.Transaction(txFunc)
+}
+// Transaction starts a new database transction and executes the supplied func.
+func (db DB) Transaction(txFunc func(*Tx) error) (err error) {
+	tx, err := db.NewTx()
 
 	if err != nil {
 		log.Error(err.Error())
@@ -58,8 +62,12 @@ func Transaction(txFunc func(*Tx) error) (err error) {
 	err = txFunc(tx)
 	return err
 }
+
 func Transactionx(txFunc func(*sqlx.Tx) error) (err error) {
-	dbx := sqlx.NewDb(db, dbType)
+	return stdDB.Transactionx(txFunc)
+}
+func (db DB) Transactionx(txFunc func(*sqlx.Tx) error) (err error) {
+	dbx := sqlx.NewDb(db.Conn, db.DbType)
 
 	tx, err := dbx.Beginx()
 	if err != nil {
@@ -88,34 +96,20 @@ func Transactionx(txFunc func(*sqlx.Tx) error) (err error) {
 	return err
 }
 
-var txMap = make(map[string]*Tx)
-var txMutex = sync.Mutex{}
 
-func txSet(id string, tx *Tx) {
-	txMutex.Lock()
-	defer txMutex.Unlock()
-	txMap[id] = tx
-}
-func txGet(id string) *Tx {
-	txMutex.Lock()
-	defer txMutex.Unlock()
-	return txMap[id]
-}
-func txRm(id string) {
-	txMutex.Lock()
-	defer txMutex.Unlock()
-	delete(txMap, id)
+func TransactionContinue(TxID string, txFunc func(*Tx, string) error) (err error) {
+	return stdDB.TransactionContinue(TxID, txFunc)
 }
 
 // TransactionContinue returns a transaction that can be continued by suppling the
 // TxID that gets passed into the txFunc.
-func TransactionContinue(TxID string, txFunc func(*Tx, string) error) (err error) {
+func (db DB) TransactionContinue(TxID string, txFunc func(*Tx, string) error) (err error) {
 	var tx *Tx
 
 	if TxID == "" {
 
 		TxID = uuid.V4()
-		tx, err = NewTx(db, dbType, placeholder, returns)
+		tx, err = db.NewTx()
 		if err != nil {
 			log.Error(err.Error())
 			return
@@ -158,4 +152,23 @@ func TransactionContinue(TxID string, txFunc func(*Tx, string) error) (err error
 
 	err = txFunc(tx, TxID)
 	return err
+}
+
+var txMap = make(map[string]*Tx)
+var txMutex = sync.Mutex{}
+
+func txSet(id string, tx *Tx) {
+	txMutex.Lock()
+	defer txMutex.Unlock()
+	txMap[id] = tx
+}
+func txGet(id string) *Tx {
+	txMutex.Lock()
+	defer txMutex.Unlock()
+	return txMap[id]
+}
+func txRm(id string) {
+	txMutex.Lock()
+	defer txMutex.Unlock()
+	delete(txMap, id)
 }

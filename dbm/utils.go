@@ -8,6 +8,34 @@ import (
 )
 
 func Count(tx *Tx, table string, where sq.Eq) (count uint64, err error) {
+	return tx.Count(table, where)
+}
+
+type FetchMap func(row *sql.Rows) error
+
+func Fetch(tx *Tx, table string, cols []string, where sq.Eq, limit, offset uint64, fn FetchMap) (err error) {
+	return tx.Fetch(table, cols, where, limit, offset, fn)
+}
+
+func Insert(tx *Tx, table string) sq.InsertBuilder {
+	return tx.Insert(table)
+}
+
+func Update(tx *Tx, table string) sq.UpdateBuilder {
+	return tx.Update(table)
+}
+
+func Replace(
+	tx *Tx,
+	table string,
+	where sq.Eq,
+	update sq.UpdateBuilder,
+	insert sq.InsertBuilder,
+) (found bool, id uint64, err error) {
+	return tx.Replace(table, where, update, insert)
+}
+
+func (tx *Tx) Count(table string, where sq.Eq) (count uint64, err error) {
 
 	s := sq.Select("count(1)")
 	s = s.RunWith(tx.Tx)
@@ -34,9 +62,7 @@ func Count(tx *Tx, table string, where sq.Eq) (count uint64, err error) {
 	return count, nil
 }
 
-type FetchMap func(row *sql.Rows) error
-
-func Fetch(tx *Tx, table string, cols []string, where sq.Eq, limit, offset uint64, fn FetchMap) (err error) {
+func (tx *Tx) Fetch(table string, cols []string, where sq.Eq, limit, offset uint64, fn FetchMap) (err error) {
 
 	s := sq.Select(cols...)
 	s = s.PlaceholderFormat(tx.Placeholder)
@@ -48,7 +74,7 @@ func Fetch(tx *Tx, table string, cols []string, where sq.Eq, limit, offset uint6
 	if where != nil {
 		s = s.Where(where)
 	}
-
+	log.Debug(s.ToSql())
 	rows, err := s.Query()
 	if err != nil {
 		return
@@ -57,7 +83,7 @@ func Fetch(tx *Tx, table string, cols []string, where sq.Eq, limit, offset uint6
 	return fn(rows)
 }
 
-func Insert(tx *Tx, table string) sq.InsertBuilder {
+func (tx *Tx) Insert(table string) sq.InsertBuilder {
 	s := sq.Insert(table)
 	s = s.PlaceholderFormat(tx.Placeholder)
 	s = s.RunWith(tx.Tx)
@@ -65,7 +91,7 @@ func Insert(tx *Tx, table string) sq.InsertBuilder {
 	return s
 }
 
-func Update(tx *Tx, table string) sq.UpdateBuilder {
+func (tx *Tx) Update(table string) sq.UpdateBuilder {
 	s := sq.Update(table)
 	s = s.PlaceholderFormat(tx.Placeholder)
 	s = s.RunWith(tx.Tx)
@@ -73,8 +99,7 @@ func Update(tx *Tx, table string) sq.UpdateBuilder {
 	return s
 }
 
-func Replace(
-	tx *Tx,
+func (tx *Tx) Replace(
 	table string,
 	where sq.Eq,
 	update sq.UpdateBuilder,

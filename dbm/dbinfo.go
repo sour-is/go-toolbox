@@ -33,9 +33,11 @@ func GetDbInfo(o interface{}) (d DbInfo) {
 		if tag == "" {
 			tag = field.Tag.Get("json")
 		}
+
 		if tag == "" || tag == "-" {
 			tag = field.Name
 		}
+
 		d.columns[field.Name] = tag
 		d.Cols = append(d.Cols, tag)
 	}
