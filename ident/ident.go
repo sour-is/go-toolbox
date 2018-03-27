@@ -22,8 +22,6 @@ import (
 type Ident interface {
 	GetIdentity() string
 	GetAspect() string
-	GetRoles() []string
-	GetGroups() []string
 
 	HasRole(r ...string) bool
 	HasGroup(g ...string) bool
@@ -90,12 +88,6 @@ func (m NullUser) GetIdentity() string {
 }
 func (m NullUser) GetAspect() string {
 	return m.Aspect
-}
-func (m NullUser) GetRoles() []string {
-	return []string{}
-}
-func (m NullUser) GetGroups() []string {
-	return []string{}
 }
 func (m NullUser) HasRole(r ...string) bool {
 	return m.Active
