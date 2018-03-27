@@ -42,6 +42,12 @@ func (m MockUser) GetIdentity() string {
 func (m MockUser) GetAspect() string {
 	return m.aspect
 }
+func (m MockUser) GetRoles() []string {
+	return []string{}
+}
+func (m MockUser) GetGroups() []string {
+	return []string{}
+}
 func (m MockUser) HasRole(r ...string) bool {
 	return m.active
 }

@@ -71,6 +71,12 @@ func (m User) GetIdentity() string {
 func (m User) GetAspect() string {
 	return m.aspect
 }
+func (m User) GetRoles() []string {
+	return []string{}
+}
+func (m User) GetGroups() []string {
+	return []string{}
+}
 
 func (m User) HasRole(r ...string) bool {
 	return m.active
