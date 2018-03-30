@@ -69,8 +69,10 @@ func (tx *Tx) Fetch(table string, cols []string, where sq.Eq, limit, offset uint
 	s = s.RunWith(tx.Tx)
 
 	s = s.From(table)
-	s = s.Limit(limit)
-	s = s.Offset(offset)
+	if limit > 0 {
+		s = s.Limit(limit)
+		s = s.Offset(offset)
+	}
 	if where != nil {
 		s = s.Where(where)
 	}
