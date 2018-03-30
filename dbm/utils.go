@@ -130,7 +130,7 @@ func (tx *Tx) Replace(
 
 			var result sq.RowScanner
 			result = insert.QueryRow()
-			err = result.Scan(ptr)
+			err = result.Scan(ptr...)
 			if err != nil {
 				log.Debug(err.Error())
 				return
