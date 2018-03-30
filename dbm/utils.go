@@ -122,7 +122,7 @@ func (tx *Tx) Replace(
 			insert = insert.Suffix(`RETURNING "` + strings.Join(auto,`","`) + "\"")
 
 			id = make([]uint64, len(d.Auto))
-			ptr := make([]*uint64, len(d.Auto))
+			ptr := make([]interface{}, len(d.Auto))
 			for i := range d.Auto {
 				ptr[i] = &id[i]
 			}
