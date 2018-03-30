@@ -116,7 +116,7 @@ func (tx *Tx) Replace(
 
 		if tx.Returns {
 			log.Debugf("RETURNING ", d.Auto)
-			insert.Suffix("RETURNING "+strings.Join(d.Auto,","))
+			insert = insert.Suffix("RETURNING "+strings.Join(d.Auto,","))
 
 			id = make([]uint64, len(d.Auto))
 			ptr := make([]*uint64, len(d.Auto))
