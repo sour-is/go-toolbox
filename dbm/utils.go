@@ -5,6 +5,7 @@ import (
 	"fmt"
 	sq "github.com/Masterminds/squirrel"
 	"sour.is/x/toolbox/log"
+	"strings"
 )
 
 func Count(tx *Tx, table string, where sq.Eq) (count uint64, err error) {
@@ -27,12 +28,12 @@ func Update(tx *Tx, table string) sq.UpdateBuilder {
 
 func Replace(
 	tx *Tx,
-	table string,
+	d DbInfo,
 	where sq.Eq,
 	update sq.UpdateBuilder,
 	insert sq.InsertBuilder,
-) (found bool, id uint64, err error) {
-	return tx.Replace(table, where, update, insert)
+) (found bool, id []uint64, err error) {
+	return tx.Replace(d, where, update, insert)
 }
 
 func (tx *Tx) Count(table string, where sq.Eq) (count uint64, err error) {
@@ -102,22 +103,30 @@ func (tx *Tx) Update(table string) sq.UpdateBuilder {
 }
 
 func (tx *Tx) Replace(
-	table string,
+	d DbInfo,
 	where sq.Eq,
 	update sq.UpdateBuilder,
 	insert sq.InsertBuilder,
-) (found bool, id uint64, err error) {
+) (found bool, id []uint64, err error) {
 
 	var num uint64
-	if num, err = Count(tx, table, where); err == nil && num == 0 {
+	if num, err = Count(tx, d.Table, where); err == nil && num == 0 {
 
 		log.Debug(insert.ToSql())
 
 		if tx.Returns {
+			log.Debugf("RETURNING ", d.Auto)
+			insert.Suffix("RETURNING "+strings.Join(d.Auto,","))
+
+			id = make([]uint64, len(d.Auto))
+			ptr := make([]*uint64, len(d.Auto))
+			for i := range d.Auto {
+				ptr[i] = &id[i]
+			}
+
 			var result sq.RowScanner
 			result = insert.QueryRow()
-			err = result.Scan(&id)
-			log.Debugf("RETURNING %d", id)
+			err = result.Scan(ptr)
 			if err != nil {
 				log.Debug(err.Error())
 				return
@@ -137,7 +146,7 @@ func (tx *Tx) Replace(
 				return
 			}
 
-			id = uint64(lastId)
+			id = append(id, uint64(lastId))
 		}
 
 	} else if err == nil && num > 0 {
