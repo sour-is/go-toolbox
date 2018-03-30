@@ -87,6 +87,13 @@ func (tx *Tx) Fetch(table string, cols []string, where sq.Eq, limit, offset uint
 	return fn(rows)
 }
 
+func (tx *Tx) Select(cols []string, table string) sq.SelectBuilder {
+	s := sq.Select(cols...).From(table)
+	s = s.PlaceholderFormat(tx.Placeholder)
+	s = s.RunWith(tx.Tx)
+
+	return s
+}
 func (tx *Tx) Insert(table string) sq.InsertBuilder {
 	s := sq.Insert(table)
 	s = s.PlaceholderFormat(tx.Placeholder)
@@ -94,7 +101,6 @@ func (tx *Tx) Insert(table string) sq.InsertBuilder {
 
 	return s
 }
-
 func (tx *Tx) Update(table string) sq.UpdateBuilder {
 	s := sq.Update(table)
 	s = s.PlaceholderFormat(tx.Placeholder)
@@ -112,6 +118,7 @@ func (tx *Tx) Replace(
 ) (found bool, err error) {
 	var num uint64
 	auto, dest, err := d.StructMap(o, d.Auto)
+	var row sq.RowScanner
 
 	if num, err = tx.Count(d.Table, where); err == nil && num == 0 {
 		if tx.Returns {
@@ -121,16 +128,7 @@ func (tx *Tx) Replace(
 			}
 
 			log.Debug(insert.ToSql())
-
-			var result sq.RowScanner
-			result = insert.QueryRow()
-
-			err = result.Scan(dest...)
-			if err != nil {
-				log.Debug(err.Error())
-				return
-			}
-
+			row = insert.QueryRow()
 		} else {
 			log.Debug(insert.ToSql())
 
@@ -146,11 +144,11 @@ func (tx *Tx) Replace(
 				log.Debug(err.Error())
 				return
 			}
-
-			dest[0] = uint64(lastId)
+			row = tx.Select(auto, d.Table).Where(sq.Eq{d.Auto[0]: lastId}).QueryRow()
 		}
 
-	} else if err == nil && num > 0 {
+	} else
+	if err == nil && num > 0 {
 
 		found = true
 		update = update.Where(where)
@@ -162,16 +160,7 @@ func (tx *Tx) Replace(
 			}
 
 			log.Debug(update.ToSql())
-
-			var result sq.RowScanner
-			result = update.QueryRow()
-
-			err = result.Scan(dest...)
-			if err != nil {
-				log.Debug(err.Error())
-				return
-			}
-
+			row = update.QueryRow()
 		} else {
 			log.Debug(update.ToSql())
 			var result sql.Result
@@ -191,9 +180,16 @@ func (tx *Tx) Replace(
 				found = false
 				err = fmt.Errorf("update Failed. %d rows affected", num)
 			}
+			row = tx.Select(auto, d.Table).Where(where).QueryRow()
 		}
 	}
 
+	err = row.Scan(dest...)
+	if err != nil {
+		log.Debug(err.Error())
+		return
+	}
+	
 	return
 }
 
