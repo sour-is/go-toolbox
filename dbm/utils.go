@@ -29,11 +29,12 @@ func Update(tx *Tx, table string) sq.UpdateBuilder {
 func Replace(
 	tx *Tx,
 	d DbInfo,
+	o interface{},
 	where sq.Eq,
 	update sq.UpdateBuilder,
 	insert sq.InsertBuilder,
-) (found bool, id []uint64, err error) {
-	return tx.Replace(d, where, update, insert)
+) (found bool, err error) {
+	return tx.Replace(d, o, where, update, insert)
 }
 
 func (tx *Tx) Count(table string, where sq.Eq) (count uint64, err error) {
@@ -104,33 +105,27 @@ func (tx *Tx) Update(table string) sq.UpdateBuilder {
 
 func (tx *Tx) Replace(
 	d DbInfo,
+	o interface{},
 	where sq.Eq,
 	update sq.UpdateBuilder,
 	insert sq.InsertBuilder,
-) (found bool, id []uint64, err error) {
-
+) (found bool, err error) {
 	var num uint64
-	if num, err = Count(tx, d.Table, where); err == nil && num == 0 {
+	auto, dest, err := d.StructMap(o, d.Auto)
 
+	if num, err = tx.Count(d.Table, where); err == nil && num == 0 {
 		if tx.Returns {
-			var auto []string
-			for _, n := range d.Auto {
-				auto = append(auto, d.Col(n))
+			if len(auto) > 0 {
+				log.Debug("RETURNING ", auto, " FOR ", d.Auto)
+				insert = insert.Suffix(`RETURNING "` + strings.Join(auto,`","`) + "\"")
 			}
 
-			log.Debug("RETURNING ", auto, " FOR ", d.Auto)
-			insert = insert.Suffix(`RETURNING "` + strings.Join(auto,`","`) + "\"")
-
-			id = make([]uint64, len(d.Auto))
-			ptr := make([]interface{}, len(d.Auto))
-			for i := range d.Auto {
-				ptr[i] = &id[i]
-			}
 			log.Debug(insert.ToSql())
 
 			var result sq.RowScanner
 			result = insert.QueryRow()
-			err = result.Scan(ptr...)
+
+			err = result.Scan(dest...)
 			if err != nil {
 				log.Debug(err.Error())
 				return
@@ -152,7 +147,7 @@ func (tx *Tx) Replace(
 				return
 			}
 
-			id = append(id, uint64(lastId))
+			dest[0] = uint64(lastId)
 		}
 
 	} else if err == nil && num > 0 {
@@ -160,24 +155,45 @@ func (tx *Tx) Replace(
 		found = true
 		update = update.Where(where)
 
-		log.Debug(update.ToSql())
-		var result sql.Result
+		if tx.Returns {
+			if len(auto) > 0 {
+				log.Debug("RETURNING ", auto, " FOR ", d.Auto)
+				insert = insert.Suffix(`RETURNING "` + strings.Join(auto,`","`) + "\"")
+			}
 
-		result, err = update.Exec()
-		if err != nil {
-			log.Warning(err.Error())
-			return
-		}
+			log.Debug(update.ToSql())
 
-		var affected int64
-		if affected, err = result.RowsAffected(); err != nil {
-			return
-		}
+			var result sq.RowScanner
+			result = update.QueryRow()
 
-		if affected == 0 {
-			err = fmt.Errorf("update Failed. %d rows affected", num)
+			err = result.Scan(dest...)
+			if err != nil {
+				log.Debug(err.Error())
+				return
+			}
+
+		} else {
+			log.Debug(update.ToSql())
+			var result sql.Result
+
+			result, err = update.Exec()
+			if err != nil {
+				log.Warning(err.Error())
+				return
+			}
+
+			var affected int64
+			if affected, err = result.RowsAffected(); err != nil {
+				return
+			}
+
+			if affected == 0 {
+				found = false
+				err = fmt.Errorf("update Failed. %d rows affected", num)
+			}
 		}
 	}
 
 	return
 }
+

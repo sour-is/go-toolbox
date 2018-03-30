@@ -13,7 +13,6 @@ type DbInfo struct {
 	columns map[string]string
 	Auto    []string
 }
-
 func (d DbInfo) Col(column string) (col string) {
 	var ok bool
 	if col, ok = d.columns[column]; !ok {
