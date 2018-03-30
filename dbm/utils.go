@@ -112,17 +112,16 @@ func (tx *Tx) Replace(
 	var num uint64
 	if num, err = Count(tx, d.Table, where); err == nil && num == 0 {
 
-		log.Debug(insert.ToSql())
-
 		if tx.Returns {
-			log.Debugf("RETURNING ", d.Auto)
-			insert = insert.Suffix("RETURNING "+strings.Join(d.Auto,","))
+			log.Debug("RETURNING ", d.Auto)
+			insert = insert.Suffix(`RETURNING "` + strings.Join(d.Auto,`","`) + "\"")
 
 			id = make([]uint64, len(d.Auto))
 			ptr := make([]*uint64, len(d.Auto))
 			for i := range d.Auto {
 				ptr[i] = &id[i]
 			}
+			log.Debug(insert.ToSql())
 
 			var result sq.RowScanner
 			result = insert.QueryRow()
@@ -133,6 +132,8 @@ func (tx *Tx) Replace(
 			}
 
 		} else {
+			log.Debug(insert.ToSql())
+
 			var result sql.Result
 			result, err = insert.Exec()
 			if err != nil {
