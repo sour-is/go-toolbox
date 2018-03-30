@@ -3,11 +3,13 @@ package dbm
 import (
 	"reflect"
 	"strings"
+	"fmt"
 )
 
 type DbInfo struct {
 	Table   string
 	Cols    []string
+	SCols   []string
 	columns map[string]string
 	Auto    []string
 }
@@ -54,10 +56,38 @@ func GetDbInfo(o interface{}) (d DbInfo) {
 
 		d.columns[field.Name] = tag
 		d.Cols = append(d.Cols, tag)
+		d.SCols = append(d.SCols, field.Name)
 	}
 
 	return d
 }
+
+func (d DbInfo) StructMap(o interface{}, cols []string) (fields []string, targets []interface{}, err error){
+	if cols == nil {
+		cols = d.SCols
+	}
+
+	r := reflect.ValueOf(o)
+	e := r.Elem()
+	if e.Kind() == reflect.Struct {
+		// exported field
+		for _, field := range cols {
+			f := e.FieldByName(field)
+			if f.IsValid() {
+				// A Value can be changed only if it is
+				// addressable and was not obtained by
+				// the use of unexported struct fields.
+				if f.CanSet() && f.CanAddr() {
+					fields = append(fields, d.Col(field))
+					targets = append(targets, f.Addr().Interface())
+				} else { err = fmt.Errorf("field %s cannot be set", field); break }
+			} else { err = fmt.Errorf("field %s is not valid", field); break }
+		}
+	} else { err = fmt.Errorf("object %s is not struct", e.Kind()) }
+
+	return
+}
+
 
 func ApplyUint(o interface{}, auto []string, vals []uint64) {
 	r := reflect.ValueOf(o)
