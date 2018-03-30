@@ -62,6 +62,7 @@ func GetDbInfo(o interface{}) (d DbInfo) {
 	return d
 }
 
+// StructMap accepts a struct and the columns to be set and returns a []interface{} that can be passed to a query scan
 func (d DbInfo) StructMap(o interface{}, cols []string) (fields []string, targets []interface{}, err error){
 	if cols == nil {
 		cols = d.SCols
@@ -86,63 +87,4 @@ func (d DbInfo) StructMap(o interface{}, cols []string) (fields []string, target
 	} else { err = fmt.Errorf("object %s is not struct", e.Kind()) }
 
 	return
-}
-
-
-func ApplyUint(o interface{}, auto []string, vals []uint64) {
-	r := reflect.ValueOf(o)
-	e := r.Elem()
-	if e.Kind() == reflect.Struct {
-		// exported field
-		for i, field := range auto {
-			f := e.FieldByName(field)
-			if f.IsValid() {
-				// A Value can be changed only if it is
-				// addressable and was not obtained by
-				// the use of unexported struct fields.
-				if f.CanSet() {
-					// change value of N
-					switch f.Kind() {
-					case reflect.Uint64, reflect.Uint32, reflect.Uint16, reflect.Uint8, reflect.Uint:
-						if !f.OverflowUint(vals[i]) {
-							f.SetUint(vals[i])
-						}
-					case reflect.Int64, reflect.Int32, reflect.Int16, reflect.Int8, reflect.Int:
-						if int64(vals[i]) >= 0 && !f.OverflowInt(int64(vals[i])) {
-							f.SetInt(int64(vals[i]))
-						}
-					}
-				}
-			}
-		}
-	}
-}
-
-func ApplyInt(o interface{}, auto []string, vals []int64) {
-	r := reflect.ValueOf(o)
-	e := r.Elem()
-	if e.Kind() == reflect.Struct {
-		// exported field
-		for i, field := range auto {
-			f := e.FieldByName(field)
-			if f.IsValid() {
-				// A Value can be changed only if it is
-				// addressable and was not obtained by
-				// the use of unexported struct fields.
-				if f.CanSet() {
-					// change value of N
-					switch f.Kind() {
-					case reflect.Uint64, reflect.Uint32, reflect.Uint16, reflect.Uint8, reflect.Uint:
-						if !f.OverflowUint(uint64(vals[i])) {
-							f.SetUint(uint64(vals[i]))
-						}
-					case reflect.Int64, reflect.Int32, reflect.Int16, reflect.Int8, reflect.Int:
-						if !f.OverflowInt(vals[i]) {
-							f.SetInt(vals[i])
-						}
-					}
-				}
-			}
-		}
-	}
 }
