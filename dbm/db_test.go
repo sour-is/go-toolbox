@@ -55,7 +55,9 @@ func TestConfig(t *testing.T) {
 		defer mockDB.Close()
 		mock.ExpectBegin()
 
-		GetDB("db.test")
+		var db DB
+		db, err = GetDB("db.test")
+		db.NewTx()
 
 		// we make sure that all expectations were met
 		if err := mock.ExpectationsWereMet(); err != nil {

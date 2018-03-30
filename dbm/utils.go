@@ -116,9 +116,8 @@ func (tx *Tx) Replace(
 		if tx.Returns {
 			var result sq.RowScanner
 			result = insert.QueryRow()
-			log.Debug(result)
 			err = result.Scan(&id)
-
+			log.Debugf("RETURNING %d", id)
 			if err != nil {
 				log.Debug(err.Error())
 				return
