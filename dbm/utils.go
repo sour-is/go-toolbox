@@ -113,8 +113,13 @@ func (tx *Tx) Replace(
 	if num, err = Count(tx, d.Table, where); err == nil && num == 0 {
 
 		if tx.Returns {
-			log.Debug("RETURNING ", d.Auto)
-			insert = insert.Suffix(`RETURNING "` + strings.Join(d.Auto,`","`) + "\"")
+			var auto []string
+			for _, n := range d.Auto {
+				auto = append(auto, d.Col(n))
+			}
+
+			log.Debug("RETURNING ", auto, " FOR ", d.Auto)
+			insert = insert.Suffix(`RETURNING "` + strings.Join(auto,`","`) + "\"")
 
 			id = make([]uint64, len(d.Auto))
 			ptr := make([]*uint64, len(d.Auto))
