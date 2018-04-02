@@ -73,7 +73,7 @@ var Fcontinue = Ccontinue
 
 var std = log.New(os.Stderr, Fprefix, LstdFlags)
 var mu = sync.Mutex{}
-var verb int = Vnone
+var verb = Vnone
 
 func StartupBanner() {
 	rand.Seed(time.Now().UnixNano())
@@ -191,7 +191,7 @@ func Panic(v ...interface{}) {
 
 // Panicf is equivalent to Printf() followed by a call to panic().
 func Panicf(format string, v ...interface{}) {
-	s := strings.Split(fmt.Sprint(v...), "\n")
+	s := strings.Split(fmt.Sprintf(format, v...), "\n")
 	std.Output(2, Ferror+s[0]+Freset)
 	for _, l := range s[1:] {
 		std.Output(2, Fcontinue+l+Freset)
@@ -327,21 +327,21 @@ func Criticalf(format string, v ...interface{}) {
 
 // These functions do nothing. It makes it easy to comment out
 // debug lines without having to remove the import.
-func NilPrint(v ...interface{})                    {}
-func NilPrintf(format string, v ...interface{})    {}
-func NilPrintln(v ...interface{})                  {}
-func NilDebug(v ...interface{})                    {}
-func NilDebugf(format string, v ...interface{})    {}
-func NilInfo(v ...interface{})                     {}
-func NilInfof(format string, v ...interface{})     {}
-func NilNotice(v ...interface{})                   {}
-func NilNoticef(format string, v ...interface{})   {}
-func NilWarning(v ...interface{})                  {}
-func NilWarningf(format string, v ...interface{})  {}
-func NilError(v ...interface{})                    {}
-func NilErrorf(format string, v ...interface{})    {}
-func NilCritical(v ...interface{})                 {}
-func NilCriticalf(format string, v ...interface{}) {}
+func NilPrint(_ ...interface{})               {}
+func NilPrintf(_ string, _ ...interface{})    {}
+func NilPrintln(_ ...interface{})             {}
+func NilDebug(_ ...interface{})               {}
+func NilDebugf(_ string, _ ...interface{})    {}
+func NilInfo(_ ...interface{})                {}
+func NilInfof(_ string, _ ...interface{})     {}
+func NilNotice(_ ...interface{})              {}
+func NilNoticef(_ string, _ ...interface{})   {}
+func NilWarning(_ ...interface{})             {}
+func NilWarningf(_ string, _ ...interface{})  {}
+func NilError(_ ...interface{})               {}
+func NilErrorf(_ string, _ ...interface{})    {}
+func NilCritical(_ ...interface{})            {}
+func NilCriticalf(_ string, _ ...interface{}) {}
 
 var souris = [][]string{
 	{

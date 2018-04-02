@@ -228,5 +228,33 @@ func TestDefaultLog(t *testing.T) {
 
 		})
 
+		convey.Convey("Nil Functions should do nothing.", func(){
+			SetVerbose(Vdebug)
+			SetColor(true)
+
+			NilPrint("PRINT")
+			NilPrintf("PRINTF")
+			NilPrintln("PRINTLN")
+
+			NilDebug("DBUG")
+			NilInfo("INFO")
+			NilWarning("WARN")
+			NilNotice("NOTE")
+			NilError("ERRO")
+			NilCritical("CRIT")
+
+			NilDebugf("%s", "DBUGF")
+			NilInfof("%s", "INFOF")
+			NilWarningf("%s", "WARNF")
+			NilNoticef("%s", "NOTEF")
+			NilErrorf("%s", "ERROF")
+			NilCriticalf("%s", "CRITF")
+
+			w.Flush()
+			convey.So(b.String(), convey.ShouldContainSubstring, "")
+			b.Reset()
+
+		})
+
 	})
 }

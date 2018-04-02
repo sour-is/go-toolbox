@@ -189,7 +189,7 @@ func (tx *Tx) Replace(
 		log.Debug(err.Error())
 		return
 	}
-	
+
 	return
 }
 

@@ -21,6 +21,7 @@ import (
 	"sour.is/x/toolbox/log"
 
 	sq "github.com/Masterminds/squirrel"
+	"time"
 )
 
 type DB struct{
@@ -37,6 +38,7 @@ func GetDB(pfx string) (db DB, err error) {
 	dbType := viper.GetString(pfx + ".type")
 	connect := viper.GetString(pfx + ".connect")
 	maxConn := viper.GetInt(pfx + ".max_conn")
+	maxLifetime := viper.GetInt(pfx + ".max_lifetime")
 
 	if dbType == "" {
 		log.Fatal("Database Type is not set!")
@@ -54,6 +56,12 @@ func GetDB(pfx string) (db DB, err error) {
 	if maxConn != 0 {
 		conn.SetMaxOpenConns(maxConn)
 	}
+
+	if maxLifetime == 0 {
+		maxLifetime = 5
+	}
+	conn.SetConnMaxLifetime(5 * time.Minute)
+
 
 	if err = conn.Ping(); err != nil {
 		log.Error(err)

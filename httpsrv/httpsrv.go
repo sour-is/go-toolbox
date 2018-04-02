@@ -260,12 +260,16 @@ type ResultWindow struct {
 func WriteError(w http.ResponseWriter, code int, msg string) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(code)
-	json.NewEncoder(w).Encode(ResultError{code, msg})
+	if err := json.NewEncoder(w).Encode(ResultError{code, msg}); err != nil {
+		log.Error(err)
+	}
 }
 func WriteObject(w http.ResponseWriter, code int, o interface{}) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(code)
-	json.NewEncoder(w).Encode(o)
+	if err := json.NewEncoder(w).Encode(o); err != nil {
+		log.Error(err)
+	}
 }
 func WriteText(w http.ResponseWriter, code int, o string) {
 	w.Header().Set("Content-Type", "text/plain")
@@ -275,12 +279,14 @@ func WriteText(w http.ResponseWriter, code int, o string) {
 func WriteWindow(w http.ResponseWriter, code int, results, limit, offset uint64, o interface{}) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(code)
-	json.NewEncoder(w).Encode(
+	if err := json.NewEncoder(w).Encode(
 		ResultWindow{
 			code,
 			"OK",
 			results,
 			limit,
 			offset,
-			o})
+			o}); err != nil {
+		log.Error(err)
+	}
 }
