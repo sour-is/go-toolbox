@@ -156,7 +156,7 @@ func (tx *Tx) Replace(
 		if tx.Returns {
 			if len(auto) > 0 {
 				log.Debug("RETURNING ", auto, " FOR ", d.Auto)
-				insert = insert.Suffix(`RETURNING "` + strings.Join(auto,`","`) + "\"")
+				update = update.Suffix(`RETURNING "` + strings.Join(auto,`","`) + "\"")
 			}
 
 			log.Debug(update.ToSql())
