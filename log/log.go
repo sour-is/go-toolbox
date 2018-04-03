@@ -118,6 +118,7 @@ func SetColor(on bool) {
 		Fcritical = Mcritical
 		Fcontinue = Mcontinue
 	}
+	std.SetPrefix(Fprefix)
 }
 
 func SetVerbose(v int) {
