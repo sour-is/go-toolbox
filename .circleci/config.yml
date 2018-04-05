@@ -26,8 +26,8 @@ jobs:
             go test -v ./... | tee ${TEST_RESULTS}/go-test.out
 
       - store_artifacts:
-          path: ${TEST_RESULTS}
+          path: /tmp/test-results
           destination: raw-test-output
 
       - store_test_results:
-          path: ${TEST_RESULTS}
+          path: /tmp/test-results
