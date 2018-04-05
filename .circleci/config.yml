@@ -8,7 +8,7 @@ jobs:
       # specify the version
       - image: circleci/golang:1.10
       
-    working_directory: /go/src/github.com/sour-is/go-toolbox
+    working_directory: /go/src/sour.is/x/toolbox
     steps:
       - checkout
 
