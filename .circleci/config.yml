@@ -8,23 +8,26 @@ jobs:
       - image: circleci/golang:1.10
       
     working_directory: /go/src/sour.is/x/toolbox
-
+    
+    environment:
+      TEST_RESULTS: /tmp/test-results
+      
     steps:
       - checkout
 
-      - run: mkdir -p $CIRCLE_TEST_REPORTS
+      - run: mkdir -p $TEST_REPORTS/tests
       - run: go get github.com/jstemmer/go-junit-report
 
       - run: go get -v -t -d ./...
       - run: 
           name: Run unit tests
           command: |
-            trap "go-junit-report <${CIRCLE_TEST_REPORTS}/go-test.out > ${CIRCLE_TEST_REPORTS}/go-test-report.xml" EXIT
-            go test -v ./... | tee ${CIRCLE_TEST_REPORTS}/go-test.out
+            trap "go-junit-report <${TEST_REPORTS}/go-test.out > ${TEST_REPORTS}/tests/go-test-report.xml" EXIT
+            go test -v ./... | tee ${TEST_REPORTS}/go-test.out
 
       - store_artifacts:
-          path: $CIRCLE_TEST_REPORTS
+          path: $TEST_REPORTS
           destination: raw-test-output
 
       - store_test_results:
-          path: $CIRCLE_TEST_REPORTS
+          path: $TEST_REPORTS
