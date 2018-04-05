@@ -15,7 +15,7 @@ jobs:
     steps:
       - checkout
 
-      - run: mkdir -p $TEST_RESULTS/tests
+      - run: mkdir -p ${TEST_RESULTS}/tests
       - run: go get github.com/jstemmer/go-junit-report
 
       - run: go get -v -t -d ./...
@@ -26,8 +26,8 @@ jobs:
             go test -v ./... | tee ${TEST_RESULTS}/go-test.out
 
       - store_artifacts:
-          path: $TEST_RESULTS
+          path: ${TEST_RESULTS}
           destination: raw-test-output
 
       - store_test_results:
-          path: $TEST_RESULTS
+          path: ${TEST_RESULTS}
