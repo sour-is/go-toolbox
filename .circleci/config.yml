@@ -15,19 +15,19 @@ jobs:
     steps:
       - checkout
 
-      - run: mkdir -p $TEST_REPORTS/tests
+      - run: mkdir -p $TEST_RESULTS/tests
       - run: go get github.com/jstemmer/go-junit-report
 
       - run: go get -v -t -d ./...
       - run: 
           name: Run unit tests
           command: |
-            trap "go-junit-report <${TEST_REPORTS}/go-test.out > ${TEST_REPORTS}/tests/go-test-report.xml" EXIT
-            go test -v ./... | tee ${TEST_REPORTS}/go-test.out
+            trap "go-junit-report <${TEST_RESULTS}/go-test.out > ${TEST_RESULTS}/tests/go-test-report.xml" EXIT
+            go test -v ./... | tee ${TEST_RESULTS}/go-test.out
 
       - store_artifacts:
-          path: $TEST_REPORTS
+          path: $TEST_RESULTS
           destination: raw-test-output
 
       - store_test_results:
-          path: $TEST_REPORTS
+          path: $TEST_RESULTS
