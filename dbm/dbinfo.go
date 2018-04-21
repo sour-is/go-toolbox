@@ -1,31 +1,38 @@
 package dbm
 
 import (
+	"fmt"
 	"reflect"
 	"strings"
-	"fmt"
 )
 
 type DbInfo struct {
-	Table   string
-	Cols    []string
-	SCols   []string
-	columns map[string]string
-	Auto    []string
+	Table string
+	Cols  []string
+	SCols []string
+	index map[string]int
+	Auto  []string
 }
-func (d DbInfo) Col(column string) (col string) {
+
+func (d DbInfo) SCol(column string) string {
+	return d.SCols[d.Index(column)]
+}
+func (d DbInfo) Col(column string) string {
+	return d.Cols[d.Index(column)]
+}
+func (d DbInfo) Index(column string) (idx int) {
 	var ok bool
-	if col, ok = d.columns[column]; !ok {
+	if idx, ok = d.index[column]; !ok {
 		panic("Col not found on table: " + column)
 	}
 
-	return col
+	return
 }
 func GetDbInfo(o interface{}) (d DbInfo) {
 	t := reflect.TypeOf(o)
 
 	d.Table = t.Name()
-	d.columns = make(map[string]string)
+	d.index = make(map[string]int)
 	for i := 0; i < t.NumField(); i++ {
 		field := t.Field(i)
 
@@ -33,7 +40,7 @@ func GetDbInfo(o interface{}) (d DbInfo) {
 		if table != "" {
 			d.Table = table
 		}
-		sp := append(strings.SplitN(field.Tag.Get("db"),",", 2), "")
+		sp := append(strings.SplitN(field.Tag.Get("db"), ",", 2), "")
 
 		tag, opt := sp[0], sp[1]
 
@@ -53,7 +60,7 @@ func GetDbInfo(o interface{}) (d DbInfo) {
 			tag = field.Name
 		}
 
-		d.columns[field.Name] = tag
+		d.index[field.Name] = len(d.Cols)
 		d.Cols = append(d.Cols, tag)
 		d.SCols = append(d.SCols, field.Name)
 	}
@@ -62,7 +69,7 @@ func GetDbInfo(o interface{}) (d DbInfo) {
 }
 
 // StructMap accepts a struct and the columns to be set and returns a []interface{} that can be passed to a query scan
-func (d DbInfo) StructMap(o interface{}, cols []string) (fields []string, targets []interface{}, err error){
+func (d DbInfo) StructMap(o interface{}, cols []string) (fields []string, targets []interface{}, err error) {
 	if cols == nil {
 		cols = d.SCols
 	}
@@ -80,10 +87,18 @@ func (d DbInfo) StructMap(o interface{}, cols []string) (fields []string, target
 				if f.CanSet() && f.CanAddr() {
 					fields = append(fields, d.Col(field))
 					targets = append(targets, f.Addr().Interface())
-				} else { err = fmt.Errorf("field %s cannot be set", field); break }
-			} else { err = fmt.Errorf("field %s is not valid", field); break }
+				} else {
+					err = fmt.Errorf("field %s cannot be set", field)
+					break
+				}
+			} else {
+				err = fmt.Errorf("field %s is not valid", field)
+				break
+			}
 		}
-	} else { err = fmt.Errorf("object %s is not struct", e.Kind()) }
+	} else {
+		err = fmt.Errorf("object %s is not struct", e.Kind())
+	}
 
 	return
 }
