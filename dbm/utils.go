@@ -108,6 +108,13 @@ func (tx *Tx) Update(table string) sq.UpdateBuilder {
 
 	return s
 }
+func (tx *Tx) Delete(table string) sq.DeleteBuilder {
+	s := sq.Delete(table)
+	s = s.PlaceholderFormat(tx.Placeholder)
+	s = s.RunWith(tx.Tx)
+
+	return s
+}
 
 func (tx *Tx) Replace(
 	d DbInfo,
