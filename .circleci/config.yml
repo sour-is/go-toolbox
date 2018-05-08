@@ -1,0 +1,33 @@
+# Golang CircleCI 2.0 configuration file
+#
+# Check https://circleci.com/docs/2.0/language-go/ for more details
+version: 2
+jobs:
+  build:
+    docker:
+      - image: circleci/golang:1.10
+      
+    working_directory: /go/src/sour.is/x/toolbox
+    
+    environment:
+      TEST_RESULTS: /tmp/test-results
+      
+    steps:
+      - checkout
+
+      - run: mkdir -p ${TEST_RESULTS}/tests
+      - run: go get github.com/jstemmer/go-junit-report
+
+      - run: go get -v -t -d ./...
+      - run: 
+          name: Run unit tests
+          command: |
+            trap "go-junit-report <${TEST_RESULTS}/go-test.out > ${TEST_RESULTS}/tests/go-test-report.xml" EXIT
+            go test -v ./... | tee ${TEST_RESULTS}/go-test.out
+
+      - store_artifacts:
+          path: /tmp/test-results
+          destination: raw-test-output
+
+      - store_test_results:
+          path: /tmp/test-results
