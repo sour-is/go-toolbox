@@ -200,3 +200,11 @@ func (tx *Tx) Replace(
 	return
 }
 
+func Ping() bool {
+	err := stdDB.Conn.Ping()
+	if err != nil {
+		log.Error(err)
+		return false
+	}
+	return true
+}
