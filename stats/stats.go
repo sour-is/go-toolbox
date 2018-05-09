@@ -21,7 +21,7 @@ func init() {
 
 	httpsrv.NewMiddleware("gather-stats", doStats).Register(httpsrv.EventComplete)
 	httpsrv.IdentRegister("stats", httpsrv.IdentRoutes{
-		{"GetStats", "GET", "/v1/stats", getStats},
+		{"get-stats", "GET", "/v1/stats", getStats},
 	})
 }
 

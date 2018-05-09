@@ -191,8 +191,8 @@ func Run() {
 
 func init() {
 	HttpRegister("info", HttpRoutes{
-		{"GetAppInfo", "GET", "/app-info", getAppInfo},
-		{"GetAppInfo", "GET", "/v1/app-info", v1GetAppInfo},
+		{"get-app-info", "GET", "/app-info", getAppInfo},
+		{"get-app-info", "GET", "/v1/app-info", v1GetAppInfo},
 	})
 }
 
