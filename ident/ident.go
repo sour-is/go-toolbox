@@ -4,10 +4,10 @@ package ident // import "sour.is/x/toolbox/ident"
 Include the desired drivers for ident in your main package.
 
 import (
-	_ "sour.is/go/ident/header"
-	_ "sour.is/go/ident/mock"
-	_ "sour.is/go/ident/rubicon"
-	_ "sour.is/go/ident/session"
+	_ "sour.is/x/toolbox/ident/header"
+	_ "sour.is/x/toolbox/ident/mock"
+	_ "sour.is/x/toolbox/ident/rubicon"
+	_ "sour.is/x/toolbox/ident/session"
 )
 
 */
