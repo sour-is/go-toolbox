@@ -10,6 +10,7 @@ import (
 	"sync"
 	"time"
 	"bytes"
+	"io/ioutil"
 )
 
 const (
@@ -169,6 +170,23 @@ func Write(r io.Reader) {
 	for _, l := range s[1:] {
 		std.Output(2, Fcontinue+l+Freset)
 	}
+}
+
+func Tee(r io.ReadCloser) (w io.ReadCloser) {
+	buf := new(bytes.Buffer)
+	buf.ReadFrom(r)
+	r.Close()
+
+	str := buf.String()
+	w = ioutil.NopCloser(strings.NewReader(str))
+
+	s := strings.Split(str, "\n")
+	std.Output(2, Finfo+s[0]+Freset)
+	for _, l := range s[1:] {
+		std.Output(2, Fcontinue+l+Freset)
+	}
+
+	return
 }
 
 // Fatal is equivalent to Print() followed by a call to os.Exit(1).
