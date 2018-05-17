@@ -9,6 +9,7 @@ import (
 	"strings"
 	"sync"
 	"time"
+	"bytes"
 )
 
 const (
@@ -159,6 +160,17 @@ func Println(v ...interface{}) {
 	}
 }
 
+func Write(r io.Reader) {
+	buf := new(bytes.Buffer)
+	buf.ReadFrom(r)
+	s := strings.Split(buf.String(), "\n")
+
+	std.Output(2, Finfo+s[0]+Freset)
+	for _, l := range s[1:] {
+		std.Output(2, Fcontinue+l+Freset)
+	}
+}
+
 // Fatal is equivalent to Print() followed by a call to os.Exit(1).
 func Fatal(v ...interface{}) {
 	s := strings.Split(fmt.Sprint(v...), "\n")
@@ -220,6 +232,16 @@ func Debugf(format string, v ...interface{}) {
 		std.Output(2, Fcontinue+l+Freset)
 	}
 }
+func Debugw(r io.Reader) {
+	buf := new(bytes.Buffer)
+	buf.ReadFrom(r)
+	s := strings.Split(buf.String(), "\n")
+
+	std.Output(2, Fdebug+s[0]+Freset)
+	for _, l := range s[1:] {
+		std.Output(2, Fcontinue+l+Freset)
+	}
+}
 
 func Info(v ...interface{}) {
 	if verb < Vinfo {
@@ -236,6 +258,16 @@ func Infof(format string, v ...interface{}) {
 		return
 	}
 	s := strings.Split(fmt.Sprintf(format, v...), "\n")
+	std.Output(2, Finfo+s[0]+Freset)
+	for _, l := range s[1:] {
+		std.Output(2, Fcontinue+l+Freset)
+	}
+}
+func Infow(r io.Reader) {
+	buf := new(bytes.Buffer)
+	buf.ReadFrom(r)
+	s := strings.Split(buf.String(), "\n")
+
 	std.Output(2, Finfo+s[0]+Freset)
 	for _, l := range s[1:] {
 		std.Output(2, Fcontinue+l+Freset)
@@ -262,6 +294,16 @@ func Noticef(format string, v ...interface{}) {
 		std.Output(2, Fcontinue+l+Freset)
 	}
 }
+func Noticew(r io.Reader) {
+	buf := new(bytes.Buffer)
+	buf.ReadFrom(r)
+	s := strings.Split(buf.String(), "\n")
+
+	std.Output(2, Fnotice+s[0]+Freset)
+	for _, l := range s[1:] {
+		std.Output(2, Fcontinue+l+Freset)
+	}
+}
 
 func Warning(v ...interface{}) {
 	if verb < Vwarning {
@@ -278,6 +320,16 @@ func Warningf(format string, v ...interface{}) {
 		return
 	}
 	s := strings.Split(fmt.Sprintf(format, v...), "\n")
+	std.Output(2, Fwarning+s[0]+Freset)
+	for _, l := range s[1:] {
+		std.Output(2, Fcontinue+l+Freset)
+	}
+}
+func Warningw(r io.Reader) {
+	buf := new(bytes.Buffer)
+	buf.ReadFrom(r)
+	s := strings.Split(buf.String(), "\n")
+
 	std.Output(2, Fwarning+s[0]+Freset)
 	for _, l := range s[1:] {
 		std.Output(2, Fcontinue+l+Freset)
@@ -304,6 +356,16 @@ func Errorf(format string, v ...interface{}) {
 		std.Output(2, Fcontinue+l+Freset)
 	}
 }
+func Errorw(r io.Reader) {
+	buf := new(bytes.Buffer)
+	buf.ReadFrom(r)
+	s := strings.Split(buf.String(), "\n")
+
+	std.Output(2, Ferror+s[0]+Freset)
+	for _, l := range s[1:] {
+		std.Output(2, Fcontinue+l+Freset)
+	}
+}
 
 func Critical(v ...interface{}) {
 	if verb < Vcritical {
@@ -325,6 +387,16 @@ func Criticalf(format string, v ...interface{}) {
 		std.Output(2, Fcontinue+l+Freset)
 	}
 }
+func Criticalw(r io.Reader) {
+	buf := new(bytes.Buffer)
+	buf.ReadFrom(r)
+	s := strings.Split(buf.String(), "\n")
+
+	std.Output(2, Fcritical+s[0]+Freset)
+	for _, l := range s[1:] {
+		std.Output(2, Fcontinue+l+Freset)
+	}
+}
 
 // These functions do nothing. It makes it easy to comment out
 // debug lines without having to remove the import.
@@ -333,16 +405,22 @@ func NilPrintf(_ string, _ ...interface{})    {}
 func NilPrintln(_ ...interface{})             {}
 func NilDebug(_ ...interface{})               {}
 func NilDebugf(_ string, _ ...interface{})    {}
+func NilDebugw(_ io.Reader)                   {}
 func NilInfo(_ ...interface{})                {}
 func NilInfof(_ string, _ ...interface{})     {}
+func NilInfow(_ io.Reader)                    {}
 func NilNotice(_ ...interface{})              {}
 func NilNoticef(_ string, _ ...interface{})   {}
+func NilNoticew(_ io.Reader)                  {}
 func NilWarning(_ ...interface{})             {}
 func NilWarningf(_ string, _ ...interface{})  {}
+func NilWarningw(_ io.Reader)                 {}
 func NilError(_ ...interface{})               {}
 func NilErrorf(_ string, _ ...interface{})    {}
+func NilErrorw(_ io.Reader)                   {}
 func NilCritical(_ ...interface{})            {}
 func NilCriticalf(_ string, _ ...interface{}) {}
+func NilCriticalw(_ io.Reader)                {}
 
 var souris = [][]string{
 	{
