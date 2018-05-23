@@ -146,6 +146,8 @@ func recordStats(pipe chan httpData) {
 	ticker60m := time.NewTicker(time.Minute * 60)
 	defer ticker60m.Stop()
 
+	httpsrv.WaitShutdown.Add(1)
+
 	for {
 		select {
 		case <-ticker1m.C:
@@ -202,6 +204,7 @@ func recordStats(pipe chan httpData) {
 
 		case <-httpsrv.SignalShutdown:
 			log.Debug("Shutting Down Stats")
+			httpsrv.WaitShutdown.Done()
 			return
 		}
 	}

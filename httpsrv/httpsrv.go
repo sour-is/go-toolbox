@@ -9,10 +9,8 @@ import (
 	"encoding/json"
 	"github.com/gorilla/mux"
 	"github.com/spf13/viper"
-	"golang.org/x/net/context"
-	"os"
-	"os/signal"
 	"sort"
+	"sync"
 	"sour.is/x/toolbox/ident"
 	"sour.is/x/toolbox/log"
 )
@@ -38,6 +36,7 @@ var modules = make(map[string]ModuleHandler)
 
 var SignalStartup = make(chan struct{})
 var SignalShutdown = make(chan struct{})
+var WaitShutdown sync.WaitGroup
 
 func NewRouter() *mux.Router {
 	router := mux.NewRouter().StrictSlash(true)
@@ -148,8 +147,6 @@ func Run() {
 
 	log.Notice("Listen and Serve on ", listen)
 
-	wait := time.Second * 15
-
 	srv := &http.Server{
 		Addr: listen,
 		// Good practice to set timeouts to avoid Slowloris attacks.
@@ -161,32 +158,18 @@ func Run() {
 
 	// Run our server in a goroutine so that it doesn't block.
 	go func() {
-		if err := srv.ListenAndServe(); err != nil {
-			log.Fatal(err)
-		}
+		srv.ListenAndServe()
 	}()
 	close(SignalStartup)
+}
 
-	c := make(chan os.Signal, 1)
-	// We'll accept graceful shutdowns when quit via SIGINT (Ctrl+C)
-	// SIGKILL, SIGQUIT or SIGTERM (Ctrl+/) will not be caught.
-	signal.Notify(c, os.Interrupt)
-
-	// Block until we receive our signal.
-	<-c
-
+func Shutdown() {
 	close(SignalShutdown)
+	log.Notice("shutting down...")
 
-	// Create a deadline to wait for.
-	ctx, cancel := context.WithTimeout(context.Background(), wait)
-	defer cancel()
-	// Doesn't block if no connections, but will otherwise wait
-	// until the timeout deadline.
-	srv.Shutdown(ctx)
-	// Optionally, you could run srv.Shutdown in a goroutine and block on
-	// <-ctx.Done() if your application should wait for other services
-	// to finalize based on context cancellation.
-	log.Notice("shutting down")
+	WaitShutdown.Wait()
+
+	log.Notice("all done")
 }
 
 func init() {
