@@ -9,6 +9,9 @@ import (
 	"sour.is/x/toolbox/ident"
 	"sour.is/x/toolbox/log"
 	"time"
+	"strings"
+	"fmt"
+	"reflect"
 )
 
 var httpPipe chan httpData
@@ -22,6 +25,7 @@ func init() {
 	httpsrv.NewMiddleware("gather-stats", doStats).Register(httpsrv.EventComplete)
 	httpsrv.IdentRegister("stats", httpsrv.IdentRoutes{
 		{"get-stats", "GET", "/v1/stats", getStats},
+		{"get-metrics", "GET", "/metrics", getMetrics},
 	})
 }
 
@@ -54,20 +58,45 @@ type httpSeriesType struct {
 var httpSeries httpSeriesType
 var httpCollect httpSeriesType
 
-type Stats struct {
-	AppStart   time.Time     `json:"app_start"`
-	UpTimeNano time.Duration `json:"uptime_nano"`
-	UpTime     string        `json:"uptime"`
-	Http       struct {
-		httpStatsType
-		AvgTimeNano int    `json:"req_avg_nano"`
-		AvgTime     string `json:"req_avg"`
+type httpReqs struct {
+	httpStatsType
+	AvgTimeNano int    `json:"req_avg_nano"`
+	AvgTime     string `json:"req_avg"`
 
-		CurrentCount httpSeriesType `json:"req_counts"`
-		LastCount    httpSeriesType `json:"req_counts_last"`
-	} `json:"http"`
+	CurrentCount httpSeriesType `json:"req_counts"`
+	LastCount    httpSeriesType `json:"req_counts_last"`
+}
+
+type Stats struct {
+	AppStart   time.Time       `json:"app_start"`
+	UpTimeNano time.Duration   `json:"uptime_nano"`
+	UpTime     string          `json:"uptime"`
+	Http       httpReqs        `json:"http"`
 	Runtime runtimeStats       `json:"runtime"`
-	DBstats map[string]dbStats `json:"db"`
+	DBstats dbStatsMap         `json:"db"`
+}
+
+func calcStats() Stats {
+	avgTime := 0
+	if httpStats.Requests > 0 {
+		avgTime = int(httpStats.RequestTime) / httpStats.Requests
+	}
+
+	return Stats{
+		appStart,
+		time.Since(appStart),
+		time.Since(appStart).String(),
+		httpReqs{
+			httpStats,
+			avgTime,
+			time.Duration(avgTime).String(),
+
+			httpCollect,
+			httpSeries,
+		},
+		getRuntime(),
+		getDBstats(),
+	}
 }
 
 // swagger:operation GET /v1/stats stats getStats
@@ -86,35 +115,28 @@ type Stats struct {
 //          items:
 func getStats(w httpsrv.ResponseWriter, r *http.Request, id ident.Ident) {
 
-	avgTime := 0
-	if httpStats.Requests > 0 {
-		avgTime = int(httpStats.RequestTime) / httpStats.Requests
-	}
-
-	stats := Stats{
-		appStart,
-		time.Since(appStart),
-		time.Since(appStart).String(),
-		struct {
-			httpStatsType
-			AvgTimeNano int    `json:"req_avg_nano"`
-			AvgTime     string `json:"req_avg"`
-
-			CurrentCount httpSeriesType `json:"req_counts"`
-			LastCount    httpSeriesType `json:"req_counts_last"`
-		}{
-			httpStats,
-			avgTime,
-			time.Duration(avgTime).String(),
-
-			httpCollect,
-			httpSeries,
-		},
-		getRuntime(),
-		getDBstats(),
-	}
+	stats := calcStats()
 
 	httpsrv.WriteObject(w, http.StatusOK, stats)
+}
+
+// swagger:operation GET /metrics metrics getMetrics
+//
+// Get Prometheus Metrics
+//
+// ---
+// produces:
+//   - "text/plain"
+// responses:
+//   "200":
+//     description: Success
+//     schema:
+//       type: string
+func getMetrics(w httpsrv.ResponseWriter, r *http.Request, id ident.Ident) {
+
+	stats := calcStats()
+
+	httpsrv.WriteText(w, http.StatusOK, stats.String())
 }
 
 func doStats(_ string, w httpsrv.ResponseWriter, r *http.Request, id ident.Ident) bool {
@@ -313,8 +335,10 @@ func WrapDB(name string, fn dbstats.OpenFunc) {
 	dbHooks[name] = h
 }
 
-func getDBstats() (m map[string]dbStats) {
-	m = make(map[string]dbStats)
+type dbStatsMap map[string]dbStats
+
+func getDBstats() (m dbStatsMap) {
+	m = make(dbStatsMap)
 	for k, v := range dbHooks {
 		s := dbStats{}
 		s.OpenConns = v.OpenConns()
@@ -338,4 +362,122 @@ func getDBstats() (m map[string]dbStats) {
 		m[k] = s
 	}
 	return m
+}
+
+func (s Stats) String() string {
+	var out strings.Builder
+	out.WriteString(s.Http.String())
+	out.WriteString(s.Runtime.String())
+	out.WriteString(s.DBstats.String())
+	return out.String()
+}
+func (s dbStatsMap) String() string {
+	return s.Exposition("db")
+}
+func (s dbStatsMap) Exposition(pfx string) string {
+	var out strings.Builder
+	for name, stats := range s {
+		out.WriteString(fmt.Sprintf("# TYPE %s_totals\n", pfx))
+		out.WriteString(stats.Exposition(pfx, name))
+	}
+
+	return out.String()
+}
+func (s dbStats) Exposition(pfx, name string) string {
+	var out strings.Builder
+
+	ts := time.Now().UnixNano() / int64(time.Millisecond)
+
+	v := reflect.ValueOf(s)
+	for i := 0; i < v.NumField(); i++ {
+		value := v.Field(i).Interface()
+		tag := v.Type().Field(i).Tag
+
+		out.WriteString(fmt.Sprintf("%s_totals{name=\"%s\",metric=\"%s\"} %d %d\n", pfx, name, tag.Get("json"), value, ts))
+	}
+
+	return out.String()
+}
+func (s runtimeStats) String() string {
+	var out strings.Builder
+
+	ts := time.Now().UnixNano() / int64(time.Millisecond)
+	out.WriteString("# TYPE runtime_totals\n")
+
+	v := reflect.ValueOf(s)
+	for i := 0; i < v.NumField(); i++ {
+		value := v.Field(i).Interface()
+		t := v.Type().Field(i).Type.Name()
+		tag := v.Type().Field(i).Tag
+		switch t {
+		case "float64":
+			out.WriteString(fmt.Sprintf("runtime_totals{metric=\"%s\"} %e %d\n", tag.Get("json"), value, ts))
+		case "bool":
+			var b int
+			if value.(bool) {
+				b = 1
+			}
+			out.WriteString(fmt.Sprintf("runtime_totals{metric=\"%s\"} %v %d\n", tag.Get("json"), b, ts))
+		default:
+			out.WriteString(fmt.Sprintf("runtime_totals{metric=\"%s\"} %v %d\n", tag.Get("json"), value, ts))
+		}
+
+	}
+
+	return out.String()
+}
+func (s httpReqs) String() string {
+	var out strings.Builder
+
+	ts := time.Now().UnixNano() / int64(time.Millisecond)
+	out.WriteString("# TYPE http_requests_totals\n")
+	out.WriteString(fmt.Sprintf("http_requests_totals{code=\"200\"} %v %d\n", s.Http2xx, ts))
+	out.WriteString(fmt.Sprintf("http_requests_totals{code=\"300\"} %v %d\n", s.Http3xx, ts))
+	out.WriteString(fmt.Sprintf("http_requests_totals{code=\"400\"} %v %d\n", s.Http4xx, ts))
+	out.WriteString(fmt.Sprintf("http_requests_totals{code=\"500\"} %v %d\n", s.Http5xx, ts))
+
+	out.WriteString(fmt.Sprintf("http_requests_totals{auth=\"false\"} %v %d\n", s.AnonRequests, ts))
+	out.WriteString(fmt.Sprintf("http_requests_totals{auth=\"true\"} %v %d\n", s.Requests - s.AnonRequests, ts))
+
+	out.WriteString(fmt.Sprintf("http_requests_totals{metric=\"count\"} %v %d\n", s.Requests, ts))
+	out.WriteString(fmt.Sprintf("http_requests_totals{metric=\"bytes\"} %v %d\n", s.BytesOut, ts))
+	out.WriteString(fmt.Sprintf("http_requests_totals{metric=\"avg_time\"} %v %d\n", s.AvgTimeNano, ts))
+
+	var c int
+	if s.LastCount.Request1m == 0 {
+		c = s.CurrentCount.Request1m
+	} else {
+		c = s.LastCount.Request1m
+	}
+	out.WriteString(fmt.Sprintf("http_requests_totals{window=\"01m\"} %v %d\n", c, ts))
+
+	if s.LastCount.Request5m == 0 {
+		c = s.CurrentCount.Request5m
+	} else {
+		c = s.LastCount.Request5m
+	}
+	out.WriteString(fmt.Sprintf("http_requests_totals{window=\"05m\"} %v %d\n", c, ts))
+
+	if s.LastCount.Request10m == 0 {
+		c = s.CurrentCount.Request10m
+	} else {
+		c = s.LastCount.Request10m
+	}
+	out.WriteString(fmt.Sprintf("http_requests_totals{window=\"10m\"} %v %d\n", c, ts))
+
+	if s.LastCount.Request25m == 0 {
+		c = s.CurrentCount.Request25m
+	} else {
+		c = s.LastCount.Request25m
+	}
+	out.WriteString(fmt.Sprintf("http_requests_totals{window=\"25m\"} %v %d\n", c, ts))
+
+	if s.LastCount.Request60m == 0 {
+		c = s.CurrentCount.Request60m
+	} else {
+		c = s.LastCount.Request60m
+	}
+	out.WriteString(fmt.Sprintf("http_requests_totals{window=\"60m\"} %v %d\n", c, ts))
+
+	return out.String()
 }
