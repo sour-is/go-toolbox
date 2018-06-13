@@ -3,5 +3,4 @@ go_import_path: sour.is/x/toolbox
 language: go
 
 go:
-  - "1.9"
   - "1.10.x"

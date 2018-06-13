@@ -113,7 +113,7 @@ func calcStats() Stats {
 //       type: object
 //       properties:
 //          items:
-func getStats(w httpsrv.ResponseWriter, r *http.Request, id ident.Ident) {
+func getStats(w httpsrv.ResponseWriter, _ *http.Request, _ ident.Ident) {
 
 	stats := calcStats()
 
@@ -132,7 +132,7 @@ func getStats(w httpsrv.ResponseWriter, r *http.Request, id ident.Ident) {
 //     description: Success
 //     schema:
 //       type: string
-func getMetrics(w httpsrv.ResponseWriter, r *http.Request, id ident.Ident) {
+func getMetrics(w httpsrv.ResponseWriter, _ *http.Request, _ ident.Ident) {
 
 	stats := calcStats()
 
