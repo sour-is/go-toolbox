@@ -388,7 +388,13 @@ func (row expositionRow) String() string {
 	for key, val := range row.Tags {
 		tags = append(tags, fmt.Sprintf("%s=\"%s\"", key, val))
 	}
-	out.WriteString(fmt.Sprintf("{%s} %v\n", strings.Join(tags,","), row.Value))
+	if len(tags) > 0 {
+		out.WriteString("{")
+		out.WriteString(strings.Join(tags,","))
+		out.WriteString("}")
+
+	}
+	out.WriteString(fmt.Sprintf(" %v\n", row.Value))
 	return out.String()
 }
 
@@ -412,13 +418,20 @@ func (e expositions) String() string {
 	return out.String()
 }
 
-func NewRow(value float64) (row expositionRow) {
+func newExp(name string, expType expositionType) (e exposition) {
+	e.Name = name
+	e.Type = expType
+	return
+}
+func (e *exposition) newRow(value float64) *expositionRow {
+	var row expositionRow
 	row.Tags = make(expositionTags)
 	row.Value = value
 
-	return
+	e.Rows = append(e.Rows, row)
+	return &row
 }
-func (row expositionRow) AddTag(name, value string) expositionRow {
+func (row *expositionRow) addTag(name, value string) *expositionRow {
 	row.Tags[name] = value
 	return row
 }
@@ -439,26 +452,25 @@ func (s dbStatsMap) String() string {
 	return out.String()
 }
 
-func (s dbStats) Exposition(name string) expositions {
-	stats := exposition{Name: "db_stats", Type: ExpGauge}
-	totals := exposition{Name: "db_totals", Type: ExpCounter}
+func (s dbStats) Exposition(name string) (lis expositions) {
 
 	v := reflect.ValueOf(s)
 	for i := 0; i < v.NumField(); i++ {
-		value := v.Field(i).Int()
+		var e exposition
 		tag := v.Type().Field(i).Tag.Get("json")
-		row := NewRow(float64(value)).AddTag("name", name).AddTag("mode", tag)
 
 		switch tag {
 		case "conns_open","stmts_open","txs_open":
-			stats.Rows = append(stats.Rows, row)
+			e = newExp(fmt.Sprintf("db_%s", tag), ExpGauge)
 		default:
-			totals.Rows = append(totals.Rows, row)
+			e = newExp(fmt.Sprintf("db_%s", tag), ExpCounter)
 		}
+
+		e.newRow(ToFloat(v.Field(i))).addTag("name", name)
+		lis = append(lis, e)
 	}
 
-	var exp expositions
-	return append(exp, stats, totals)
+	return
 }
 func (s runtimeStats) String() string {
 	return s.Exposition().String()
@@ -480,43 +492,56 @@ func ToFloat(v reflect.Value) float64 {
 	}
 	return 0.0
 }
-func (s runtimeStats) Exposition() expositions {
-	stats := exposition{"runtime_stats", ExpGauge, nil}
-	totals := exposition{"runtime_totals", ExpCounter, nil}
+func (s runtimeStats) Exposition() (lis expositions) {
 
 	v := reflect.ValueOf(s)
 	for i := 0; i < v.NumField(); i++ {
+		var e exposition
 		tag := v.Type().Field(i).Tag.Get("json")
-		row := NewRow(ToFloat(v.Field(i))).AddTag("mode", tag)
 
 		switch tag {
 		case "total_alloc","lookups","mallocs","frees","gc_pause_total":
-			totals.Rows = append(totals.Rows, row)
+			e = newExp(fmt.Sprintf("runtime_%s_totals", tag), ExpCounter)
 		default:
-			stats.Rows = append(stats.Rows, row)
+			e = newExp(fmt.Sprintf("runtime_%s", tag), ExpGauge)
 		}
+
+		e.newRow(ToFloat(v.Field(i)))
+		lis = append(lis, e)
 	}
 
-	var exp expositions
-	return append(exp, stats, totals)
+	return
 }
 func (s httpReqs) String() string {
 	return s.Exposition().String()
 }
-func (s httpReqs) Exposition() expositions {
-	stats := exposition{"http_request_stats", ExpGauge, nil}
-	totals := exposition{"http_request_totals", ExpCounter, nil}
+func (s httpReqs) Exposition() (lis expositions) {
 
-	stats.Rows = append(stats.Rows, NewRow(float64(s.AvgTimeNano)).AddTag("mode","avg_time"))
+	e := newExp("http_requests_avg_time", ExpGauge)
+	e.newRow(float64(s.AvgTimeNano))
+	lis = append(lis, e)
 
-	totals.Rows = append(totals.Rows, NewRow(float64(s.Http2xx)).AddTag("code","200"))
-	totals.Rows = append(totals.Rows, NewRow(float64(s.Http3xx)).AddTag("code","300"))
-	totals.Rows = append(totals.Rows, NewRow(float64(s.Http4xx)).AddTag("code","400"))
-	totals.Rows = append(totals.Rows, NewRow(float64(s.Http5xx)).AddTag("code","500"))
-	totals.Rows = append(totals.Rows, NewRow(float64(s.AnonRequests)).AddTag("auth","false"))
-	totals.Rows = append(totals.Rows, NewRow(float64(s.Requests - s.AnonRequests)).AddTag("auth","true"))
-	totals.Rows = append(totals.Rows, NewRow(float64(s.Requests)).AddTag("mode","count"))
-	totals.Rows = append(totals.Rows, NewRow(float64(s.BytesOut)).AddTag("mode","bytes"))
+	e = newExp("http_requests_by_status", ExpGauge)
+	e.newRow(float64(s.Http2xx)).addTag("code","200")
+	e.newRow(float64(s.Http3xx)).addTag("code","300")
+	e.newRow(float64(s.Http4xx)).addTag("code","400")
+	e.newRow(float64(s.Http5xx)).addTag("code","500")
+	lis = append(lis, e)
+
+	e = newExp("http_requests_by_auth", ExpCounter)
+	e.newRow(float64(s.AnonRequests)).addTag("auth","false")
+	e.newRow(float64(s.Requests - s.AnonRequests)).addTag("auth","true")
+	lis = append(lis, e)
+
+	e = newExp("http_requests_total", ExpCounter)
+	e.newRow(float64(s.Requests))
+	lis = append(lis, e)
+
+	e = newExp("http_request_bytes_total", ExpCounter)
+	e.newRow(float64(s.BytesOut))
+	lis = append(lis, e)
+
+	e = newExp("http_request_freq_sum", ExpSummary)
 
 	var c int
 	if s.LastCount.Request1m == 0 {
@@ -524,36 +549,36 @@ func (s httpReqs) Exposition() expositions {
 	} else {
 		c = s.LastCount.Request1m
 	}
-	stats.Rows = append(stats.Rows, NewRow(float64(c)).AddTag("window","01m"))
+	e.newRow(float64(c)).addTag("window","01m")
 
 	if s.LastCount.Request5m == 0 {
 		c = s.CurrentCount.Request5m
 	} else {
 		c = s.LastCount.Request5m
 	}
-	stats.Rows = append(stats.Rows, NewRow(float64(c)).AddTag("window","05m"))
+	e.newRow(float64(c)).addTag("window","05m")
 
 	if s.LastCount.Request10m == 0 {
 		c = s.CurrentCount.Request10m
 	} else {
 		c = s.LastCount.Request10m
 	}
-	stats.Rows = append(stats.Rows, NewRow(float64(c)).AddTag("window","10m"))
+	e.newRow(float64(c)).addTag("window","10m")
 
 	if s.LastCount.Request25m == 0 {
 		c = s.CurrentCount.Request25m
 	} else {
 		c = s.LastCount.Request25m
 	}
-	stats.Rows = append(stats.Rows, NewRow(float64(c)).AddTag("window","25m"))
+	e.newRow(float64(c)).addTag("window","25m")
 
 	if s.LastCount.Request60m == 0 {
 		c = s.CurrentCount.Request60m
 	} else {
 		c = s.LastCount.Request60m
 	}
-	stats.Rows = append(stats.Rows, NewRow(float64(c)).AddTag("window","60m"))
+	e.newRow(float64(c)).addTag("window","60m")
+	lis = append(lis, e)
 
-	var exp expositions
-	return append(exp, stats, totals)
+	return
 }
