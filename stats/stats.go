@@ -364,6 +364,65 @@ func getDBstats() (m dbStatsMap) {
 	return m
 }
 
+type expositionTags map[string]string
+type expositionType string
+const(
+	ExpCounter = "counter"
+	ExpGauge = "gauge"
+	ExpSummary = "summary"
+)
+type expositionRow struct {
+	Tags expositionTags
+	Value float64
+}
+type exposition struct {
+	Name string
+	Type expositionType
+	Rows []expositionRow
+}
+type expositions []exposition
+
+func (row expositionRow) String() string {
+	var out strings.Builder
+	var tags []string
+	for key, val := range row.Tags {
+		tags = append(tags, fmt.Sprintf("%s=\"%s\"", key, val))
+	}
+	out.WriteString(fmt.Sprintf("{%s} %v\n", strings.Join(tags,","), row.Value))
+	return out.String()
+}
+
+func (e exposition) String() string {
+	var out strings.Builder
+	out.WriteString(fmt.Sprintf("# TYPE %s %s\n", e.Name, e.Type))
+	for _, row := range e.Rows {
+		out.WriteString(e.Name)
+		out.WriteString(row.String())
+	}
+
+	return out.String()
+}
+
+func (e expositions) String() string {
+	var out strings.Builder
+	for _, exp := range e {
+		out.WriteString(exp.String())
+	}
+
+	return out.String()
+}
+
+func NewRow(value float64) (row expositionRow) {
+	row.Tags = make(expositionTags)
+	row.Value = value
+
+	return
+}
+func (row expositionRow) AddTag(name, value string) expositionRow {
+	row.Tags[name] = value
+	return row
+}
+
 func (s Stats) String() string {
 	var out strings.Builder
 	out.WriteString(s.Http.String())
@@ -372,74 +431,92 @@ func (s Stats) String() string {
 	return out.String()
 }
 func (s dbStatsMap) String() string {
-	return s.Exposition("db")
-}
-func (s dbStatsMap) Exposition(pfx string) string {
 	var out strings.Builder
 	for name, stats := range s {
-		out.WriteString(fmt.Sprintf("# TYPE %s_totals\n", pfx))
-		out.WriteString(stats.Exposition(pfx, name))
+		out.WriteString(stats.Exposition(name).String())
 	}
 
 	return out.String()
 }
-func (s dbStats) Exposition(pfx, name string) string {
-	var out strings.Builder
+
+func (s dbStats) Exposition(name string) expositions {
+	stats := exposition{Name: "db_stats", Type: ExpGauge}
+	totals := exposition{Name: "db_totals", Type: ExpCounter}
 
 	v := reflect.ValueOf(s)
 	for i := 0; i < v.NumField(); i++ {
 		value := v.Field(i).Int()
-		tag := v.Type().Field(i).Tag
+		tag := v.Type().Field(i).Tag.Get("json")
+		row := NewRow(float64(value)).AddTag("name", name).AddTag("mode", tag)
 
-		out.WriteString(fmt.Sprintf("%s_totals{name=\"%s\",metric=\"%s\"} %v\n", pfx, name, tag.Get("json"), float64(value)))
+		switch tag {
+		case "conns_open","stmts_open","txs_open":
+			stats.Rows = append(stats.Rows, row)
+		default:
+			totals.Rows = append(totals.Rows, row)
+		}
 	}
 
-	return out.String()
+	var exp expositions
+	return append(exp, stats, totals)
 }
 func (s runtimeStats) String() string {
-	var out strings.Builder
-
-	out.WriteString("# TYPE runtime_totals\n")
+	return s.Exposition().String()
+}
+func ToFloat(v reflect.Value) float64 {
+	switch v.Type().Name() {
+	case "float32","float64":
+		return float64(v.Float())
+	case "bool":
+		var b int
+		if v.Bool() {
+			b = 1
+		}
+		return float64(b)
+	case "uint","uint64","uint32":
+		return float64(v.Uint())
+	case "int","int32","int64":
+		return float64(v.Int())
+	}
+	return 0.0
+}
+func (s runtimeStats) Exposition() expositions {
+	stats := exposition{"runtime_stats", ExpGauge, nil}
+	totals := exposition{"runtime_totals", ExpCounter, nil}
 
 	v := reflect.ValueOf(s)
 	for i := 0; i < v.NumField(); i++ {
-		value := v.Field(i).Interface()
-		t := v.Type().Field(i).Type.Name()
-		tag := v.Type().Field(i).Tag
-		switch t {
-		case "float32","float64":
-			out.WriteString(fmt.Sprintf("runtime_totals{mode=\"%s\"} %e\n", tag.Get("json"), value))
-		case "bool":
-			var b int
-			if value.(bool) {
-				b = 1
-			}
-			out.WriteString(fmt.Sprintf("runtime_totals{mode=\"%s\"} %v\n", tag.Get("json"), b))
-		case "uint","uint64","uint32":
-			out.WriteString(fmt.Sprintf("runtime_totals{mode=\"%s\"} %v\n", tag.Get("json"), float64(v.Field(i).Uint())))
-		case "int","int32","int64":
-			out.WriteString(fmt.Sprintf("runtime_totals{mode=\"%s\"} %v\n", tag.Get("json"), float64(v.Field(i).Int())))
-		}
+		tag := v.Type().Field(i).Tag.Get("json")
+		row := NewRow(ToFloat(v.Field(i))).AddTag("mode", tag)
 
+		switch tag {
+		case "total_alloc","lookups","mallocs","frees","gc_pause_total":
+			totals.Rows = append(totals.Rows, row)
+		default:
+			stats.Rows = append(stats.Rows, row)
+		}
 	}
 
-	return out.String()
+	var exp expositions
+	return append(exp, stats, totals)
 }
 func (s httpReqs) String() string {
-	var out strings.Builder
+	return s.Exposition().String()
+}
+func (s httpReqs) Exposition() expositions {
+	stats := exposition{"http_request_stats", ExpGauge, nil}
+	totals := exposition{"http_request_totals", ExpCounter, nil}
 
-	out.WriteString("# TYPE http_requests_totals\n")
-	out.WriteString(fmt.Sprintf("http_requests_totals{code=\"200\"} %v\n", float64(s.Http2xx)))
-	out.WriteString(fmt.Sprintf("http_requests_totals{code=\"300\"} %v\n", float64(s.Http3xx)))
-	out.WriteString(fmt.Sprintf("http_requests_totals{code=\"400\"} %v\n", float64(s.Http4xx)))
-	out.WriteString(fmt.Sprintf("http_requests_totals{code=\"500\"} %v\n", float64(s.Http5xx)))
+	stats.Rows = append(stats.Rows, NewRow(float64(s.AvgTimeNano)).AddTag("mode","avg_time"))
 
-	out.WriteString(fmt.Sprintf("http_requests_totals{auth=\"false\"} %v\n", float64(s.AnonRequests)))
-	out.WriteString(fmt.Sprintf("http_requests_totals{auth=\"true\"} %v\n", float64(s.Requests - s.AnonRequests)))
-
-	out.WriteString(fmt.Sprintf("http_requests_totals{mode=\"count\"} %v\n", float64(s.Requests)))
-	out.WriteString(fmt.Sprintf("http_requests_totals{mode=\"bytes\"} %v\n", float64(s.BytesOut)))
-	out.WriteString(fmt.Sprintf("http_requests_totals{mode=\"avg_time\"} %v\n", float64(s.AvgTimeNano)))
+	totals.Rows = append(totals.Rows, NewRow(float64(s.Http2xx)).AddTag("code","200"))
+	totals.Rows = append(totals.Rows, NewRow(float64(s.Http3xx)).AddTag("code","300"))
+	totals.Rows = append(totals.Rows, NewRow(float64(s.Http4xx)).AddTag("code","400"))
+	totals.Rows = append(totals.Rows, NewRow(float64(s.Http5xx)).AddTag("code","500"))
+	totals.Rows = append(totals.Rows, NewRow(float64(s.AnonRequests)).AddTag("auth","false"))
+	totals.Rows = append(totals.Rows, NewRow(float64(s.Requests - s.AnonRequests)).AddTag("auth","true"))
+	totals.Rows = append(totals.Rows, NewRow(float64(s.Requests)).AddTag("mode","count"))
+	totals.Rows = append(totals.Rows, NewRow(float64(s.BytesOut)).AddTag("mode","bytes"))
 
 	var c int
 	if s.LastCount.Request1m == 0 {
@@ -447,35 +524,36 @@ func (s httpReqs) String() string {
 	} else {
 		c = s.LastCount.Request1m
 	}
-	out.WriteString(fmt.Sprintf("http_requests_totals{window=\"01m\"} %v\n", float64(c)))
+	stats.Rows = append(stats.Rows, NewRow(float64(c)).AddTag("window","01m"))
 
 	if s.LastCount.Request5m == 0 {
 		c = s.CurrentCount.Request5m
 	} else {
 		c = s.LastCount.Request5m
 	}
-	out.WriteString(fmt.Sprintf("http_requests_totals{window=\"05m\"} %v\n", float64(c)))
+	stats.Rows = append(stats.Rows, NewRow(float64(c)).AddTag("window","05m"))
 
 	if s.LastCount.Request10m == 0 {
 		c = s.CurrentCount.Request10m
 	} else {
 		c = s.LastCount.Request10m
 	}
-	out.WriteString(fmt.Sprintf("http_requests_totals{window=\"10m\"} %v\n", float64(c)))
+	stats.Rows = append(stats.Rows, NewRow(float64(c)).AddTag("window","10m"))
 
 	if s.LastCount.Request25m == 0 {
 		c = s.CurrentCount.Request25m
 	} else {
 		c = s.LastCount.Request25m
 	}
-	out.WriteString(fmt.Sprintf("http_requests_totals{window=\"25m\"} %v\n", float64(c)))
+	stats.Rows = append(stats.Rows, NewRow(float64(c)).AddTag("window","25m"))
 
 	if s.LastCount.Request60m == 0 {
 		c = s.CurrentCount.Request60m
 	} else {
 		c = s.LastCount.Request60m
 	}
-	out.WriteString(fmt.Sprintf("http_requests_totals{window=\"60m\"} %v\n", float64(c)))
+	stats.Rows = append(stats.Rows, NewRow(float64(c)).AddTag("window","60m"))
 
-	return out.String()
+	var exp expositions
+	return append(exp, stats, totals)
 }
