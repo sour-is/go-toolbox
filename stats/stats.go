@@ -388,10 +388,10 @@ func (s dbStats) Exposition(pfx, name string) string {
 
 	v := reflect.ValueOf(s)
 	for i := 0; i < v.NumField(); i++ {
-		value := v.Field(i).Interface()
+		value := v.Field(i).Int()
 		tag := v.Type().Field(i).Tag
 
-		out.WriteString(fmt.Sprintf("%s_totals{name=\"%s\",metric=\"%s\"} %d\n", pfx, name, tag.Get("json"), value))
+		out.WriteString(fmt.Sprintf("%s_totals{name=\"%s\",metric=\"%s\"} %d\n", pfx, name, tag.Get("json"), float64(value)))
 	}
 
 	return out.String()
@@ -407,7 +407,7 @@ func (s runtimeStats) String() string {
 		t := v.Type().Field(i).Type.Name()
 		tag := v.Type().Field(i).Tag
 		switch t {
-		case "float64":
+		case "float32","float64":
 			out.WriteString(fmt.Sprintf("runtime_totals{mode=\"%s\"} %e\n", tag.Get("json"), value))
 		case "bool":
 			var b int
@@ -415,8 +415,10 @@ func (s runtimeStats) String() string {
 				b = 1
 			}
 			out.WriteString(fmt.Sprintf("runtime_totals{mode=\"%s\"} %v\n", tag.Get("json"), b))
-		default:
-			out.WriteString(fmt.Sprintf("runtime_totals{mode=\"%s\"} %v\n", tag.Get("json"), value))
+		case "uint","uint64","uint32":
+			out.WriteString(fmt.Sprintf("runtime_totals{mode=\"%s\"} %v\n", tag.Get("json"), float64(v.Field(i).Uint())))
+		case "int","int32","int64":
+			out.WriteString(fmt.Sprintf("runtime_totals{mode=\"%s\"} %v\n", tag.Get("json"), float64(v.Field(i).Int())))
 		}
 
 	}
@@ -427,17 +429,17 @@ func (s httpReqs) String() string {
 	var out strings.Builder
 
 	out.WriteString("# TYPE http_requests_totals\n")
-	out.WriteString(fmt.Sprintf("http_requests_totals{code=\"200\"} %v\n", s.Http2xx))
-	out.WriteString(fmt.Sprintf("http_requests_totals{code=\"300\"} %v\n", s.Http3xx))
-	out.WriteString(fmt.Sprintf("http_requests_totals{code=\"400\"} %v\n", s.Http4xx))
-	out.WriteString(fmt.Sprintf("http_requests_totals{code=\"500\"} %v\n", s.Http5xx))
+	out.WriteString(fmt.Sprintf("http_requests_totals{code=\"200\"} %v\n", float64(s.Http2xx)))
+	out.WriteString(fmt.Sprintf("http_requests_totals{code=\"300\"} %v\n", float64(s.Http3xx)))
+	out.WriteString(fmt.Sprintf("http_requests_totals{code=\"400\"} %v\n", float64(s.Http4xx)))
+	out.WriteString(fmt.Sprintf("http_requests_totals{code=\"500\"} %v\n", float64(s.Http5xx)))
 
-	out.WriteString(fmt.Sprintf("http_requests_totals{auth=\"false\"} %v\n", s.AnonRequests))
-	out.WriteString(fmt.Sprintf("http_requests_totals{auth=\"true\"} %v\n", s.Requests - s.AnonRequests))
+	out.WriteString(fmt.Sprintf("http_requests_totals{auth=\"false\"} %v\n", float64(s.AnonRequests)))
+	out.WriteString(fmt.Sprintf("http_requests_totals{auth=\"true\"} %v\n", float64(s.Requests - s.AnonRequests)))
 
-	out.WriteString(fmt.Sprintf("http_requests_totals{mode=\"count\"} %v\n", s.Requests))
-	out.WriteString(fmt.Sprintf("http_requests_totals{mode=\"bytes\"} %v\n", s.BytesOut))
-	out.WriteString(fmt.Sprintf("http_requests_totals{mode=\"avg_time\"} %v\n", s.AvgTimeNano))
+	out.WriteString(fmt.Sprintf("http_requests_totals{mode=\"count\"} %v\n", float64(s.Requests)))
+	out.WriteString(fmt.Sprintf("http_requests_totals{mode=\"bytes\"} %v\n", float64(s.BytesOut)))
+	out.WriteString(fmt.Sprintf("http_requests_totals{mode=\"avg_time\"} %v\n", float64(s.AvgTimeNano)))
 
 	var c int
 	if s.LastCount.Request1m == 0 {
@@ -445,35 +447,35 @@ func (s httpReqs) String() string {
 	} else {
 		c = s.LastCount.Request1m
 	}
-	out.WriteString(fmt.Sprintf("http_requests_totals{window=\"01m\"} %v\n", c))
+	out.WriteString(fmt.Sprintf("http_requests_totals{window=\"01m\"} %v\n", float64(c)))
 
 	if s.LastCount.Request5m == 0 {
 		c = s.CurrentCount.Request5m
 	} else {
 		c = s.LastCount.Request5m
 	}
-	out.WriteString(fmt.Sprintf("http_requests_totals{window=\"05m\"} %v\n", c))
+	out.WriteString(fmt.Sprintf("http_requests_totals{window=\"05m\"} %v\n", float64(c)))
 
 	if s.LastCount.Request10m == 0 {
 		c = s.CurrentCount.Request10m
 	} else {
 		c = s.LastCount.Request10m
 	}
-	out.WriteString(fmt.Sprintf("http_requests_totals{window=\"10m\"} %v\n", c))
+	out.WriteString(fmt.Sprintf("http_requests_totals{window=\"10m\"} %v\n", float64(c)))
 
 	if s.LastCount.Request25m == 0 {
 		c = s.CurrentCount.Request25m
 	} else {
 		c = s.LastCount.Request25m
 	}
-	out.WriteString(fmt.Sprintf("http_requests_totals{window=\"25m\"} %v\n", c))
+	out.WriteString(fmt.Sprintf("http_requests_totals{window=\"25m\"} %v\n", float64(c)))
 
 	if s.LastCount.Request60m == 0 {
 		c = s.CurrentCount.Request60m
 	} else {
 		c = s.LastCount.Request60m
 	}
-	out.WriteString(fmt.Sprintf("http_requests_totals{window=\"60m\"} %v\n", c))
+	out.WriteString(fmt.Sprintf("http_requests_totals{window=\"60m\"} %v\n", float64(c)))
 
 	return out.String()
 }
