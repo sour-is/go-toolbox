@@ -391,7 +391,7 @@ func (s dbStats) Exposition(pfx, name string) string {
 		value := v.Field(i).Int()
 		tag := v.Type().Field(i).Tag
 
-		out.WriteString(fmt.Sprintf("%s_totals{name=\"%s\",metric=\"%s\"} %d\n", pfx, name, tag.Get("json"), float64(value)))
+		out.WriteString(fmt.Sprintf("%s_totals{name=\"%s\",metric=\"%s\"} %v\n", pfx, name, tag.Get("json"), float64(value)))
 	}
 
 	return out.String()
