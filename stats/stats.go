@@ -521,7 +521,7 @@ func (s httpReqs) Exposition() (lis expositions) {
 	e.newRow(float64(s.AvgTimeNano))
 	lis = append(lis, e)
 
-	e = newExp("http_requests_by_status", ExpGauge)
+	e = newExp("http_requests_by_status", ExpCounter)
 	e.newRow(float64(s.Http2xx)).addTag("code","200")
 	e.newRow(float64(s.Http3xx)).addTag("code","300")
 	e.newRow(float64(s.Http4xx)).addTag("code","400")
