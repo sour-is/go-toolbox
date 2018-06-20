@@ -8,6 +8,7 @@ import (
 
 type DbInfo struct {
 	Table string
+	View  string
 	Cols  []string
 	SCols []string
 	index map[string]int
@@ -40,6 +41,11 @@ func GetDbInfo(o interface{}) (d DbInfo) {
 		if table != "" {
 			d.Table = table
 		}
+		view := field.Tag.Get("view")
+		if view != "" {
+			d.View = view
+		}
+
 		sp := append(strings.SplitN(field.Tag.Get("db"), ",", 2), "")
 
 		tag, opt := sp[0], sp[1]
@@ -63,6 +69,9 @@ func GetDbInfo(o interface{}) (d DbInfo) {
 		d.index[field.Name] = len(d.Cols)
 		d.Cols = append(d.Cols, tag)
 		d.SCols = append(d.SCols, field.Name)
+	}
+	if d.View == "" {
+		d.View = d.Table
 	}
 
 	return d
