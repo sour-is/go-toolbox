@@ -8,9 +8,9 @@ import (
 
 	. "github.com/smartystreets/goconvey/convey"
 
-	"github.com/spf13/viper"
 	"database/sql"
 	"fmt"
+	"github.com/spf13/viper"
 	"sour.is/x/toolbox/log"
 )
 
@@ -36,7 +36,7 @@ func TestMain(m *testing.M) {
 	viper.ReadConfig(bytes.NewBuffer([]byte(defaultTestConfig)))
 	fmt.Println("HELLO")
 	log.SetVerbose(log.Vdebug)
-	log.SetFlags(log.LstdFlags|log.Lshortfile)
+	log.SetFlags(log.LstdFlags | log.Lshortfile)
 
 	m.Run()
 }

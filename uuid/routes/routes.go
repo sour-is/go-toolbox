@@ -11,22 +11,22 @@ import (
 func init() {
 	httpsrv.HttpRegister("uuid", httpsrv.HttpRoutes{
 		{
-			"v4",
-			"GET",
-			"/v1/uuid/v4",
-			v4,
+			Name:        "v4",
+			Method:      "GET",
+			Pattern:     "/v1/uuid/v4",
+			HandlerFunc: v4,
 		},
 		{
-			"v5",
-			"GET",
-			"/v1/uuid/v5",
-			v5,
+			Name:        "v5",
+			Method:      "GET",
+			Pattern:     "/v1/uuid/v5",
+			HandlerFunc: v5,
 		},
 		{
-			"v6",
-			"GET",
-			"/v1/uuid/v6",
-			v6,
+			Name:        "v6",
+			Method:      "GET",
+			Pattern:     "/v1/uuid/v6",
+			HandlerFunc: v6,
 		},
 	})
 }

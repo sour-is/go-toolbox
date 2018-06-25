@@ -10,7 +10,7 @@ import (
 
 func init() {
 	httpsrv.IdentRegister("default", httpsrv.IdentRoutes{
-		{"Index", "GET", "/", Index},
+		{Name: "Index", Method: "GET", Pattern: "/", HandlerFunc: Index},
 	})
 }
 

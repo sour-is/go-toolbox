@@ -1,16 +1,16 @@
 package log // import "sour.is/x/toolbox/log"
 
 import (
+	"bytes"
 	"fmt"
 	"io"
+	"io/ioutil"
 	"log"
 	"math/rand"
 	"os"
 	"strings"
 	"sync"
 	"time"
-	"bytes"
-	"io/ioutil"
 )
 
 const (

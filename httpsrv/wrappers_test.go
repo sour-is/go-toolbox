@@ -31,7 +31,7 @@ func TestIdentWrapper(t *testing.T) {
 	monkey.Patch(ident.GetIdent, func(str string, r *http.Request) ident.Ident {
 		t.Log("GOT " + str)
 
-		return ident.NullUser{"IDENT", "ASPECT", "NAME", true}
+		return ident.NullUser{Ident: "IDENT", Aspect: "ASPECT", Name: "NAME", Active: true}
 	})
 
 	defer monkey.UnpatchAll()

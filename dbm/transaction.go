@@ -29,10 +29,10 @@ func (db DB) NewTx() (tx *Tx, err error) {
 	return
 }
 
-
 func Transaction(txFunc func(*Tx) error) (err error) {
 	return stdDB.Transaction(txFunc)
 }
+
 // Transaction starts a new database transction and executes the supplied func.
 func (db DB) Transaction(txFunc func(*Tx) error) (err error) {
 	tx, err := db.NewTx()
@@ -95,7 +95,6 @@ func (db DB) Transactionx(txFunc func(*sqlx.Tx) error) (err error) {
 	err = txFunc(tx)
 	return err
 }
-
 
 func TransactionContinue(TxID string, txFunc func(*Tx, string) error) (err error) {
 	return stdDB.TransactionContinue(TxID, txFunc)

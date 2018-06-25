@@ -10,9 +10,9 @@ import (
 	"github.com/gorilla/mux"
 	"github.com/spf13/viper"
 	"sort"
-	"sync"
 	"sour.is/x/toolbox/ident"
 	"sour.is/x/toolbox/log"
+	"sync"
 )
 
 // Example Usage

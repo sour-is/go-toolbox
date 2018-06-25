@@ -228,7 +228,7 @@ func TestDefaultLog(t *testing.T) {
 
 		})
 
-		convey.Convey("Nil Functions should do nothing.", func(){
+		convey.Convey("Nil Functions should do nothing.", func() {
 			SetVerbose(Vdebug)
 			SetColor(true)
 

@@ -131,7 +131,7 @@ func (tx *Tx) Replace(
 		if tx.Returns {
 			if len(auto) > 0 {
 				log.Debug("RETURNING ", auto, " FOR ", d.Auto)
-				insert = insert.Suffix(`RETURNING "` + strings.Join(auto,`","`) + "\"")
+				insert = insert.Suffix(`RETURNING "` + strings.Join(auto, `","`) + "\"")
 			}
 
 			log.Debug(insert.ToSql())
@@ -154,8 +154,7 @@ func (tx *Tx) Replace(
 			row = tx.Select(auto, d.Table).Where(sq.Eq{d.Auto[0]: lastId}).QueryRow()
 		}
 
-	} else
-	if err == nil && num > 0 {
+	} else if err == nil && num > 0 {
 
 		found = true
 		update = update.Where(where)
@@ -163,7 +162,7 @@ func (tx *Tx) Replace(
 		if tx.Returns {
 			if len(auto) > 0 {
 				log.Debug("RETURNING ", auto, " FOR ", d.Auto)
-				update = update.Suffix(`RETURNING "` + strings.Join(auto,`","`) + "\"")
+				update = update.Suffix(`RETURNING "` + strings.Join(auto, `","`) + "\"")
 			}
 
 			log.Debug(update.ToSql())
