@@ -11,7 +11,7 @@
   branch = "v1"
   name = "github.com/Masterminds/squirrel"
   packages = ["."]
-  revision = "40ef4f86bf59a996c348a9f56ddb4c4d3d49a6df"
+  revision = "b127ed9be03443fe3c0877e391130e3dd3f3107a"
 
 [[projects]]
   branch = "master"
@@ -35,19 +35,19 @@
   branch = "master"
   name = "github.com/gopherjs/gopherjs"
   packages = ["js"]
-  revision = "1daac00a5961469351b87e7ac223239c37938d2a"
+  revision = "8dffc02ea1cb8398bb73f30424697c60fcf8d4c5"
 
 [[projects]]
   name = "github.com/gorilla/context"
   packages = ["."]
-  revision = "1ea25387ff6f684839d82767c1733ff4d4d15d0a"
-  version = "v1.1"
+  revision = "08b5f424b9271eedf6f9f0ce86cb9396ed337a42"
+  version = "v1.1.1"
 
 [[projects]]
   name = "github.com/gorilla/mux"
   packages = ["."]
-  revision = "53c1911da2b537f792e7cafcb446b05ffe33b996"
-  version = "v1.6.1"
+  revision = "e3702bed27f0d39777b0b37b664b6280e8ef8fbf"
+  version = "v1.6.2"
 
 [[projects]]
   branch = "master"
@@ -96,14 +96,14 @@
 [[projects]]
   name = "github.com/magiconair/properties"
   packages = ["."]
-  revision = "c3beff4c2358b44d0493c7dda585e7db7ff28ae6"
-  version = "v1.7.6"
+  revision = "c2353362d570a7bfa228149c62842019201cfb71"
+  version = "v1.8.0"
 
 [[projects]]
   branch = "master"
   name = "github.com/mitchellh/mapstructure"
   packages = ["."]
-  revision = "00c29f56e2386353d58c599509e8dc3801b0d716"
+  revision = "bb74f1db0675b241733089d5a1faa5dd8b0ef57b"
 
 [[projects]]
   name = "github.com/patrickmn/go-cache"
@@ -114,8 +114,8 @@
 [[projects]]
   name = "github.com/pelletier/go-toml"
   packages = ["."]
-  revision = "acdc4509485b587f5e675510c4f2c63e90ff68a8"
-  version = "v1.1.0"
+  revision = "c01d1270ff3e442a8a57cddc1c92dc1138598194"
+  version = "v1.2.0"
 
 [[projects]]
   name = "github.com/smartystreets/assertions"
@@ -143,8 +143,8 @@
     ".",
     "mem"
   ]
-  revision = "63644898a8da0bc22138abf860edaf5277b6102e"
-  version = "v1.1.0"
+  revision = "787d034dfe70e44075ccc060d346146ef53270ad"
+  version = "v1.1.1"
 
 [[projects]]
   name = "github.com/spf13/cast"
@@ -174,7 +174,7 @@
   branch = "master"
   name = "golang.org/x/sys"
   packages = ["unix"]
-  revision = "79b0c6888797020a994db17c8510466c72fe75d9"
+  revision = "a200a19cb90b19de298170992778b1fda7217bd6"
 
 [[projects]]
   name = "golang.org/x/text"
