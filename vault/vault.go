@@ -67,12 +67,12 @@ const (
 
 func config() error {
 	// Read VAULT specific config environment variables.
-	viper.BindEnv("vault.addr",   "VAULT_ADDR")
+	viper.BindEnv("vault.addr", "VAULT_ADDR")
 	viper.BindEnv("vault.secret", "VAULT_SECRET")
-	viper.BindEnv("vault.token",  "VAULT_TOKEN")
-	viper.BindEnv("vault.ca",     "VAULT_CAFILE")
-	viper.BindEnv("vault.cert",   "VAULT_CLIENT_CERT")
-	viper.BindEnv("vault.key",    "VAULT_CLIENT_KEY")
+	viper.BindEnv("vault.token", "VAULT_TOKEN")
+	viper.BindEnv("vault.ca", "VAULT_CAFILE")
+	viper.BindEnv("vault.cert", "VAULT_CLIENT_CERT")
+	viper.BindEnv("vault.key", "VAULT_CLIENT_KEY")
 
 	vault.Addr = viper.GetString("vault.addr")
 	vault.Secret = viper.GetString("vault.secret")
