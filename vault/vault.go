@@ -52,6 +52,8 @@ var vault struct {
 	Secret string
 	Token  string
 	CA     string
+	Cert   string
+	Key    string
 	PKI    pki
 }
 
@@ -65,20 +67,38 @@ const (
 
 func config() error {
 	// Read VAULT specific config environment variables.
-	viper.BindEnv("vault.addr", "VAULT_ADDR")
+	viper.BindEnv("vault.addr",   "VAULT_ADDR")
 	viper.BindEnv("vault.secret", "VAULT_SECRET")
-	viper.BindEnv("vault.token", "VAULT_TOKEN")
-	viper.BindEnv("vault.cafile", "VAULT_CAFILE")
-	viper.BindEnv("vault.certfile", "VAULT_CLIENT_CERT")
-	viper.BindEnv("vault.keyfile", "VAULT_CLIENT_KEY")
+	viper.BindEnv("vault.token",  "VAULT_TOKEN")
+	viper.BindEnv("vault.ca",     "VAULT_CAFILE")
+	viper.BindEnv("vault.cert",   "VAULT_CLIENT_CERT")
+	viper.BindEnv("vault.key",    "VAULT_CLIENT_KEY")
 
 	vault.Addr = viper.GetString("vault.addr")
 	vault.Secret = viper.GetString("vault.secret")
-	vault.CA = viper.GetString("vault.ca")
 
-	if vault.CA == "" && viper.IsSet("vault.cafile") {
-		b, _ := ioutil.ReadFile(viper.GetString("vault.cafile"))
+	if viper.IsSet("vault.ca") {
+		b, err := ioutil.ReadFile(viper.GetString("vault.ca"))
+		if err != nil {
+			log.Fatal(err)
+		}
 		vault.CA = string(b)
+	}
+
+	if viper.IsSet("vault.cert") {
+		b, err := ioutil.ReadFile(viper.GetString("vault.cert"))
+		if err != nil {
+			log.Fatal(err)
+		}
+		vault.Cert = string(b)
+	}
+
+	if viper.IsSet("vault.key") {
+		b, err := ioutil.ReadFile(viper.GetString("vault.key"))
+		if err != nil {
+			log.Fatal(err)
+		}
+		vault.Key = string(b)
 	}
 
 	if viper.IsSet("vault.token") {
@@ -95,20 +115,38 @@ func config() error {
 		if vault.PKI.Addr == "" {
 			vault.PKI.Addr = vault.Addr
 		}
+
 		if vault.PKI.CAfile != "" {
-			b, _ := ioutil.ReadFile(vault.PKI.CAfile)
+			b, err := ioutil.ReadFile(vault.PKI.CAfile)
+			if err != nil {
+				log.Fatal(err)
+			}
 			vault.PKI.CA = string(b)
 		}
 		if vault.PKI.CA == "" {
 			vault.PKI.CA = vault.CA
 		}
+
 		if vault.PKI.CertFile != "" {
-			b, _ := ioutil.ReadFile(vault.PKI.CertFile)
+			b, err := ioutil.ReadFile(vault.PKI.CertFile)
+			if err != nil {
+				log.Fatal(err)
+			}
 			vault.PKI.Cert = string(b)
 		}
+		if vault.PKI.Cert == "" {
+			vault.PKI.Cert = vault.Cert
+		}
+
 		if vault.PKI.KeyFile != "" {
-			b, _ := ioutil.ReadFile(vault.PKI.KeyFile)
+			b, err := ioutil.ReadFile(vault.PKI.KeyFile)
+			if err != nil {
+				log.Fatal(err)
+			}
 			vault.PKI.Key = string(b)
+		}
+		if vault.PKI.Key == "" {
+			vault.PKI.Key = vault.Key
 		}
 
 		return certAuth(vault.PKI)
@@ -121,6 +159,11 @@ func LoadVault() error {
 	err := config()
 	if err != nil {
 		return err
+	}
+
+	if vault.Secret == "" {
+		log.Debug("No Secret defined for vault.")
+		return nil
 	}
 
 	log.Noticef("Read config from: %s secret: %s", vault.Addr, vault.Secret)
