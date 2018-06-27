@@ -118,6 +118,12 @@
   version = "v1.2.0"
 
 [[projects]]
+  name = "github.com/pkg/errors"
+  packages = ["."]
+  revision = "645ef00459ed84a119197bfb8d8205042c6df63d"
+  version = "v0.8.0"
+
+[[projects]]
   name = "github.com/smartystreets/assertions"
   packages = [
     ".",
@@ -172,6 +178,25 @@
 
 [[projects]]
   branch = "master"
+  name = "github.com/vektah/dataloaden"
+  packages = ["."]
+  revision = "487f817525ba0d79e6e4d1f1f4501464d6417e2a"
+
+[[projects]]
+  name = "github.com/vektah/gqlgen"
+  packages = [
+    ".",
+    "codegen",
+    "codegen/templates",
+    "neelance/common",
+    "neelance/errors",
+    "neelance/schema"
+  ]
+  revision = "cb87a2cb66f5a64749f6464900b1c12bca47ed67"
+  version = "0.2.1"
+
+[[projects]]
+  branch = "master"
   name = "golang.org/x/sys"
   packages = ["unix"]
   revision = "a200a19cb90b19de298170992778b1fda7217bd6"
@@ -190,6 +215,18 @@
   version = "v0.3.0"
 
 [[projects]]
+  branch = "master"
+  name = "golang.org/x/tools"
+  packages = [
+    "go/ast/astutil",
+    "go/buildutil",
+    "go/loader",
+    "imports",
+    "internal/fastwalk"
+  ]
+  revision = "16699b2d33e2654d743c50b4525ab7e73e346238"
+
+[[projects]]
   name = "gopkg.in/yaml.v2"
   packages = ["."]
   revision = "5420a8b6744d3b0345ab293f6fcba19c978f1183"
@@ -198,6 +235,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "6357312db97210e893931df7cddc158a5b5ec3ef6a6cc3cfc44d978c0e90a31e"
+  inputs-digest = "3e4e45e2845f7fde60a3522a9d164fec5ca9ba0df6d85dbbb89badc25e88b832"
   solver-name = "gps-cdcl"
   solver-version = 1
