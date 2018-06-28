@@ -26,13 +26,13 @@ func TestV4(t *testing.T) {
 			return 0, fmt.Errorf("Something Broke!")
 		})
 		v4 := V4()
-		So(v4, ShouldEqual, NilUuid)
+		So(v4, ShouldEqual, NilUUID)
 	})
 }
 
 func TestV5(t *testing.T) {
 	Convey("Generate a V5 UUID", t, func() {
-		v4 := V5("test", NilUuid)
+		v4 := V5("test", NilUUID)
 		VERSION := []uint8{'5'}
 		CHECK := []uint8{'8', '9', 'a', 'b'}
 
@@ -43,7 +43,7 @@ func TestV5(t *testing.T) {
 
 func TestV6(t *testing.T) {
 	Convey("Generate a V6 UUID", t, func() {
-		v4 := V6(NilUuid, false)
+		v4 := V6(NilUUID, false)
 		VERSION := []uint8{'6'}
 		CHECK := []uint8{'8', '9', 'a', 'b'}
 
@@ -54,12 +54,13 @@ func TestV6(t *testing.T) {
 
 func TestBytes(t *testing.T) {
 	Convey("Convert UUID string to []byte", t, func() {
-		b := Bytes(NilUuid)
+		b := Bytes(NilUUID)
 
 		So(len(b), ShouldEqual, 16)
 	})
 }
 
+const hextable = "0123456789abcdef"
 func TestFromHexChar(t *testing.T) {
 	Convey("Test conversion of hex values to bytes", t, func() {
 		for i, c := range hextable {

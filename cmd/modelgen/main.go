@@ -73,32 +73,8 @@ func main() {
 				continue
 			}
 
-			for _, field := range st.Fields.List {
-				for _, name := range field.Names {
-					tag := reflect.StructTag(strings.Trim(field.Tag.Value, "`"))
-					auto := false
-					if db := tag.Get("db"); strings.Contains(db, ",AUTO") {
-						auto = true
-					}
-					if tab := tag.Get("table"); tab != "" {
-						smap.Table = true
-					}
-					if tab := tag.Get("view"); tab != "" {
-						smap.View = true
-					}
+			smap.Table, smap.View, smap.Fields = procStruct(st)
 
-					var arr *ast.ArrayType
-					if arr, ok = field.Type.(*ast.ArrayType); ok {
-						if _, ok = arr.Elt.(*ast.Ident); !ok {
-							continue
-						}
-
-						smap.Fields = append(smap.Fields, structField{Name: name.Name, Container: tag.Get("cont"), Auto: auto})
-					} else if _, ok := field.Type.(*ast.Ident); ok {
-						smap.Fields = append(smap.Fields, structField{Name: name.Name, Container: "", Auto: auto})
-					}
-				}
-			}
 			if smap.Table == false && smap.View == false {
 				// No Table or View == Do not generate.
 				continue
@@ -118,7 +94,10 @@ func main() {
 	}
 
 	basepath := filepath.Dir(os.Args[1])
-	os.Chdir(basepath)
+	err = os.Chdir(basepath)
+	if err != nil {
+		log.Fatal(err)
+	}
 
 	scanner := bufio.NewScanner(fh)
 	for scanner.Scan() {
@@ -140,6 +119,36 @@ func main() {
 			log.Error(err)
 		}
 	}
+}
+
+func procStruct(st *ast.StructType) (table, view bool, fields []structField) {
+	for _, field := range st.Fields.List {
+		for _, name := range field.Names {
+			tag := reflect.StructTag(strings.Trim(field.Tag.Value, "`"))
+			auto := false
+			if db := tag.Get("db"); strings.Contains(db, ",AUTO") {
+				auto = true
+			}
+			if tab := tag.Get("table"); tab != "" {
+				table = true
+			}
+			if tab := tag.Get("view"); tab != "" {
+				view = true
+			}
+
+			if arr, ok := field.Type.(*ast.ArrayType); ok {
+				if _, ok = arr.Elt.(*ast.Ident); !ok {
+					continue
+				}
+
+				fields = append(fields, structField{Name: name.Name, Container: tag.Get("cont"), Auto: auto})
+			} else if _, ok := field.Type.(*ast.Ident); ok {
+				fields = append(fields, structField{Name: name.Name, Container: "", Auto: auto})
+			}
+		}
+	}
+
+	return
 }
 
 var fnMap = template.FuncMap{

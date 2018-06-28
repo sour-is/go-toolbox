@@ -8,10 +8,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
-	"time"
-
 	"github.com/spf13/viper"
-	"sour.is/x/toolbox/httpsrv"
 	"sour.is/x/toolbox/log"
 )
 
@@ -62,7 +59,7 @@ const (
 	methodPOST      = "POST"
 	vaultPKIAuth    = "v1/auth/cert/login"
 	vaultLookupSelf = "v1/auth/token/lookup-self"
-	vaultRenewSelf  = "v1/auth/token/renew-self"
+//	vaultRenewSelf  = "v1/auth/token/renew-self"
 )
 
 func config() error {
@@ -155,6 +152,7 @@ func config() error {
 	return checkToken()
 }
 
+// LoadVault loads values from vault and sores them into viper
 func LoadVault() error {
 	err := config()
 	if err != nil {
@@ -166,11 +164,15 @@ func LoadVault() error {
 		return nil
 	}
 
+	if vault.Addr == "" {
+		log.Fatal("No address defined for vault.")
+	}
+
 	log.Noticef("Read config from: %s secret: %s", vault.Addr, vault.Secret)
 
 	cl := newClient(vault.CA, "", "")
 	cl.Token = vault.Token
-	data, err := cl.Req(methodGET, fmt.Sprintf("%s/v1/%s", vault.Addr, vault.Secret))
+	data, err := cl.req(methodGET, fmt.Sprintf("%s/v1/%s", vault.Addr, vault.Secret))
 	if err != nil {
 		return err
 	}
@@ -189,7 +191,7 @@ func certAuth(pki pki) error {
 	}
 
 	cl := newClient(pki.CA, pki.Cert, pki.Key)
-	auth, err := cl.Auth(methodPOST, fmt.Sprintf("%s/%s", pki.Addr, vaultPKIAuth))
+	auth, err := cl.auth(methodPOST, fmt.Sprintf("%s/%s", pki.Addr, vaultPKIAuth))
 	if err != nil {
 		log.Fatalf("unable to authenticate vault: %s", err.Error())
 	}
@@ -200,7 +202,7 @@ func certAuth(pki pki) error {
 
 	return nil
 }
-
+/*
 func tokenRenewer(timeout time.Duration) {
 	ticker60m := time.NewTicker(timeout)
 	defer ticker60m.Stop()
@@ -214,7 +216,7 @@ func tokenRenewer(timeout time.Duration) {
 			log.Debug("Renewing Token ")
 			cl := newClient(vault.CA, vault.PKI.Cert, vault.PKI.Key)
 			cl.Token = vault.Token
-			_, err := cl.Req(methodPOST, fmt.Sprintf("%s/%s", vault.Addr, vaultRenewSelf))
+			_, err := cl.req(methodPOST, fmt.Sprintf("%s/%s", vault.Addr, vaultRenewSelf))
 			if err != nil {
 				log.Error(err)
 				return
@@ -227,11 +229,11 @@ func tokenRenewer(timeout time.Duration) {
 		}
 	}
 }
-
+*/
 func checkToken() error {
 	cl := newClient(vault.CA, "", "")
 	cl.Token = vault.Token
-	auth, err := cl.Auth(methodGET, fmt.Sprintf("%s/%s", vault.Addr, vaultLookupSelf))
+	auth, err := cl.auth(methodGET, fmt.Sprintf("%s/%s", vault.Addr, vaultLookupSelf))
 	if err != nil {
 		return err
 	}
@@ -285,7 +287,7 @@ func newClient(ca, cert, key string) (c client) {
 
 	return
 }
-func (c client) Req(method, url string) (data vaultData, err error) {
+func (c client) req(method, url string) (data vaultData, err error) {
 
 	var req *http.Request
 	req, err = http.NewRequest(method, url, bytes.NewBufferString(""))
@@ -317,7 +319,7 @@ func (c client) Req(method, url string) (data vaultData, err error) {
 
 	return
 }
-func (c client) Auth(method, url string) (auth vaultAuth, err error) {
+func (c client) auth(method, url string) (auth vaultAuth, err error) {
 
 	var req *http.Request
 	req, err = http.NewRequest(method, url, bytes.NewBufferString(""))

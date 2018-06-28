@@ -56,7 +56,7 @@ func TestRoutes(t *testing.T) {
 		v6(w, r)
 		u := w.Body.String()
 
-		So(u, ShouldEqual, uuid.V6(uuid.NilUuid, true))
+		So(u, ShouldEqual, uuid.V6(uuid.NilUUID, true))
 		So(len(u), ShouldEqual, 36)
 		So(u, ShouldContainSubstring, "-")
 		b := uuid.Bytes(u)

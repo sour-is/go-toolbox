@@ -24,6 +24,7 @@ import (
 	"time"
 )
 
+// DB database connection and settings
 type DB struct {
 	Conn        *sql.DB
 	DbType      string
@@ -84,6 +85,7 @@ func GetDB(pfx string) (db DB, err error) {
 
 var stdDB DB
 
+// Config read configuration from viper
 func Config() {
 	if viper.IsSet("database") {
 		pfx := "db." + viper.GetString("database")

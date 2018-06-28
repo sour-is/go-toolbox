@@ -35,10 +35,10 @@ type httpStatsType struct {
 	Requests    int           `json:"reqs"`
 	RequestTime time.Duration `json:"req_time"`
 
-	Http2xx int `json:"http_2xx"`
-	Http3xx int `json:"http_3xx"`
-	Http4xx int `json:"http_4xx"`
-	Http5xx int `json:"http_5xx"`
+	HTTP2xx int `json:"http_2xx"`
+	HTTP3xx int `json:"http_3xx"`
+	HTTP4xx int `json:"http_4xx"`
+	HTTP5xx int `json:"http_5xx"`
 
 	AnonRequests int `json:"reqs_anon"`
 
@@ -71,7 +71,7 @@ type Stats struct {
 	AppStart   time.Time     `json:"app_start"`
 	UpTimeNano time.Duration `json:"uptime_nano"`
 	UpTime     string        `json:"uptime"`
-	Http       httpReqs      `json:"http"`
+	HTTP       httpReqs      `json:"http"`
 	Runtime    runtimeStats  `json:"runtime"`
 	DBstats    dbStatsMap    `json:"db"`
 }
@@ -193,12 +193,12 @@ func recordStats(pipe chan httpData) {
 			httpSeries.Request60m, httpCollect.Request60m = httpCollect.Request60m, 0
 
 		case h := <-pipe:
-			httpStats.Requests += 1
-			httpCollect.Request1m += 1
-			httpCollect.Request5m += 1
-			httpCollect.Request10m += 1
-			httpCollect.Request25m += 1
-			httpCollect.Request60m += 1
+			httpStats.Requests++
+			httpCollect.Request1m++
+			httpCollect.Request5m++
+			httpCollect.Request10m++
+			httpCollect.Request25m++
+			httpCollect.Request60m++
 
 			httpStats.RequestTime += h.W.StopTime()
 
@@ -206,20 +206,20 @@ func recordStats(pipe chan httpData) {
 			switch {
 
 			case code >= 200 && code < 300:
-				httpStats.Http2xx += 1
+				httpStats.HTTP2xx++
 
 			case code >= 300 && code < 400:
-				httpStats.Http3xx += 1
+				httpStats.HTTP3xx++
 
 			case code >= 400 && code < 500:
-				httpStats.Http4xx += 1
+				httpStats.HTTP4xx++
 
 			case code >= 500:
-				httpStats.Http5xx += 1
+				httpStats.HTTP5xx++
 			}
 
 			if !h.ID.IsActive() {
-				httpStats.AnonRequests += 1
+				httpStats.AnonRequests++
 			}
 
 			httpStats.BytesOut += h.W.R.BytesOut
@@ -440,7 +440,7 @@ func (row *expositionRow) addTag(name, value string) *expositionRow {
 
 func (s Stats) String() string {
 	var out strings.Builder
-	out.WriteString(s.Http.String())
+	out.WriteString(s.HTTP.String())
 	out.WriteString(s.Runtime.String())
 	out.WriteString(s.DBstats.String())
 	return out.String()
@@ -524,10 +524,10 @@ func (s httpReqs) Exposition() (lis expositions) {
 	lis = append(lis, e)
 
 	e = newExp("http_requests_by_status", ExpCounter)
-	e.newRow(float64(s.Http2xx)).addTag("code", "200")
-	e.newRow(float64(s.Http3xx)).addTag("code", "300")
-	e.newRow(float64(s.Http4xx)).addTag("code", "400")
-	e.newRow(float64(s.Http5xx)).addTag("code", "500")
+	e.newRow(float64(s.HTTP2xx)).addTag("code", "200")
+	e.newRow(float64(s.HTTP3xx)).addTag("code", "300")
+	e.newRow(float64(s.HTTP4xx)).addTag("code", "400")
+	e.newRow(float64(s.HTTP5xx)).addTag("code", "500")
 	lis = append(lis, e)
 
 	e = newExp("http_requests_by_auth", ExpCounter)

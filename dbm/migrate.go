@@ -8,12 +8,13 @@ import (
 	"strings"
 )
 
-type Asset struct {
+type asset struct {
 	File func(string) ([]byte, error)
 	Dir  func(string) ([]string, error)
 }
 
-func Migrate(a Asset) (err error) {
+// Migrate runs SQL DDL to update tables.
+func Migrate(a asset) (err error) {
 	if viper.IsSet("database") {
 		pfx := "db." + viper.GetString("database")
 		if !viper.GetBool(pfx) {

@@ -40,6 +40,7 @@ func doAccessLog(name string, w httpsrv.ResponseWriter, r *http.Request, id iden
 }
 */
 
+// Dial sets up sysloger to addr
 func Dial(addr, tag string) {
 
 	var err error
