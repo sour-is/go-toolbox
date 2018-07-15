@@ -43,7 +43,7 @@ func TestApplyUint(t *testing.T) {
 }
 
 type dbTable struct {
-	Col1 int       `table:"table_name"`
+	Col1 int       `table:"table_name" view:"view_name"`
 	Col2 string    `db:"col2,AUTO"`
 	Col3 []float32 `json:"col3"`
 }
@@ -52,6 +52,9 @@ func TestDbInfo(t *testing.T) {
 	Convey("Givin a table struct", t, func() {
 		o := dbTable{}
 		d := GetDbInfo(o)
+
+		So(d.Table, ShouldEqual, "table_name")
+		So(d.View, ShouldEqual, "view_name")
 
 		So(d.Index("Col1"), ShouldEqual, 0)
 		So(d.Index("Col2"), ShouldEqual, 1)
@@ -68,4 +71,10 @@ func TestDbInfo(t *testing.T) {
 		So(len(d.Auto), ShouldEqual, 1)
 		So(d.Auto[0], ShouldContainSubstring, "Col2")
 	})
+}
+
+func BenchmarkDbInfo(b *testing.B) {
+	o := dbTable{}
+
+	GetDbInfo(o)
 }
