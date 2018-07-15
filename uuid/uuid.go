@@ -7,13 +7,15 @@ import (
 	"time"
 )
 
-const NilUuid = "00000000-0000-0000-0000-000000000000"
+// NilUUID is a null uuid.
+const NilUUID = "00000000-0000-0000-0000-000000000000"
 
+// V4 return UUIDv4
 func V4() string {
 	b := make([]byte, 16)
 	_, err := rand.Read(b)
 	if err != nil {
-		return NilUuid
+		return NilUUID
 	}
 
 	// this make sure that the 13th character is "4"
@@ -24,9 +26,6 @@ func V4() string {
 
 	return fmt.Sprintf("%x-%x-%x-%x-%x", b[0:4], b[4:6], b[6:8], b[8:10], b[10:])
 }
-
-const hextable = "0123456789abcdef"
-
 func fromHexChar(c rune) (byte, bool) {
 	switch {
 	case 48 <= c && c <= 57:
@@ -39,6 +38,7 @@ func fromHexChar(c rune) (byte, bool) {
 
 	return 0, false
 }
+// V5 return UUIDv5
 func V5(name, namespace string) string {
 	n := make([]byte, 0, 16)
 	half := false
@@ -67,7 +67,7 @@ func V5(name, namespace string) string {
 
 	return fmt.Sprintf("%x-%x-%x-%x-%x", b[0:4], b[4:6], b[6:8], b[8:10], b[10:16])
 }
-
+// V6 returns UUIDv6
 func V6(namespace string, origin bool) string {
 	pfx := sha1.Sum([]byte(namespace))
 
@@ -108,7 +108,7 @@ func V6(namespace string, origin bool) string {
 
 	return fmt.Sprintf("%x-%x-%x-%s-%s", b[0:4], b[4:6], b[6:8], tcode[0:4], tcode[4:16])
 }
-
+// Bytes returns the byte values for a uuid
 func Bytes(uuid string) (n []byte) {
 	n = make([]byte, 0, 16)
 

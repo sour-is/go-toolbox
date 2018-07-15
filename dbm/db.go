@@ -16,21 +16,21 @@ import (
 import (
 	"database/sql"
 	"github.com/spf13/viper"
-	"strings"
 	"regexp"
 	"sour.is/x/toolbox/log"
+	"strings"
 
 	sq "github.com/Masterminds/squirrel"
 	"time"
 )
 
-type DB struct{
-	Conn *sql.DB
-	DbType string
+// DB database connection and settings
+type DB struct {
+	Conn        *sql.DB
+	DbType      string
 	Placeholder sq.PlaceholderFormat
-	Returns bool
+	Returns     bool
 }
-
 
 // GetDB returns a database connection.
 func GetDB(pfx string) (db DB, err error) {
@@ -62,7 +62,6 @@ func GetDB(pfx string) (db DB, err error) {
 	}
 	conn.SetConnMaxLifetime(5 * time.Minute)
 
-
 	if err = conn.Ping(); err != nil {
 		log.Error(err)
 		return
@@ -84,9 +83,9 @@ func GetDB(pfx string) (db DB, err error) {
 	return
 }
 
-
 var stdDB DB
 
+// Config read configuration from viper
 func Config() {
 	if viper.IsSet("database") {
 		pfx := "db." + viper.GetString("database")

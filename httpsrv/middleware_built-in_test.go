@@ -47,7 +47,7 @@ func TestDoAccessLog(t *testing.T) {
 		w := WrapResponseWriter(httptest.NewRecorder())
 		w.WriteHeader(200)
 
-		doAccessLog("NAME", w, r, ident.NullUser{"IDENT", "ASPECT", "name", true})
+		doAccessLog("NAME", w, r, ident.NullUser{Ident: "IDENT", Aspect: "ASPECT", Name: "name", Active: true})
 
 		l.Flush()
 		str := b.String()

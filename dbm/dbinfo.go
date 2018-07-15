@@ -6,6 +6,7 @@ import (
 	"strings"
 )
 
+// DbInfo database model metadata
 type DbInfo struct {
 	Table string
 	View  string
@@ -14,13 +15,15 @@ type DbInfo struct {
 	index map[string]int
 	Auto  []string
 }
-
+// SCol returns the struct column names
 func (d DbInfo) SCol(column string) string {
 	return d.SCols[d.Index(column)]
 }
+// Col returns the mapped column names
 func (d DbInfo) Col(column string) string {
 	return d.Cols[d.Index(column)]
 }
+// Index returns the column number
 func (d DbInfo) Index(column string) (idx int) {
 	var ok bool
 	if idx, ok = d.index[column]; !ok {
@@ -29,6 +32,7 @@ func (d DbInfo) Index(column string) (idx int) {
 
 	return
 }
+// GetDbInfo builds a metadata struct
 func GetDbInfo(o interface{}) (d DbInfo) {
 	t := reflect.TypeOf(o)
 
@@ -110,62 +114,4 @@ func (d DbInfo) StructMap(o interface{}, cols []string) (fields []string, target
 	}
 
 	return
-}
-
-func ApplyUint(o interface{}, auto []string, vals []uint64) {
-	r := reflect.ValueOf(o)
-	e := r.Elem()
-	if e.Kind() == reflect.Struct {
-		// exported field
-		for i, field := range auto {
-			f := e.FieldByName(field)
-			if f.IsValid() {
-				// A Value can be changed only if it is
-				// addressable and was not obtained by
-				// the use of unexported struct fields.
-				if f.CanSet() {
-					// change value of N
-					switch f.Kind() {
-					case reflect.Uint64, reflect.Uint32, reflect.Uint16, reflect.Uint8, reflect.Uint:
-						if !f.OverflowUint(vals[i]) {
-							f.SetUint(vals[i])
-						}
-					case reflect.Int64, reflect.Int32, reflect.Int16, reflect.Int8, reflect.Int:
-						if int64(vals[i]) >= 0 && !f.OverflowInt(int64(vals[i])) {
-							f.SetInt(int64(vals[i]))
-						}
-					}
-				}
-			}
-		}
-	}
-}
-
-func ApplyInt(o interface{}, auto []string, vals []int64) {
-	r := reflect.ValueOf(o)
-	e := r.Elem()
-	if e.Kind() == reflect.Struct {
-		// exported field
-		for i, field := range auto {
-			f := e.FieldByName(field)
-			if f.IsValid() {
-				// A Value can be changed only if it is
-				// addressable and was not obtained by
-				// the use of unexported struct fields.
-				if f.CanSet() {
-					// change value of N
-					switch f.Kind() {
-					case reflect.Uint64, reflect.Uint32, reflect.Uint16, reflect.Uint8, reflect.Uint:
-						if !f.OverflowUint(uint64(vals[i])) {
-							f.SetUint(uint64(vals[i]))
-						}
-					case reflect.Int64, reflect.Int32, reflect.Int16, reflect.Int8, reflect.Int:
-						if !f.OverflowInt(vals[i]) {
-							f.SetInt(vals[i])
-						}
-					}
-				}
-			}
-		}
-	}
 }

@@ -12,13 +12,14 @@ import (
 	sq "github.com/Masterminds/squirrel"
 )
 
+// Tx database transaction
 type Tx struct {
 	*sql.Tx
 	DbType      string
 	Placeholder sq.PlaceholderFormat
 	Returns     bool
 }
-
+// NewTx create new transaction
 func (db DB) NewTx() (tx *Tx, err error) {
 	tx = new(Tx)
 	tx.Tx, err = db.Conn.Begin()
@@ -28,11 +29,11 @@ func (db DB) NewTx() (tx *Tx, err error) {
 
 	return
 }
-
-
+// Transaction starts a new database tranaction and executes the supplied func.
 func Transaction(txFunc func(*Tx) error) (err error) {
 	return stdDB.Transaction(txFunc)
 }
+
 // Transaction starts a new database transction and executes the supplied func.
 func (db DB) Transaction(txFunc func(*Tx) error) (err error) {
 	tx, err := db.NewTx()
@@ -62,10 +63,11 @@ func (db DB) Transaction(txFunc func(*Tx) error) (err error) {
 	err = txFunc(tx)
 	return err
 }
-
+// Transactionx starts a new database tranaction and executes the supplied func.
 func Transactionx(txFunc func(*sqlx.Tx) error) (err error) {
 	return stdDB.Transactionx(txFunc)
 }
+// Transactionx starts a new database tranaction and executes the supplied func.
 func (db DB) Transactionx(txFunc func(*sqlx.Tx) error) (err error) {
 	dbx := sqlx.NewDb(db.Conn, db.DbType)
 
@@ -96,7 +98,8 @@ func (db DB) Transactionx(txFunc func(*sqlx.Tx) error) (err error) {
 	return err
 }
 
-
+// TransactionContinue returns a transaction that can be continued by suppling the
+// TxID that gets passed into the txFunc.
 func TransactionContinue(TxID string, txFunc func(*Tx, string) error) (err error) {
 	return stdDB.TransactionContinue(TxID, txFunc)
 }

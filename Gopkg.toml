@@ -24,6 +24,10 @@
 #   go-tests = true
 #   unused-packages = true
 
+required = [
+    "github.com/vektah/gqlgen",
+    "github.com/vektah/dataloaden"
+]
 
 [[constraint]]
   name = "github.com/gorilla/mux"

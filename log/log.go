@@ -1,18 +1,19 @@
 package log // import "sour.is/x/toolbox/log"
 
 import (
+	"bytes"
 	"fmt"
 	"io"
+	"io/ioutil"
 	"log"
 	"math/rand"
 	"os"
 	"strings"
 	"sync"
 	"time"
-	"bytes"
-	"io/ioutil"
 )
 
+// Debug flags
 const (
 	Ldate         = 1 << iota            // the date in the local time zone: 2009/01/23
 	Ltime                                // the time in the local time zone: 01:23:23
@@ -23,6 +24,7 @@ const (
 	LstdFlags     = Ldate | Ltime | LUTC // initial values for the standard logger
 )
 
+// Debug error levels and color coding
 const (
 	Tdebug    = "DBUG"
 	Tinfo     = "INFO"
@@ -53,6 +55,7 @@ const (
 	Mcontinue = Tcontinue + " ] "
 )
 
+// Debug message levels
 const (
 	Vnone     = 0
 	Vcritical = 1 << iota
@@ -63,39 +66,42 @@ const (
 	Vdebug
 )
 
-var Freset = Creset
-var Fprefix = Cprefix
-var Fdebug = Cdebug
-var Finfo = Cinfo
-var Fnotice = Cnotice
-var Fwarning = Cwarning
-var Ferror = Cerror
-var Fcritical = Ccritical
-var Fcontinue = Ccontinue
+// Set default formatting
+var (
+   Freset = Creset
+   Fprefix = Cprefix
+   Fdebug = Cdebug
+   Finfo = Cinfo
+   Fnotice = Cnotice
+   Fwarning = Cwarning
+   Ferror = Cerror
+   Fcritical = Ccritical
+   Fcontinue = Ccontinue
+)
 
 var std = log.New(os.Stderr, Fprefix, LstdFlags)
 var mu = sync.Mutex{}
 var verb = Vnone
 
+// StartupBanner displays a random banner.
 func StartupBanner() {
 	rand.Seed(time.Now().UnixNano())
 	i := rand.Int()
 	Print(strings.Join(souris[i%len(souris)], "\n"))
 }
-
 // SetOutput sets the output destination for the standard logger.
 func SetOutput(w io.Writer) {
 	std.SetOutput(w)
 }
-
 // SetFlags sets the output flags for the standard logger.
 func SetFlags(flag int) {
 	std.SetFlags(flag)
 }
+// Flags returns the current flag values
 func Flags() (flag int) {
 	return std.Flags()
 }
-
+// SetColor enables or disables the display of color
 func SetColor(on bool) {
 	mu.Lock()
 	defer mu.Unlock()
@@ -122,7 +128,7 @@ func SetColor(on bool) {
 	}
 	std.SetPrefix(Fprefix)
 }
-
+// SetVerbose level to output
 func SetVerbose(v int) {
 	mu.Lock()
 	defer mu.Unlock()
@@ -160,7 +166,7 @@ func Println(v ...interface{}) {
 		std.Output(2, Fcontinue+l+Freset)
 	}
 }
-
+// Write outputs contents of io.Reader to standard logger.
 func Write(r io.Reader) {
 	buf := new(bytes.Buffer)
 	buf.ReadFrom(r)
@@ -171,7 +177,7 @@ func Write(r io.Reader) {
 		std.Output(2, Fcontinue+l+Freset)
 	}
 }
-
+// Tee outputs contents of io.Reader to standard logger. and returns a new io.Reader
 func Tee(r io.ReadCloser) (w io.ReadCloser) {
 	buf := new(bytes.Buffer)
 	buf.ReadFrom(r)
@@ -188,7 +194,6 @@ func Tee(r io.ReadCloser) (w io.ReadCloser) {
 
 	return
 }
-
 // Fatal is equivalent to Print() followed by a call to os.Exit(1).
 func Fatal(v ...interface{}) {
 	s := strings.Split(fmt.Sprint(v...), "\n")
@@ -199,7 +204,6 @@ func Fatal(v ...interface{}) {
 
 	os.Exit(1)
 }
-
 // Fatalf is equivalent to Printf() followed by a call to os.Exit(1).
 func Fatalf(format string, v ...interface{}) {
 	s := strings.Split(fmt.Sprintf(format, v...), "\n")
@@ -209,7 +213,6 @@ func Fatalf(format string, v ...interface{}) {
 	}
 	os.Exit(1)
 }
-
 // Panic is equivalent to Print() followed by a call to panic().
 func Panic(v ...interface{}) {
 	s := strings.Split(fmt.Sprint(v...), "\n")
@@ -219,7 +222,6 @@ func Panic(v ...interface{}) {
 	}
 	panic(s)
 }
-
 // Panicf is equivalent to Printf() followed by a call to panic().
 func Panicf(format string, v ...interface{}) {
 	s := strings.Split(fmt.Sprintf(format, v...), "\n")
@@ -229,7 +231,7 @@ func Panicf(format string, v ...interface{}) {
 	}
 	panic(s)
 }
-
+// Debug outputs to logger with DEBUG level.
 func Debug(v ...interface{}) {
 	if verb < Vdebug {
 		return
@@ -240,6 +242,7 @@ func Debug(v ...interface{}) {
 		std.Output(2, Fcontinue+l+Freset)
 	}
 }
+// Debugf formats output to logger with DEBUG level.
 func Debugf(format string, v ...interface{}) {
 	if verb < Vdebug {
 		return
@@ -250,6 +253,7 @@ func Debugf(format string, v ...interface{}) {
 		std.Output(2, Fcontinue+l+Freset)
 	}
 }
+// Debugw outputs io.Reader to logger with DEBUG level.
 func Debugw(r io.Reader) {
 	buf := new(bytes.Buffer)
 	buf.ReadFrom(r)
@@ -260,7 +264,7 @@ func Debugw(r io.Reader) {
 		std.Output(2, Fcontinue+l+Freset)
 	}
 }
-
+// Info outputs to logger with INFO level.
 func Info(v ...interface{}) {
 	if verb < Vinfo {
 		return
@@ -271,6 +275,7 @@ func Info(v ...interface{}) {
 		std.Output(2, Fcontinue+l+Freset)
 	}
 }
+// Infof formatted outputs to logger with INFO level.
 func Infof(format string, v ...interface{}) {
 	if verb < Vinfo {
 		return
@@ -281,6 +286,7 @@ func Infof(format string, v ...interface{}) {
 		std.Output(2, Fcontinue+l+Freset)
 	}
 }
+// Infow outputs io.Reader to logger with INFO level.
 func Infow(r io.Reader) {
 	buf := new(bytes.Buffer)
 	buf.ReadFrom(r)
@@ -291,7 +297,7 @@ func Infow(r io.Reader) {
 		std.Output(2, Fcontinue+l+Freset)
 	}
 }
-
+// Notice outputs to logger with NOTICE level.
 func Notice(v ...interface{}) {
 	if verb < Vnotice {
 		return
@@ -302,6 +308,7 @@ func Notice(v ...interface{}) {
 		std.Output(2, Fcontinue+l+Freset)
 	}
 }
+// Noticef formatted outputs to logger with NOTICE level.
 func Noticef(format string, v ...interface{}) {
 	if verb < Vnotice {
 		return
@@ -312,6 +319,7 @@ func Noticef(format string, v ...interface{}) {
 		std.Output(2, Fcontinue+l+Freset)
 	}
 }
+// Noticew outputs io.Reader to logger with NOTICE level.
 func Noticew(r io.Reader) {
 	buf := new(bytes.Buffer)
 	buf.ReadFrom(r)
@@ -322,7 +330,7 @@ func Noticew(r io.Reader) {
 		std.Output(2, Fcontinue+l+Freset)
 	}
 }
-
+// Warning outputs to logger with WARNING level.
 func Warning(v ...interface{}) {
 	if verb < Vwarning {
 		return
@@ -333,6 +341,7 @@ func Warning(v ...interface{}) {
 		std.Output(2, Fcontinue+l+Freset)
 	}
 }
+// Warningf formatted outputs to logger with WARNING level.
 func Warningf(format string, v ...interface{}) {
 	if verb < Vwarning {
 		return
@@ -343,6 +352,7 @@ func Warningf(format string, v ...interface{}) {
 		std.Output(2, Fcontinue+l+Freset)
 	}
 }
+// Warningw outputs io.Reader to logger with WARNING level.
 func Warningw(r io.Reader) {
 	buf := new(bytes.Buffer)
 	buf.ReadFrom(r)
@@ -353,7 +363,7 @@ func Warningw(r io.Reader) {
 		std.Output(2, Fcontinue+l+Freset)
 	}
 }
-
+// Error outputs to logger with ERROR level.
 func Error(v ...interface{}) {
 	if verb < Verror {
 		return
@@ -364,6 +374,7 @@ func Error(v ...interface{}) {
 		std.Output(2, Fcontinue+l+Freset)
 	}
 }
+// Errorf formatted outputs to logger with ERROR level.
 func Errorf(format string, v ...interface{}) {
 	if verb < Verror {
 		return
@@ -374,6 +385,7 @@ func Errorf(format string, v ...interface{}) {
 		std.Output(2, Fcontinue+l+Freset)
 	}
 }
+// Errorw outputs io.Reader to logger with ERROR level.
 func Errorw(r io.Reader) {
 	buf := new(bytes.Buffer)
 	buf.ReadFrom(r)
@@ -384,7 +396,7 @@ func Errorw(r io.Reader) {
 		std.Output(2, Fcontinue+l+Freset)
 	}
 }
-
+// Critical outputs to logger with CRITICAL level.
 func Critical(v ...interface{}) {
 	if verb < Vcritical {
 		return
@@ -395,6 +407,7 @@ func Critical(v ...interface{}) {
 		std.Output(2, Fcontinue+l+Freset)
 	}
 }
+// Criticalf formatted outputs to logger with CRITICAL level.
 func Criticalf(format string, v ...interface{}) {
 	if verb < Vcritical {
 		return
@@ -405,6 +418,7 @@ func Criticalf(format string, v ...interface{}) {
 		std.Output(2, Fcontinue+l+Freset)
 	}
 }
+// Criticalw outputs io.Reader to logger with CRITICAL level.
 func Criticalw(r io.Reader) {
 	buf := new(bytes.Buffer)
 	buf.ReadFrom(r)
@@ -418,26 +432,48 @@ func Criticalw(r io.Reader) {
 
 // These functions do nothing. It makes it easy to comment out
 // debug lines without having to remove the import.
+
+// NilPrint does nothing.
 func NilPrint(_ ...interface{})               {}
+// NilPrintf does nothing.
 func NilPrintf(_ string, _ ...interface{})    {}
+// NilPrintln does nothing.
 func NilPrintln(_ ...interface{})             {}
+// NilDebug does nothing.
 func NilDebug(_ ...interface{})               {}
+// NilDebugf does nothing.
 func NilDebugf(_ string, _ ...interface{})    {}
+// NilDebugw does nothing.
 func NilDebugw(_ io.Reader)                   {}
+// NilInfo does nothing.
 func NilInfo(_ ...interface{})                {}
+// NilInfof does nothing.
 func NilInfof(_ string, _ ...interface{})     {}
+// NilInfow does nothing.
 func NilInfow(_ io.Reader)                    {}
+// NilNotice does nothing.
 func NilNotice(_ ...interface{})              {}
+// NilNoticef does nothing.
 func NilNoticef(_ string, _ ...interface{})   {}
+// NilNoticew does nothing.
 func NilNoticew(_ io.Reader)                  {}
+// NilWarning does nothing.
 func NilWarning(_ ...interface{})             {}
+// NilWarningf does nothing.
 func NilWarningf(_ string, _ ...interface{})  {}
+// NilWarningw does nothing.
 func NilWarningw(_ io.Reader)                 {}
+// NilError does nothing.
 func NilError(_ ...interface{})               {}
+// NilErrorf does nothing.
 func NilErrorf(_ string, _ ...interface{})    {}
+// NilErrorw does nothing.
 func NilErrorw(_ io.Reader)                   {}
+// NilCritical does nothing.
 func NilCritical(_ ...interface{})            {}
+// NilCriticalf does nothing.
 func NilCriticalf(_ string, _ ...interface{}) {}
+// NilCriticalw does nothing.
 func NilCriticalw(_ io.Reader)                {}
 
 var souris = [][]string{

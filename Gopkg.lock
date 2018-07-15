@@ -11,7 +11,7 @@
   branch = "v1"
   name = "github.com/Masterminds/squirrel"
   packages = ["."]
-  revision = "40ef4f86bf59a996c348a9f56ddb4c4d3d49a6df"
+  revision = "b127ed9be03443fe3c0877e391130e3dd3f3107a"
 
 [[projects]]
   branch = "master"
@@ -35,19 +35,19 @@
   branch = "master"
   name = "github.com/gopherjs/gopherjs"
   packages = ["js"]
-  revision = "1daac00a5961469351b87e7ac223239c37938d2a"
+  revision = "8dffc02ea1cb8398bb73f30424697c60fcf8d4c5"
 
 [[projects]]
   name = "github.com/gorilla/context"
   packages = ["."]
-  revision = "1ea25387ff6f684839d82767c1733ff4d4d15d0a"
-  version = "v1.1"
+  revision = "08b5f424b9271eedf6f9f0ce86cb9396ed337a42"
+  version = "v1.1.1"
 
 [[projects]]
   name = "github.com/gorilla/mux"
   packages = ["."]
-  revision = "53c1911da2b537f792e7cafcb446b05ffe33b996"
-  version = "v1.6.1"
+  revision = "e3702bed27f0d39777b0b37b664b6280e8ef8fbf"
+  version = "v1.6.2"
 
 [[projects]]
   branch = "master"
@@ -96,14 +96,14 @@
 [[projects]]
   name = "github.com/magiconair/properties"
   packages = ["."]
-  revision = "c3beff4c2358b44d0493c7dda585e7db7ff28ae6"
-  version = "v1.7.6"
+  revision = "c2353362d570a7bfa228149c62842019201cfb71"
+  version = "v1.8.0"
 
 [[projects]]
   branch = "master"
   name = "github.com/mitchellh/mapstructure"
   packages = ["."]
-  revision = "00c29f56e2386353d58c599509e8dc3801b0d716"
+  revision = "bb74f1db0675b241733089d5a1faa5dd8b0ef57b"
 
 [[projects]]
   name = "github.com/patrickmn/go-cache"
@@ -114,8 +114,14 @@
 [[projects]]
   name = "github.com/pelletier/go-toml"
   packages = ["."]
-  revision = "acdc4509485b587f5e675510c4f2c63e90ff68a8"
-  version = "v1.1.0"
+  revision = "c01d1270ff3e442a8a57cddc1c92dc1138598194"
+  version = "v1.2.0"
+
+[[projects]]
+  name = "github.com/pkg/errors"
+  packages = ["."]
+  revision = "645ef00459ed84a119197bfb8d8205042c6df63d"
+  version = "v0.8.0"
 
 [[projects]]
   name = "github.com/smartystreets/assertions"
@@ -143,8 +149,8 @@
     ".",
     "mem"
   ]
-  revision = "63644898a8da0bc22138abf860edaf5277b6102e"
-  version = "v1.1.0"
+  revision = "787d034dfe70e44075ccc060d346146ef53270ad"
+  version = "v1.1.1"
 
 [[projects]]
   name = "github.com/spf13/cast"
@@ -172,9 +178,28 @@
 
 [[projects]]
   branch = "master"
+  name = "github.com/vektah/dataloaden"
+  packages = ["."]
+  revision = "487f817525ba0d79e6e4d1f1f4501464d6417e2a"
+
+[[projects]]
+  name = "github.com/vektah/gqlgen"
+  packages = [
+    ".",
+    "codegen",
+    "codegen/templates",
+    "neelance/common",
+    "neelance/errors",
+    "neelance/schema"
+  ]
+  revision = "cb87a2cb66f5a64749f6464900b1c12bca47ed67"
+  version = "0.2.1"
+
+[[projects]]
+  branch = "master"
   name = "golang.org/x/sys"
   packages = ["unix"]
-  revision = "79b0c6888797020a994db17c8510466c72fe75d9"
+  revision = "a200a19cb90b19de298170992778b1fda7217bd6"
 
 [[projects]]
   name = "golang.org/x/text"
@@ -190,6 +215,18 @@
   version = "v0.3.0"
 
 [[projects]]
+  branch = "master"
+  name = "golang.org/x/tools"
+  packages = [
+    "go/ast/astutil",
+    "go/buildutil",
+    "go/loader",
+    "imports",
+    "internal/fastwalk"
+  ]
+  revision = "16699b2d33e2654d743c50b4525ab7e73e346238"
+
+[[projects]]
   name = "gopkg.in/yaml.v2"
   packages = ["."]
   revision = "5420a8b6744d3b0345ab293f6fcba19c978f1183"
@@ -198,6 +235,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "6357312db97210e893931df7cddc158a5b5ec3ef6a6cc3cfc44d978c0e90a31e"
+  inputs-digest = "3e4e45e2845f7fde60a3522a9d164fec5ca9ba0df6d85dbbb89badc25e88b832"
   solver-name = "gps-cdcl"
   solver-version = 1
