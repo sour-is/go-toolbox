@@ -9,13 +9,13 @@ import (
 )
 
 // Count returns a row count for query
-func Count(tx *Tx, table string, where sq.Eq) (count uint64, err error) {
+func Count(tx *Tx, table string, where interface{}) (count uint64, err error) {
 	return tx.Count(table, where)
 }
 // FetchMap
 type FetchMap func(row *sql.Rows) error
 // Fetch fetch rows and pass through supplied function
-func Fetch(tx *Tx, table string, cols []string, where sq.Eq, limit, offset uint64, fn FetchMap) (err error) {
+func Fetch(tx *Tx, table string, cols []string, where interface{}, limit, offset uint64, fn FetchMap) (err error) {
 	return tx.Fetch(table, cols, where, limit, offset, fn)
 }
 // Insert begin new insert statement.
@@ -31,14 +31,14 @@ func Replace(
 	tx *Tx,
 	d DbInfo,
 	o interface{},
-	where sq.Eq,
+	where interface{},
 	update sq.UpdateBuilder,
 	insert sq.InsertBuilder,
 ) (found bool, err error) {
 	return tx.Replace(d, o, where, update, insert)
 }
 // Count returns a row count for query
-func (tx *Tx) Count(table string, where sq.Eq) (count uint64, err error) {
+func (tx *Tx) Count(table string, where interface{}) (count uint64, err error) {
 
 	s := sq.Select("count(1)")
 	s = s.RunWith(tx.Tx)
@@ -65,7 +65,7 @@ func (tx *Tx) Count(table string, where sq.Eq) (count uint64, err error) {
 	return count, nil
 }
 // Fetch fetch rows and pass through supplied function
-func (tx *Tx) Fetch(table string, cols []string, where sq.Eq, limit, offset uint64, fn FetchMap) (err error) {
+func (tx *Tx) Fetch(table string, cols []string, where interface{}, limit, offset uint64, fn FetchMap) (err error) {
 	s := sq.Select(cols...)
 	s = s.PlaceholderFormat(tx.Placeholder)
 	s = s.RunWith(tx.Tx)
@@ -122,7 +122,7 @@ func (tx *Tx) Delete(table string) sq.DeleteBuilder {
 func (tx *Tx) Replace(
 	d DbInfo,
 	o interface{},
-	where sq.Eq,
+	where interface{},
 	update sq.UpdateBuilder,
 	insert sq.InsertBuilder,
 ) (found bool, err error) {
