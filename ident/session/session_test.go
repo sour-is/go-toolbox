@@ -7,16 +7,32 @@ import (
 
 	. "github.com/smartystreets/goconvey/convey"
 	"sour.is/x/toolbox/ident"
+	"github.com/spf13/viper"
+	"strings"
 )
 
 func TestSession(t *testing.T) {
+	config := `
+	[idm.session]
+    [idm.session.user-groups]
+      "ident" = [ "admin" ]
+    [idm.session.group-roles]
+      "admin" = [ "reader", "writer" ]
+	`
+
+	viper.SetConfigType("toml")
+	viper.ReadConfig(strings.NewReader(config))
+
+	t.Log(viper.AllSettings())
+	Config()
+
 	req := httptest.NewRequest("GET", "/some-url", nil)
 
 	Convey("On session should register itself.", t, func() {
 		So(ident.IdentSet, ShouldContainKey, "session")
 	})
 
-	sess := NewSession("ident", "aspect", "display name")
+	sess := NewSession("ident", "aspect", "display name", nil, nil)
 
 	Convey("Given a valid session", t, func() {
 		Convey("When the authorization header is not set", func() {
@@ -55,6 +71,13 @@ func TestSession(t *testing.T) {
 			So(u.IsActive(), ShouldBeTrue)
 			So(u.HasRole("any"), ShouldBeFalse)
 			So(u.HasGroup("any"), ShouldBeFalse)
+
+			t.Log(u)
+
+			So(u.HasGroup("admin"), ShouldBeTrue)
+			So(u.HasRole("writer"), ShouldBeTrue)
+			So(u.HasRole("reader"), ShouldBeTrue)
+
 		})
 
 		Convey("If the session has been deleted", func() {
