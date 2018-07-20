@@ -30,6 +30,7 @@ type User struct {
 	Active bool     `json:"active"`
 	Groups map[string]struct{} `json:"groups"`
 	Roles  map[string]struct{} `json:"roles"`
+	Session string `json:"session"`
 }
 
 func Config() {
@@ -88,6 +89,7 @@ func NewSession(ident, aspect, display string, groups []string, roles []string) 
 		Active: true,
 		Groups: make(map[string]struct{}),
 		Roles: make(map[string]struct{}),
+		Session: id,
 	}
 
 	if g, ok := userGroups[ident]; ok {
