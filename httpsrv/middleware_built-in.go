@@ -27,7 +27,7 @@ func doSessionID(_ string, w ResponseWriter, r *http.Request, _ ident.Ident) boo
 }
 
 var accessLog = stdlog.New(os.Stdout, "", log.Ldate|log.Ltime|log.LUTC)
-var logFormat = "%s %- 16s\t%- 6s %- 30s\t%12s %d %s"
+var logFormat = "%s %- 16s\t%- 16v\t%- 6s %- 30s\t%12s %d %s"
 
 func doAccessLog(name string, w ResponseWriter, r *http.Request, id ident.Ident) bool {
 	user := "-"
@@ -36,7 +36,8 @@ func doAccessLog(name string, w ResponseWriter, r *http.Request, id ident.Ident)
 	}
 	accessLog.Printf(
 		logFormat,
-		r.Header.Get(sessionId),
+		r.Header.Get(sessionId)[19:],
+		r.RemoteAddr,
 		user,
 		r.Method,
 		name,
