@@ -1,7 +1,9 @@
 package dbm
 
 import "testing"
-import . "github.com/smartystreets/goconvey/convey"
+import (
+	. "github.com/smartystreets/goconvey/convey"
+)
 
 type testStruct struct {
 	Uint64 uint64
@@ -50,5 +52,7 @@ func TestDbInfo(t *testing.T) {
 func BenchmarkDbInfo(b *testing.B) {
 	o := dbTable{}
 
-	GetDbInfo(o)
+	for i := 0; i < b.N; i++ {
+		GetDbInfo(o)
+	}
 }
