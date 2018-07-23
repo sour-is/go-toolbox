@@ -12,12 +12,17 @@ type DbInfo struct {
 	View  string
 	Cols  []string
 	SCols []string
+	GCols []string
 	index map[string]int
 	Auto  []string
 }
 // SCol returns the struct column names
 func (d DbInfo) SCol(column string) string {
 	return d.SCols[d.Index(column)]
+}
+// GCol returns the graphql column names
+func (d DbInfo) GCol(column string) string {
+	return d.GCols[d.Index(column)]
 }
 // Col returns the mapped column names
 func (d DbInfo) Col(column string) string {
@@ -58,9 +63,16 @@ func GetDbInfo(o interface{}) (d DbInfo) {
 			d.Auto = append(d.Auto, field.Name)
 		}
 
+		json := field.Tag.Get("json")
 		if tag == "" {
-			tag = field.Tag.Get("json")
+			tag = json
 		}
+
+		graphql := field.Tag.Get("graphql")
+		if tag == "" {
+			tag = graphql
+		}
+
 
 		if tag == "-" {
 			continue
@@ -71,13 +83,23 @@ func GetDbInfo(o interface{}) (d DbInfo) {
 		}
 
 		d.index[field.Name] = len(d.Cols)
+
+		if _, ok := d.index[tag]; !ok && tag != "" {
+			d.index[tag] = len(d.Cols)
+		}
+		if _, ok := d.index[json]; !ok && json != "" {
+			d.index[json] = len(d.Cols)
+		}
+		if _, ok := d.index[graphql]; !ok && graphql != "" {
+			d.index[graphql] = len(d.Cols)
+		}
+
 		d.Cols = append(d.Cols, tag)
 		d.SCols = append(d.SCols, field.Name)
 	}
 	if d.View == "" {
 		d.View = d.Table
 	}
-
 	return d
 }
 

@@ -20,7 +20,8 @@ type testStruct struct {
 type dbTable struct {
 	Col1 int       `table:"table_name" view:"view_name"`
 	Col2 string    `db:"col2,AUTO"`
-	Col3 []float32 `json:"col3"`
+	Col3 []float32 `json:"col3" graphql:"graphCol3"`
+	Col4 uint64    `graphql:"graphCol4"`
 }
 
 // TestDbInfo test the DbInfo function
@@ -34,15 +35,28 @@ func TestDbInfo(t *testing.T) {
 
 		So(d.Index("Col1"), ShouldEqual, 0)
 		So(d.Index("Col2"), ShouldEqual, 1)
+		So(d.Index("col2"), ShouldEqual, 1)
 		So(d.Index("Col3"), ShouldEqual, 2)
+		So(d.Index("col3"), ShouldEqual, 2)
+		So(d.Index("graphCol3"), ShouldEqual, 2)
+		So(d.Index("Col4"), ShouldEqual, 3)
+		So(d.Index("graphCol4"), ShouldEqual, 3)
 
 		So(d.SCol("Col1"), ShouldEqual, "Col1")
 		So(d.SCol("Col2"), ShouldEqual, "Col2")
+		So(d.SCol("col2"), ShouldEqual, "Col2")
 		So(d.SCol("Col3"), ShouldEqual, "Col3")
+		So(d.SCol("graphCol3"), ShouldEqual, "Col3")
+		So(d.SCol("col3"), ShouldEqual, "Col3")
+		So(d.SCol("Col4"), ShouldEqual, "Col4")
+		So(d.SCol("graphCol4"), ShouldEqual, "Col4")
 
 		So(d.Col("Col1"), ShouldEqual, "Col1")
 		So(d.Col("Col2"), ShouldEqual, "col2")
+		So(d.Col("col2"), ShouldEqual, "col2")
 		So(d.Col("Col3"), ShouldEqual, "col3")
+		So(d.Col("graphCol3"), ShouldEqual, "col3")
+		So(d.Col("graphCol4"), ShouldEqual, "graphCol4")
 
 		So(len(d.Auto), ShouldEqual, 1)
 		So(d.Auto[0], ShouldContainSubstring, "Col2")

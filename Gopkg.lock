@@ -227,12 +227,6 @@
   revision = "16699b2d33e2654d743c50b4525ab7e73e346238"
 
 [[projects]]
-  name = "gopkg.in/Masterminds/squirrel.v1"
-  packages = ["."]
-  revision = "a6b93000bd219143c56c16e6cb1c4b91da3f224b"
-  version = "v1.0"
-
-[[projects]]
   name = "gopkg.in/yaml.v2"
   packages = ["."]
   revision = "5420a8b6744d3b0345ab293f6fcba19c978f1183"
@@ -241,6 +235,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "6ce89bad9c4a3a975168d8b67cfc2f7f687611ce36a5f54d62ddc32ab613e907"
+  inputs-digest = "3e4e45e2845f7fde60a3522a9d164fec5ca9ba0df6d85dbbb89badc25e88b832"
   solver-name = "gps-cdcl"
   solver-version = 1
