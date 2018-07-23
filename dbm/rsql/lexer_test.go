@@ -1,15 +1,15 @@
 package rsql
 
-import "testing"
+import (
+	"testing"
+)
 
 func TestReservedToken(t *testing.T) {
-	input := `"'\();,=!~<>`
+	input := `\();,=!~<>`
 	tests := []struct{
 		expectedType TokenType
 		expectedLiteral string
 	} {
-		{DQUOT, `"`},
-		{SQUOT, `'`},
 		{ESCAPE, `\`},
 		{LPAREN, "("},
 		{RPAREN, ")"},
@@ -80,10 +80,11 @@ func TestNextToken(t *testing.T) {
 
 	l := NewLexer(input)
 
-	i := 0
-	var tt struct{expectedType TokenType; expectedLiteral string}
-	for i, tt = range tests {
+	c := 0
+	for i, tt := range tests {
+		c++
 		tok := l.NextToken()
+		t.Log(tok, c)
 		if tok.Type != tt.expectedType {
 			t.Errorf("tests[%v]: token type wrong. expected=%v got=%v", i, tt.expectedType, tok.Type)
 		}
@@ -92,8 +93,9 @@ func TestNextToken(t *testing.T) {
 			t.Fatalf("tests[%v]: token literal type wrong. expected=%v got=%v", i, tt.expectedLiteral, tok.Literal)
 		}
 	}
-	if i != len(tests) {
-		t.Errorf("tests[x]: lexer returned different number of tokens. expected=%v got=%v", len(tests), i)
+	if c != len(tests) {
+		t.Errorf("tests[x]: lexer returned different number of tokens. expected=%v got=%v", len(tests), c)
+		t.Error(tests)
 	}
 
 

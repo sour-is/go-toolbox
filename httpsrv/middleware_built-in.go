@@ -34,9 +34,14 @@ func doAccessLog(name string, w ResponseWriter, r *http.Request, id ident.Ident)
 	if id.IsActive() {
 		user = id.GetAspect() + "/" + id.GetIdentity()
 	}
+	header := r.Header.Get(sessionId)
+	if len(header) < 20 {
+		header = uuid.NilUUID
+	}
+
 	accessLog.Printf(
 		logFormat,
-		r.Header.Get(sessionId)[19:],
+		header[19:],
 		r.RemoteAddr,
 		user,
 		r.Method,
