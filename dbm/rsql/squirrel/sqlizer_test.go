@@ -85,11 +85,9 @@ func TestQuery(t *testing.T) {
 	}
 
 	for i, tt := range tests {
-		q, e := Query(tt.input, d)
-		if len(e.(errors)) > 0 {
-			for _, err := range e.(errors) {
-				t.Errorf(err)
-			}
+		q, err := Query(tt.input, d)
+		if err != nil {
+			t.Error(err)
 		}
 
 		actual := fmt.Sprintf("%#v", q)
