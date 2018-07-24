@@ -31,6 +31,14 @@ func (d DbInfo) Col(column string) (string, error) {
 	idx, err := d.Index(column)
 	return d.Cols[idx], err
 }
+// ColPanic returns the mapped column names will panic if col does not exist
+func (d DbInfo) ColPanic(column string) string {
+	idx, err := d.Index(column)
+	if err != nil {
+		panic(err)
+	}
+	return d.Cols[idx]
+}
 // Index returns the column number
 func (d DbInfo) Index(column string) (idx int, err error) {
 	var ok bool
