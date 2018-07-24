@@ -2,50 +2,43 @@ package rsql
 
 // Tokens for RSQL FIQL
 const (
-	ILLEGAL = "ILLEGAL"
-	EOF = "EOF"
+	TokIllegal = "TokIllegal"
+	TokEOF     = "TokEOF"
 
-	IDENT = "IDENT"
-	NUMBER = "NUMBER"
-	STR = "STR"
-	FLOAT = "FLOAT"
-	BOOL = "BOOL"
-	EXTEND = "EXTEND"
+	TokIdent   = "TokIdent"
+	TokInteger = "TokInteger"
+	TokString  = "TokString"
+	TokFloat   = "TokFloat"
+	TokBool    = "TokBool"
+	TokExtend  = "TokExtend"
 
-	AND = "AND"
-	SEMICOLON = ";"
+	TokLParen = "("
+	TokRParen = ")"
 
-	OR = "OR"
-	COMMA = ","
+	TokLBracket = "["
+	TokRBracket = "]"
 
-	LPAREN = "("
-	RPAREN = ")"
+	TokTilda = "~"
+	TokBang  = "!"
+	TokEqual = "="
+	TokLT    = "<"
+	TokGT    = ">"
+	TokLE    = "<="
+	TokGE    = ">="
+	TokEQ    = "=="
+	TokNEQ   = "!="
+	TokAND   = ";"
+	TokOR    = ","
 
-	TILDA = "~"
-	BANG = "!"
-	EQUAL = "="
-	LT = "<"
-	GT = ">"
-	LE = "<="
-	GE = ">="
-	EQ = "=="
-	NEQ = "!="
-    MINUS = "-"
-
-	SQUOT = "'"
-	DQUOT = `"`
-
-	ESCAPE = `\`
-
-	TRUE =  "true"
-	FALSE = "false"
-	NULL = "null"
+	TokTRUE  =  "true"
+	TokFALSE = "false"
+	TokNULL  = "null"
 )
 
 var keywords = map[string]TokenType {
-	"true": TRUE,
-	"false": FALSE,
-	"null": NULL,
+	"true":  TokTRUE,
+	"false": TokFALSE,
+	"null":  TokNULL,
 }
 
 type TokenType string
@@ -62,5 +55,5 @@ func lookupIdent(ident string) TokenType {
 	if tok, ok := keywords[ident]; ok {
 		return tok
 	}
-	return IDENT
+	return TokIdent
 }
