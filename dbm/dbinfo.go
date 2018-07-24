@@ -17,22 +17,25 @@ type DbInfo struct {
 	Auto  []string
 }
 // SCol returns the struct column names
-func (d DbInfo) SCol(column string) string {
-	return d.SCols[d.Index(column)]
+func (d DbInfo) SCol(column string) (string, error) {
+	idx, err := d.Index(column)
+	return d.SCols[idx], err
 }
 // GCol returns the graphql column names
-func (d DbInfo) GCol(column string) string {
-	return d.GCols[d.Index(column)]
+func (d DbInfo) GCol(column string) (string, error) {
+	idx, err := d.Index(column)
+	return d.GCols[idx], err
 }
 // Col returns the mapped column names
-func (d DbInfo) Col(column string) string {
-	return d.Cols[d.Index(column)]
+func (d DbInfo) Col(column string) (string, error) {
+	idx, err := d.Index(column)
+	return d.Cols[idx], err
 }
 // Index returns the column number
-func (d DbInfo) Index(column string) (idx int) {
+func (d DbInfo) Index(column string) (idx int, err error) {
 	var ok bool
 	if idx, ok = d.index[column]; !ok {
-		panic("Col not found on table: " + column)
+		err = fmt.Errorf("column not found on table: %v", column)
 	}
 
 	return
@@ -120,7 +123,11 @@ func (d DbInfo) StructMap(o interface{}, cols []string) (fields []string, target
 				// addressable and was not obtained by
 				// the use of unexported struct fields.
 				if f.CanSet() && f.CanAddr() {
-					fields = append(fields, d.Col(field))
+					col, err := d.Col(field)
+					if err != nil {
+						break
+					}
+					fields = append(fields, col)
 					targets = append(targets, f.Addr().Interface())
 				} else {
 					err = fmt.Errorf("field %s cannot be set", field)

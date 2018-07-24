@@ -4,52 +4,72 @@ import (
 	"sour.is/x/toolbox/dbm/rsql"
 	"github.com/Masterminds/squirrel"
 	"log"
+	"sour.is/x/toolbox/dbm"
+	"strings"
 )
 
-func Query(in string) interface{} {
+type errors []string
+func (e errors) Error() string {
+	return strings.Join(e, ",\n")
+}
+
+func Query(in string, db dbm.DbInfo) (interface{}, []string) {
+	d := decoder{dbInfo: db}
 	l := rsql.NewLexer(in)
 	p := rsql.NewParser(l)
 	program := p.ParseProgram()
 	log.Print(program.String())
-	return decode(program)
+	return d.decode(program)
 }
 
-func decode(in *rsql.Program) squirrel.Sqlizer {
+type decoder struct{
+	dbInfo dbm.DbInfo
+	errors []string
+}
+
+func (db *decoder) decode(in *rsql.Program) (squirrel.Sqlizer, []string) {
+
 	switch len(in.Statements) {
 	case 0:
-		return nil
+		return nil, db.errors
 	case 1:
-		return decodeStatement(in.Statements[0])
+		return  db.decodeStatement(in.Statements[0]), db.errors
 	default:
 		a := squirrel.And{}
 		for _, stmt := range in.Statements {
-			a = append(a, decodeStatement(stmt))
+			a = append(a, db.decodeStatement(stmt))
 		}
-		return a
+		return a, db.errors
 	}
 }
 
-func decodeStatement(in rsql.Statement) squirrel.Sqlizer {
+func  (db *decoder) decodeStatement(in rsql.Statement) squirrel.Sqlizer {
 	switch s := in.(type) {
 	case *rsql.ExpressionStatement:
-		return decodeExpression(s.Expression)
+		return db.decodeExpression(s.Expression)
 	}
 	return nil
 }
 
-func decodeExpression(in rsql.Expression) squirrel.Sqlizer {
+func  (db *decoder) decodeExpression(in rsql.Expression) squirrel.Sqlizer {
 	switch e := in.(type) {
 	case *rsql.InfixExpression:
-		return decodeInfix(e)
+		return db. decodeInfix(e)
 	}
 	return nil
 }
 
-func decodeInfix(in *rsql.InfixExpression) squirrel.Sqlizer {
+func  (db *decoder) decodeInfix(in *rsql.InfixExpression) squirrel.Sqlizer {
+	defer func(){
+		if r := recover(); r != nil {
+
+		}
+	}()
+
 	switch in.Token.Type {
 	case rsql.TokAND:
 		a := squirrel.And{}
-		left := decodeExpression(in.Left)
+		left := db.decodeExpression(in.Left)
 		switch v := left.(type) {
 		case squirrel.And:
 			for _, el := range v {
@@ -59,7 +79,7 @@ func decodeInfix(in *rsql.InfixExpression) squirrel.Sqlizer {
 			a = append(a, v)
 		}
 
-		right := decodeExpression(in.Right)
+		right := db.decodeExpression(in.Right)
 		switch v := right.(type) {
 		case squirrel.And:
 			for _, el := range v {
@@ -72,36 +92,72 @@ func decodeInfix(in *rsql.InfixExpression) squirrel.Sqlizer {
 		return a
 	case rsql.TokOR:
 		return squirrel.Or{
-			decodeExpression(in.Left),
-			decodeExpression(in.Right),
+			db.decodeExpression(in.Left),
+			db.decodeExpression(in.Right),
 		}
 	case rsql.TokEQ:
-		return squirrel.Eq{in.Left.String(): decodeValue(in.Right)}
+		col, err := db.dbInfo.Col(in.Left.String())
+		if err != nil {
+			db.errors = append(db.errors, err.Error())
+			return nil
+		}
+
+		return squirrel.Eq{col: db.decodeValue(in.Right)}
 	case rsql.TokNEQ:
-		return squirrel.NotEq{in.Left.String(): decodeValue(in.Right)}
+		col, err := db.dbInfo.Col(in.Left.String())
+		if err != nil {
+			db.errors = append(db.errors, err.Error())
+			return nil
+		}
+
+		return squirrel.NotEq{col: db.decodeValue(in.Right)}
 	case rsql.TokGT:
-		return squirrel.Gt{in.Left.String(): decodeValue(in.Right)}
+		col, err := db.dbInfo.Col(in.Left.String())
+		if err != nil {
+			db.errors = append(db.errors, err.Error())
+			return nil
+		}
+
+		return squirrel.Gt{col: db.decodeValue(in.Right)}
 	case rsql.TokGE:
-		return squirrel.GtOrEq{in.Left.String(): decodeValue(in.Right)}
+		col, err := db.dbInfo.Col(in.Left.String())
+		if err != nil {
+			db.errors = append(db.errors, err.Error())
+			return nil
+		}
+
+		return squirrel.GtOrEq{col: db.decodeValue(in.Right)}
 	case rsql.TokLT:
-		return squirrel.Lt{in.Left.String(): decodeValue(in.Right)}
+		col, err := db.dbInfo.Col(in.Left.String())
+		if err != nil {
+			db.errors = append(db.errors, err.Error())
+			return nil
+		}
+
+		return squirrel.Lt{col: db.decodeValue(in.Right)}
 	case rsql.TokLE:
-		return squirrel.LtOrEq{in.Left.String(): decodeValue(in.Right)}
+		col, err := db.dbInfo.Col(in.Left.String())
+		if err != nil {
+			db.errors = append(db.errors, err.Error())
+			return nil
+		}
+
+		return squirrel.LtOrEq{col: db.decodeValue(in.Right)}
 	default:
 		return nil
 	}
 }
-func decodeValue(in rsql.Expression) interface{} {
+func (db *decoder) decodeValue(in rsql.Expression) interface{} {
 	switch v := in.(type) {
 	case *rsql.Array:
 		var values []interface{}
 		for _, el := range v.Elements {
-			values = append(values, decodeValue(el))
+			values = append(values, db.decodeValue(el))
 		}
 
 		return values
 	case *rsql.InfixExpression:
-		return decodeInfix(v)
+		return db.decodeInfix(v)
 	case *rsql.Identifier:
 		return v.Value
 	case *rsql.Integer:

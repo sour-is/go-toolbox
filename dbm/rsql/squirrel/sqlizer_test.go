@@ -4,9 +4,26 @@ import (
 	"testing"
 	"github.com/Masterminds/squirrel"
 	"fmt"
+	"sour.is/x/toolbox/dbm"
 )
 
+type testTable struct{
+	Foo string `json:"foo"`
+	Bar string `json:"bar"`
+	Baz string `json:"baz"`
+	Director string `json:"director"`
+	Actor string `json:"actor"`
+	Year string `json:"year"`
+	Genres string `json:"genres"`
+	One  string `json:"one"`
+	Two  string `json:"two"`
+	Family string `json:"family_name"`
+}
+
+
 func TestQuery(t *testing.T) {
+	d := dbm.GetDbInfo(testTable{})
+
 	tests := []struct{
 		input string
 		expect squirrel.Sqlizer
@@ -40,8 +57,8 @@ func TestQuery(t *testing.T) {
 					squirrel.Eq{"director": "name's"},
 					squirrel.Eq{"actor": "name's"},
 					squirrel.Or{
-						squirrel.LtOrEq{"Year": 2000},
-						squirrel.GtOrEq{"Year": 2010},
+						squirrel.LtOrEq{"year": 2000},
+						squirrel.GtOrEq{"year": 2010},
 					},
 					squirrel.Or{
 						squirrel.LtOrEq{"one": -1.0},
@@ -49,7 +66,6 @@ func TestQuery(t *testing.T) {
 					},
 				},
 		},
-
 		{
 			`genres==[sci-fi,action] ; genres==[romance,animated,horror] , director==Que*Tarantino`,
 			squirrel.And{
@@ -61,14 +77,24 @@ func TestQuery(t *testing.T) {
 			},
 		},
 		{"", nil},
+		{"family_name==LUNDY", squirrel.Eq{"family_name":"LUNDY"}},
+		{"family_name==[1,2,null]", squirrel.Eq{"family_name":[]interface {}{1, 2, nil}}},
+
 
 	}
 
 	for i, tt := range tests {
-		actual := fmt.Sprintf("%#v", Query(tt.input))
+		q, e := Query(tt.input, d)
+		if len(e) > 0 {
+			for _, err := range e {
+				t.Errorf(err)
+			}
+		}
+
+		actual := fmt.Sprintf("%#v", q)
 		expect := fmt.Sprintf("%#v", tt.expect)
 		if expect != actual {
-			t.Errorf("test[%d]: %v\n\tinput and expected are not the same. wanted=%v got=%v", i, tt.input, expect, actual)
+			t.Errorf("test[%d]: %v\n\tinput and expected are not the same. wanted=%s got=%s", i, tt.input, expect, actual)
 		}
 	}
 

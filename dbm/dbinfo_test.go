@@ -33,30 +33,60 @@ func TestDbInfo(t *testing.T) {
 		So(d.Table, ShouldEqual, "table_name")
 		So(d.View, ShouldEqual, "view_name")
 
-		So(d.Index("Col1"), ShouldEqual, 0)
-		So(d.Index("Col2"), ShouldEqual, 1)
-		So(d.Index("col2"), ShouldEqual, 1)
-		So(d.Index("Col3"), ShouldEqual, 2)
-		So(d.Index("col3"), ShouldEqual, 2)
-		So(d.Index("graphCol3"), ShouldEqual, 2)
-		So(d.Index("Col4"), ShouldEqual, 3)
-		So(d.Index("graphCol4"), ShouldEqual, 3)
+		tests := []struct{
+			input string
+			expect interface{}
+		}{
+			{"Col1", 0},
+			{"Col2", 1},
+			{"col2", 1},
+			{"Col3", 2},
+			{"col3", 2},
+			{"graphCol3", 2},
+			{"Col4", 3},
+			{"graphCol4", 3},
+		}
+		for _, tt := range tests {
+			i, err := d.Index(tt.input)
+			So(err, ShouldBeNil)
+			So(i, ShouldEqual, tt.expect)
+		}
 
-		So(d.SCol("Col1"), ShouldEqual, "Col1")
-		So(d.SCol("Col2"), ShouldEqual, "Col2")
-		So(d.SCol("col2"), ShouldEqual, "Col2")
-		So(d.SCol("Col3"), ShouldEqual, "Col3")
-		So(d.SCol("graphCol3"), ShouldEqual, "Col3")
-		So(d.SCol("col3"), ShouldEqual, "Col3")
-		So(d.SCol("Col4"), ShouldEqual, "Col4")
-		So(d.SCol("graphCol4"), ShouldEqual, "Col4")
+		tests = []struct{
+			input string
+			expect interface{}
+		}{
+			{"Col1", "Col1"},
+			{"Col2", "Col2"},
+			{"col2", "Col2"},
+			{"Col3", "Col3"},
+			{"graphCol3", "Col3"},
+			{"col3", "Col3"},
+			{"Col4", "Col4"},
+			{"graphCol4", "Col4"},
+		}
+		for _, tt := range tests {
+			i, err := d.SCol(tt.input)
+			So(err, ShouldBeNil)
+			So(i, ShouldEqual, tt.expect)
+		}
 
-		So(d.Col("Col1"), ShouldEqual, "Col1")
-		So(d.Col("Col2"), ShouldEqual, "col2")
-		So(d.Col("col2"), ShouldEqual, "col2")
-		So(d.Col("Col3"), ShouldEqual, "col3")
-		So(d.Col("graphCol3"), ShouldEqual, "col3")
-		So(d.Col("graphCol4"), ShouldEqual, "graphCol4")
+		tests = []struct{
+			input string
+			expect interface{}
+		}{
+			{"Col1", "Col1"},
+			{"Col2", "col2"},
+			{"col2", "col2"},
+			{"Col3", "col3"},
+			{"graphCol3", "col3"},
+			{"graphCol4", "graphCol4"},
+		}
+		for _, tt := range tests {
+			i, err := d.Col(tt.input)
+			So(err, ShouldBeNil)
+			So(i, ShouldEqual, tt.expect)
+		}
 
 		So(len(d.Auto), ShouldEqual, 1)
 		So(d.Auto[0], ShouldContainSubstring, "Col2")
