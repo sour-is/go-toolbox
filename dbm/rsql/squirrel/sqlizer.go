@@ -13,7 +13,7 @@ func (e errors) Error() string {
 	return strings.Join(e, ",\n")
 }
 
-func Query(in string, db dbm.DbInfo) (interface{}, []string) {
+func Query(in string, db dbm.DbInfo) (interface{}, error) {
 	d := decoder{dbInfo: db}
 	l := rsql.NewLexer(in)
 	p := rsql.NewParser(l)
@@ -24,10 +24,10 @@ func Query(in string, db dbm.DbInfo) (interface{}, []string) {
 
 type decoder struct{
 	dbInfo dbm.DbInfo
-	errors []string
+	errors errors
 }
 
-func (db *decoder) decode(in *rsql.Program) (squirrel.Sqlizer, []string) {
+func (db *decoder) decode(in *rsql.Program) (squirrel.Sqlizer, error) {
 
 	switch len(in.Statements) {
 	case 0:
