@@ -49,7 +49,7 @@ func TestQuery(t *testing.T) {
 
 		{"foo==1;bar==2", squirrel.And{squirrel.Eq{"foo": 1}, squirrel.Eq{"bar": 2}}},
 		{"foo==1,bar==2", squirrel.Or{squirrel.Eq{"foo": 1}, squirrel.Eq{"bar": 2}}},
-		{"foo==1,bar==2;baz=3", squirrel.And{squirrel.Or{squirrel.Eq{"foo": 1}, squirrel.Eq{"bar": 2}}, squirrel.Eq{"baz": 3}}},
+		{"foo==1,bar==2;baz=3", nil},
 		{
 			input:`director=='name\'s';actor=eq="name\'s";Year=le=2000,Year>=2010;one <= -1.0, two != true`,
 			expect:
@@ -79,14 +79,15 @@ func TestQuery(t *testing.T) {
 		{"", nil},
 		{"family_name==LUNDY", squirrel.Eq{"family_name":"LUNDY"}},
 		{"family_name==[1,2,null]", squirrel.Eq{"family_name":[]interface {}{1, 2, nil}}},
-
+		{"family_name=LUNDY", nil},
+		{"foo==1,family_name=LUNDY;baz==2", nil},
 
 	}
 
 	for i, tt := range tests {
 		q, e := Query(tt.input, d)
-		if len(e) > 0 {
-			for _, err := range e {
+		if len(e.(errors)) > 0 {
+			for _, err := range e.(errors) {
 				t.Errorf(err)
 			}
 		}

@@ -57,7 +57,7 @@ func (l *Lexer) NextToken() Token {
 
 			return tok
 		} else {
-			tok = newToken(TokEQ, l.rune)
+			tok = newToken(TokIllegal, l.rune)
 		}
 	case ';': tok = newToken(TokAND, l.rune)
 	case ',': tok = newToken(TokOR, l.rune)

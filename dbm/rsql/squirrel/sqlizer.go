@@ -37,7 +37,12 @@ func (db *decoder) decode(in *rsql.Program) (squirrel.Sqlizer, error) {
 	default:
 		a := squirrel.And{}
 		for _, stmt := range in.Statements {
-			a = append(a, db.decodeStatement(stmt))
+			d := db.decodeStatement(stmt)
+			if d == nil {
+				return nil, db.errors
+			}
+
+			a = append(a, d)
 		}
 		return a, db.errors
 	}
@@ -60,11 +65,6 @@ func  (db *decoder) decodeExpression(in rsql.Expression) squirrel.Sqlizer {
 }
 
 func  (db *decoder) decodeInfix(in *rsql.InfixExpression) squirrel.Sqlizer {
-	defer func(){
-		if r := recover(); r != nil {
-
-		}
-	}()
 
 	switch in.Token.Type {
 	case rsql.TokAND:
@@ -73,20 +73,30 @@ func  (db *decoder) decodeInfix(in *rsql.InfixExpression) squirrel.Sqlizer {
 		switch v := left.(type) {
 		case squirrel.And:
 			for _, el := range v {
-				a = append(a, el)
+				if el != nil {
+					a = append(a, el)
+				}
 			}
+
 		default:
-			a = append(a, v)
+			if v != nil {
+				a = append(a, v)
+			}
 		}
 
 		right := db.decodeExpression(in.Right)
 		switch v := right.(type) {
 		case squirrel.And:
 			for _, el := range v {
-				a = append(a, el)
+				if el != nil {
+					a = append(a, el)
+				}
 			}
+
 		default:
-			a = append(a, v)
+			if v != nil {
+				a = append(a, v)
+			}
 		}
 
 		return a
