@@ -5,20 +5,24 @@ import (
 )
 
 func TestReservedToken(t *testing.T) {
-	input := `();,==!~<>`
+	input := `( ) ; , == != ~ < > <= >= [ ]`
 	tests := []struct{
 		expectedType TokenType
 		expectedLiteral string
 	} {
-		{TokLParen, "("},
-		{TokRParen, ")"},
-		{TokAND, ";"},
-		{TokOR, ","},
-		{TokEQ, "=="},
-		{TokBang, "!"},
-		{TokTilda,"~"},
-		{TokLT, "<"},
-		{TokGT,">"},
+		{TokLParen,   "("},
+		{TokRParen,   ")"},
+		{TokAND,      ";"},
+		{TokOR,       ","},
+		{TokEQ,       "=="},
+		{TokNEQ,      "!="},
+		{TokLIKE,     "~"},
+		{TokLT,       "<"},
+		{TokGT,       ">"},
+		{TokLE,       "<="},
+		{TokGE,       ">="},
+		{TokLBracket, "["},
+		{TokRBracket, "]"},
 	}
 
 	l := NewLexer(input)
@@ -83,7 +87,7 @@ func TestNextToken(t *testing.T) {
 	for i, tt := range tests {
 		c++
 		tok := l.NextToken()
-		t.Log(tok, c)
+
 		if tok.Type != tt.expectedType {
 			t.Errorf("tests[%v]: token type wrong. expected=%v got=%v", i, tt.expectedType, tok.Type)
 		}

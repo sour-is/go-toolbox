@@ -9,7 +9,6 @@ const (
 	TokInteger = "TokInteger"
 	TokString  = "TokString"
 	TokFloat   = "TokFloat"
-	TokBool    = "TokBool"
 	TokExtend  = "TokExtend"
 
 	TokLParen = "("
@@ -18,17 +17,16 @@ const (
 	TokLBracket = "["
 	TokRBracket = "]"
 
-	TokTilda = "~"
-	TokBang  = "!"
-	TokEqual = "="
-	TokLT    = "<"
-	TokGT    = ">"
-	TokLE    = "<="
-	TokGE    = ">="
-	TokEQ    = "=="
-	TokNEQ   = "!="
-	TokAND   = ";"
-	TokOR    = ","
+	TokLIKE = "~"
+	TokNOT  = "!"
+	TokLT   = "<"
+	TokGT   = ">"
+	TokLE   = "<="
+	TokGE   = ">="
+	TokEQ   = "=="
+	TokNEQ  = "!="
+	TokAND  = ";"
+	TokOR   = ","
 
 	TokTRUE  =  "true"
 	TokFALSE = "false"
@@ -39,6 +37,8 @@ var keywords = map[string]TokenType {
 	"true":  TokTRUE,
 	"false": TokFALSE,
 	"null":  TokNULL,
+	"and":   TokAND,
+	"or":    TokOR,
 }
 
 type TokenType string

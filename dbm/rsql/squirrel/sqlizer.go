@@ -3,8 +3,9 @@ package squirrel
 import (
 	"sour.is/x/toolbox/dbm/rsql"
 	"github.com/Masterminds/squirrel"
-	"log"
 	"sour.is/x/toolbox/dbm"
+	"fmt"
+	"strings"
 )
 
 func Query(in string, db dbm.DbInfo) (interface{}, error) {
@@ -12,14 +13,12 @@ func Query(in string, db dbm.DbInfo) (interface{}, error) {
 	l := rsql.NewLexer(in)
 	p := rsql.NewParser(l)
 	program := p.ParseProgram()
-	log.Print(program.String())
 	return d.decode(program)
 }
 
 type decoder struct{
 	dbInfo dbm.DbInfo
 }
-
 func (db *decoder) decode(in *rsql.Program) (squirrel.Sqlizer, error) {
 
 	switch len(in.Statements) {
@@ -40,24 +39,21 @@ func (db *decoder) decode(in *rsql.Program) (squirrel.Sqlizer, error) {
 		return a, nil
 	}
 }
-
-func  (db *decoder) decodeStatement(in rsql.Statement) (squirrel.Sqlizer, error) {
+func (db *decoder) decodeStatement(in rsql.Statement) (squirrel.Sqlizer, error) {
 	switch s := in.(type) {
 	case *rsql.ExpressionStatement:
 		return db.decodeExpression(s.Expression)
 	}
 	return nil, nil
 }
-
-func  (db *decoder) decodeExpression(in rsql.Expression) (squirrel.Sqlizer, error) {
+func (db *decoder) decodeExpression(in rsql.Expression) (squirrel.Sqlizer, error) {
 	switch e := in.(type) {
 	case *rsql.InfixExpression:
 		return db. decodeInfix(e)
 	}
 	return nil, nil
 }
-
-func  (db *decoder) decodeInfix(in *rsql.InfixExpression) (squirrel.Sqlizer, error) {
+func (db *decoder) decodeInfix(in *rsql.InfixExpression) (squirrel.Sqlizer, error) {
 
 	switch in.Token.Type {
 	case rsql.TokAND:
@@ -123,6 +119,24 @@ func  (db *decoder) decodeInfix(in *rsql.InfixExpression) (squirrel.Sqlizer, err
 		}
 
 		return squirrel.Eq{col: v}, nil
+	case rsql.TokLIKE:
+		col, err := db.dbInfo.Col(in.Left.String())
+		if err != nil {
+			return nil, err
+		}
+
+		v, err := db.decodeValue(in.Right)
+		if err != nil {
+			return nil, err
+		}
+
+		switch value := v.(type) {
+		case string:
+			return Like{col, strings.Replace(value, "*", "%", -1)}, nil
+		default:
+			return nil, fmt.Errorf("LIKE requires a string value")
+		}
+
 	case rsql.TokNEQ:
 		col, err := db.dbInfo.Col(in.Left.String())
 		if err != nil {
@@ -213,4 +227,14 @@ func (db *decoder) decodeValue(in rsql.Expression) (interface{}, error) {
 	}
 
 	return nil, nil
+}
+
+type Like struct{
+	column string
+	value string
+}
+func (l Like) ToSql() (sql string, args []interface{}, err error) {
+	sql = l.column
+	args = append(args, l.value)
+	return
 }

@@ -22,6 +22,7 @@ var precidences = map[TokenType]int{
 	TokLE: PrecedenceCompare,
 	TokGT: PrecedenceCompare,
 	TokGE: PrecedenceCompare,
+	TokLIKE: PrecedenceCompare,
 	TokOR: PrecedenceOR,
 	TokAND: PrecedenceAND,
 }
@@ -63,6 +64,7 @@ func NewParser(l *Lexer) *Parser {
 	p.registerInfix(TokLE, p.parseInfixExpression)
 	p.registerInfix(TokGT, p.parseInfixExpression)
 	p.registerInfix(TokGE, p.parseInfixExpression)
+	p.registerInfix(TokLIKE, p.parseInfixExpression)
 	p.registerInfix(TokAND, p.parseInfixExpression)
 	p.registerInfix(TokOR, p.parseInfixExpression)
 
@@ -139,7 +141,6 @@ func (p *Parser) parseStatement() Statement {
 		return p.parseExpressionStatement()
 	}
 }
-
 func (p *Parser) parseExpressionStatement() *ExpressionStatement {
 	stmt := &ExpressionStatement{Token: p.curToken}
 	stmt.Expression = p.parseExpression(PrecedenceLowest)

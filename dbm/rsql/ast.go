@@ -119,9 +119,9 @@ type ExpressionStatement struct {
 	Token Token
 	Expression Expression
 }
-func (ExpressionStatement) statementNode() {}
+func (ExpressionStatement) statementNode()         {}
 func (e ExpressionStatement) TokenLiteral() string { return e.Token.Literal }
-func (e ExpressionStatement) String() string {
+func (e ExpressionStatement) String()       string {
 	if e.Expression != nil {
 		return e.Expression.String()
 	}
@@ -134,9 +134,9 @@ type PrefixExpression struct {
 	Operator string
 	Right    Expression
 }
-func (p *PrefixExpression) expressionNode() {}
-func (p *PrefixExpression) TokenLiteral() string { return p.Token.Literal }
-func (p *PrefixExpression) String() string {
+func (p *PrefixExpression) expressionNode()        {}
+func (p *PrefixExpression) TokenLiteral()   string { return p.Token.Literal }
+func (p *PrefixExpression) String()         string {
 	var out bytes.Buffer
 
 	out.WriteRune('(')
@@ -153,9 +153,9 @@ type InfixExpression struct {
 	Operator string
 	Right    Expression
 }
-func (i *InfixExpression) expressionNode() {}
-func (i *InfixExpression) TokenLiteral() string { return i.Token.Literal }
-func (i *InfixExpression) String() string {
+func (i *InfixExpression) expressionNode()        {}
+func (i *InfixExpression) TokenLiteral()   string { return i.Token.Literal }
+func (i *InfixExpression) String()         string {
 	var out bytes.Buffer
 
 	out.WriteRune('(')

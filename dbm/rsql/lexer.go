@@ -65,14 +65,15 @@ func (l *Lexer) NextToken() Token {
 	case '(': tok = newToken(TokLParen, l.rune)
 	case ']': tok = newToken(TokRBracket, l.rune)
 	case '[': tok = newToken(TokLBracket, l.rune)
-	case '~': tok = newToken(TokTilda, l.rune)
+	case '~': tok = newToken(TokLIKE, l.rune)
 	case '!':
 		if l.peekRune() == '=' {
 			r := l.rune
 			l.readRune()
 			tok.Type, tok.Literal = TokNEQ, string(r) + string(l.rune)
 		} else {
-			tok = newToken(TokBang, l.rune)
+			tok = newToken(TokIllegal, l.rune)
+			return tok
 		}
 	case '<':
 		if l.peekRune() == '=' {
