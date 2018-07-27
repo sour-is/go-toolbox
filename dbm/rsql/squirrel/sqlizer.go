@@ -8,7 +8,7 @@ import (
 	"strings"
 )
 
-func Query(in string, db dbm.DbInfo) (interface{}, error) {
+func Query(in string, db dbm.DbInfo) (squirrel.Sqlizer, error) {
 	d := decoder{dbInfo: db}
 	l := rsql.NewLexer(in)
 	p := rsql.NewParser(l)
@@ -234,7 +234,7 @@ type Like struct{
 	value string
 }
 func (l Like) ToSql() (sql string, args []interface{}, err error) {
-	sql = l.column
+	sql = fmt.Sprintf("%s LIKE(?)", l.column)
 	args = append(args, l.value)
 	return
 }
