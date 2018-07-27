@@ -60,7 +60,7 @@ func TestSession(t *testing.T) {
 		})
 
 		Convey("When the authorization header is set", func() {
-			req.Header.Set("authorization", "session " + sess.(*User).Session)
+			req.Header.Set("authorization", "session " + sess.(User).Session)
 
 			u := ident.GetIdent("session", req)
 
