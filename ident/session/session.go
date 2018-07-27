@@ -2,17 +2,19 @@ package session // import "sour.is/x/toolbox/ident/session"
 
 import (
 	"net/http"
-	"strings"
-	"time"
+		"time"
 
 	"github.com/patrickmn/go-cache"
 	"sour.is/x/toolbox/ident"
 	"sour.is/x/toolbox/uuid"
 	"github.com/spf13/viper"
+	"sour.is/x/toolbox/log"
+	"strings"
 )
 
 var store *cache.Cache
 
+var cookieName string
 var groupRoles map[string][]string
 var userRoles map[string][]string
 var userGroups map[string][]string
@@ -23,6 +25,7 @@ func init() {
 	ident.Register("session", CheckSession)
 }
 
+// User is an ident.Ident
 type User struct {
 	Ident  string   `json:"ident"`
 	Aspect string   `json:"aspect"`
@@ -33,6 +36,7 @@ type User struct {
 	Session string `json:"session"`
 }
 
+// Config sets up the session module
 func Config() {
 	if viper.IsSet("idm.session.user-roles") {
 		userRoles = viper.GetStringMapStringSlice("idm.session.user-roles")
@@ -43,24 +47,38 @@ func Config() {
 	if viper.IsSet("idm.session.group-roles") {
 		groupRoles = viper.GetStringMapStringSlice("idm.session.group-roles")
 	}
+	if viper.IsSet("idm.session.cookie") {
+		cookieName = viper.GetString("idm.session.cookie")
+	}
 }
 
+// GetSessionId attempts to read a session id out of request
 func GetSessionId(r *http.Request) string {
-	var auth string
 
-	if auth = r.Header.Get("authorization"); auth == "" {
-		return ""
+	// Try reading from cookies
+	cookie, err := r.Cookie(cookieName)
+	if err != nil {
+		log.Error(err)
 	}
 
-	f := strings.Fields(auth)
-	if len(f) < 2 || f[0] != "session" {
-		return ""
+	if cookie != nil {
+		return cookie.Value
 	}
 
-	return f[1]
+	// Try reading from Authorization
+	if auth := r.Header.Get("authorization"); auth != "" {
+		f := strings.Fields(auth)
+		if len(f) < 2 || f[0] != "session" {
+			return ""
+		}
 
+		return f[1]
+	}
+
+	return ""
 }
 
+// CheckSession is called by ident to lookup the user
 func CheckSession(r *http.Request) ident.Ident {
 
 	id := GetSessionId(r)
@@ -79,8 +97,9 @@ func CheckSession(r *http.Request) ident.Ident {
 	return User{}
 }
 
-func NewSession(ident, aspect, display string, groups []string, roles []string) (id string) {
-	id = uuid.V4()
+// NewSession creates a new session and returns an ident.Ident
+func NewSession(ident, aspect, display string, groups []string, roles []string) (ident.Ident) {
+	id := uuid.V4()
 
 	u := User{
 		Ident:  ident,
@@ -116,18 +135,22 @@ func NewSession(ident, aspect, display string, groups []string, roles []string) 
 
 	store.SetDefault(id, u)
 
-	return
+	return u
 }
+// DeleteSession removes the session
 func DeleteSession(id string) {
 	store.Delete(id)
 }
 
+// GetIdentity returns the identity of user
 func (u User) GetIdentity() string {
 	return u.Ident
 }
+// GetAspect returns the current aspect of user
 func (u User) GetAspect() string {
 	return u.Aspect
 }
+// HasRole returns true if any roles match
 func (u User) HasRole(r ...string) bool {
 	for _, k := range r {
 		if _, ok := u.Roles[k]; ok {
@@ -136,6 +159,7 @@ func (u User) HasRole(r ...string) bool {
 	}
 	return false
 }
+// HasGroup returns true if any groups match
 func (u User) HasGroup(g ...string) bool {
 	for _, k := range g {
 		if _, ok := u.Groups[k]; ok {
@@ -144,9 +168,11 @@ func (u User) HasGroup(g ...string) bool {
 	}
 	return false
 }
+// IsActive returns true if user is active
 func (u User) IsActive() bool {
 	return u.Active
 }
+// GetDisplay returns the display name of user
 func (u User) GetDisplay() string {
 	return u.Name
 }

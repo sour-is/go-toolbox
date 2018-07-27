@@ -1,8 +1,7 @@
 package session // import "sour.is/x/toolbox/ident/session"
 
 import (
-	"io"
-	"net/http/httptest"
+		"net/http/httptest"
 	"testing"
 
 	. "github.com/smartystreets/goconvey/convey"
@@ -61,7 +60,7 @@ func TestSession(t *testing.T) {
 		})
 
 		Convey("When the authorization header is set", func() {
-			req.Header.Set("authorization", "session "+sess)
+			req.Header.Set("authorization", "session " + sess.(*User).Session)
 
 			u := ident.GetIdent("session", req)
 
@@ -81,18 +80,11 @@ func TestSession(t *testing.T) {
 		})
 
 		Convey("If the session has been deleted", func() {
-			DeleteSession(sess)
+			DeleteSession(sess.(User).Session)
 
 			u := ident.GetIdent("session", req)
 
 			So(u.IsActive(), ShouldBeFalse)
 		})
 	})
-
 }
-
-type nopCloser struct {
-	io.Reader
-}
-
-func (nopCloser) Close() error { return nil }
