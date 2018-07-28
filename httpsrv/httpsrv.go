@@ -148,9 +148,7 @@ func RegisterModule(name string, fn ModuleHandler) {
 func Run() {
 	router := NewRouter()
 	listen := viper.GetString("http.listen")
-
 	log.Notice("Listen and Serve on ", listen)
-
 	srv := &http.Server{
 		Addr: listen,
 		// Good practice to set timeouts to avoid Slowloris attacks.
@@ -159,11 +157,45 @@ func Run() {
 		IdleTimeout:  time.Second * 60,
 		Handler:      router, // Pass our instance of gorilla/mux in.
 	}
+	
+	if viper.GetBool("http.tls") {
+		cfg := &tls.Config{
+        		MinVersion:               tls.VersionTLS12,
+			CurvePreferences:         []tls.CurveID{tls.CurveP521, tls.CurveP384, tls.CurveP256},
+			PreferServerCipherSuites: true,
+			CipherSuites: []uint16{
+			    tls.TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384,
+			    tls.TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA,
+			    tls.TLS_RSA_WITH_AES_256_GCM_SHA384,
+			    tls.TLS_RSA_WITH_AES_256_CBC_SHA,
+			},
+    		}
+		
+		srv.TLSConfig = cfg
+        	srv.TLSNextProto: make(map[string]func(*http.Server, *tls.Conn, http.Handler), 0)
+		
+		crt := viper.GetString("http.tls_crt")
+		key := viper.GetString("http.tls_key")
+		
+		go func() {
+			err := srv.ListenAndServeTLS(crt, key)
+			if err != nil {
+				log.Error(err)
+			}
+		}()
+		
+	} else {
 
-	// Run our server in a goroutine so that it doesn't block.
-	go func() {
-		srv.ListenAndServe()
-	}()
+		// Run our server in a goroutine so that it doesn't block.
+		go func() {
+			err := srv.ListenAndServe()
+			if err != nil {
+				log.Error(err)
+			}
+
+		}()
+
+	}	
 	close(SignalStartup)
 }
 // Shutdown graceful shutdown of server
@@ -191,7 +223,7 @@ func init() {
 	})
 }
 
-// swagger:operation GET /app-info appInfo getAppInfo
+// swagger:operation GET /app-info appInfo get-app-info
 //
 // Get App Info
 //
@@ -214,7 +246,7 @@ func getAppInfo(w http.ResponseWriter, _ *http.Request) {
 
 	w.Write([]byte(s))
 }
-// swagger:operation GET /v1/app-info appInfo v1GetAppInfo
+// swagger:operation GET /v1/app-info appInfo v1-get-app-info
 //
 // Get App Info
 //
