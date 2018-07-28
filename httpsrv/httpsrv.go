@@ -173,7 +173,7 @@ func Run() {
     		}
 		
 		srv.TLSConfig = cfg
-        	srv.TLSNextProto: make(map[string]func(*http.Server, *tls.Conn, http.Handler), 0)
+        	srv.TLSNextProto = make(map[string]func(*http.Server, *tls.Conn, http.Handler), 0)
 		
 		crt := viper.GetString("http.tls_crt")
 		key := viper.GetString("http.tls_key")
