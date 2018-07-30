@@ -92,6 +92,9 @@ func TestQuery(t *testing.T) {
 		if !tt.fail && err != nil {
 			t.Error(err)
 		}
+		if q != nil {
+			t.Log(q.ToSql())
+		}
 
 		actual := fmt.Sprintf("%#v", q)
 		expect := fmt.Sprintf("%#v", tt.expect)
