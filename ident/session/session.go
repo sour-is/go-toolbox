@@ -194,8 +194,8 @@ func (u User) GetDisplay() string {
 	return u.Name
 }
 
-func (u User) GetCookie() http.Cookie {
-	return http.Cookie {
+func (u User) GetCookie() *http.Cookie {
+	return &http.Cookie {
 		Name:     cookieName,
 		Value:    u.Cookie,
 		HttpOnly: true,
