@@ -63,7 +63,7 @@ func Config() {
 }
 
 // GetSessionId attempts to read a session id out of request
-func GetSessionId(r *http.Request) string {
+func getSessionId(r *http.Request) string {
 
 	// Try reading from cookies
 	cookie, err := r.Cookie(cookieName)
@@ -90,9 +90,11 @@ func GetSessionId(r *http.Request) string {
 
 // CheckSession is called by ident to lookup the user
 func CheckSession(r *http.Request) ident.Ident {
+	id := getSessionId(r)
+	return GetSessionId(id)
+}
 
-	id := GetSessionId(r)
-
+func GetSessionId(id string) ident.Ident {
 	if id == "" {
 		return User{}
 	}

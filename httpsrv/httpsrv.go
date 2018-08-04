@@ -158,26 +158,27 @@ func Run() {
 		IdleTimeout:  time.Second * 60,
 		Handler:      router, // Pass our instance of gorilla/mux in.
 	}
-	
+
 	if viper.GetBool("http.tls") {
 		cfg := &tls.Config{
-        		MinVersion:               tls.VersionTLS12,
+			MinVersion:               tls.VersionTLS12,
 			CurvePreferences:         []tls.CurveID{tls.CurveP521, tls.CurveP384, tls.CurveP256},
-    		}
-		
+		}
+
 		srv.TLSConfig = cfg
-        	srv.TLSNextProto = make(map[string]func(*http.Server, *tls.Conn, http.Handler), 0)
-		
+		srv.TLSNextProto = make(map[string]func(*http.Server, *tls.Conn, http.Handler), 0)
+
 		crt := viper.GetString("http.tls_crt")
 		key := viper.GetString("http.tls_key")
-		
+
 		go func() {
 			err := srv.ListenAndServeTLS(crt, key)
 			if err != nil {
 				log.Error(err)
+				Shutdown()
 			}
 		}()
-		
+
 	} else {
 
 		// Run our server in a goroutine so that it doesn't block.
@@ -185,27 +186,27 @@ func Run() {
 			err := srv.ListenAndServe()
 			if err != nil {
 				log.Error(err)
+				Shutdown()
 			}
-
 		}()
 
-	}	
+	}
 	close(SignalStartup)
 }
 // Shutdown graceful shutdown of server
 func Shutdown() {
 	close(SignalShutdown)
 	log.Notice("shutting down...")
-    done := make(chan struct{})
+	done := make(chan struct{})
 	go func() {
 		WaitShutdown.Wait()
 		close(done)
-    }()
+	}()
 
-    select {
-    case <-done:
-    	log.Notice("all done.")
-    case <-time.After(15 * time.Second):
+	select {
+	case <-done:
+		log.Notice("all done.")
+	case <-time.After(15 * time.Second):
 		log.Notice("times up. forcing shutdown.")
 	}
 }
