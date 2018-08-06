@@ -63,7 +63,7 @@ func Config() {
 }
 
 // GetSessionId attempts to read a session id out of request
-func GetSessionId(r *http.Request) string {
+func GetSessionFromHeader(r *http.Request) string {
 
 	// Try reading from cookies
 	cookie, err := r.Cookie(cookieName)
@@ -88,15 +88,7 @@ func GetSessionId(r *http.Request) string {
 	return ""
 }
 
-// CheckSession is called by ident to lookup the user
-func CheckSession(r *http.Request) ident.Ident {
-
-	id := GetSessionId(r)
-
-	if id == "" {
-		return User{}
-	}
-
+func CheckSessionByID(id string) ident.Ident {
 	if user, ok := store.Get(id); ok == true {
 		u := user.(User)
 		store.Set(u.Session, u, sessionExpire)
@@ -106,6 +98,18 @@ func CheckSession(r *http.Request) ident.Ident {
 	}
 
 	return User{}
+}
+
+// CheckSession is called by ident to lookup the user
+func CheckSession(r *http.Request) ident.Ident {
+
+	id := GetSessionFromHeader(r)
+
+	if id == "" {
+		return User{}
+	}
+
+	return CheckSessionByID(id)
 }
 
 // NewSession creates a new session and returns an ident.Ident
