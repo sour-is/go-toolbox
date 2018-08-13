@@ -20,6 +20,7 @@ type structField struct {
 	Name      string
 	Container string
 	Auto      bool
+	ROnly     bool
 }
 
 type structMap struct {
@@ -64,9 +65,9 @@ func main() {
 				continue
 			}
 
-			//fmt.Printf("type %s\n", ts.Name.Name)
 			smap := structMap{}
 			smap.Name = ts.Name.Name
+			log.Debugf("type %s\n", ts.Name.Name)
 
 			var st *ast.StructType
 			if st, ok = ts.Type.(*ast.StructType); !ok {
@@ -124,10 +125,16 @@ func main() {
 func procStruct(st *ast.StructType) (table, view bool, fields []structField) {
 	for _, field := range st.Fields.List {
 		for _, name := range field.Names {
+
 			tag := reflect.StructTag(strings.Trim(field.Tag.Value, "`"))
+
 			auto := false
 			if db := tag.Get("db"); strings.Contains(db, ",AUTO") {
 				auto = true
+			}
+			readonly := false
+			if db := tag.Get("db"); strings.Contains(db, ",RO") {
+				readonly = true
 			}
 			if tab := tag.Get("table"); tab != "" {
 				table = true
@@ -138,13 +145,29 @@ func procStruct(st *ast.StructType) (table, view bool, fields []structField) {
 
 			if arr, ok := field.Type.(*ast.ArrayType); ok {
 				if _, ok = arr.Elt.(*ast.Ident); !ok {
+					log.Debug("non-ident array ", name, field)
 					continue
 				}
 
-				fields = append(fields, structField{Name: name.Name, Container: tag.Get("cont"), Auto: auto})
-			} else if _, ok := field.Type.(*ast.Ident); ok {
-				fields = append(fields, structField{Name: name.Name, Container: "", Auto: auto})
+				fields = append(
+					fields,
+					structField{
+						Name: name.Name,
+						Container: tag.Get("cont"),
+						Auto: auto,
+						ROnly: readonly,
+					})
+				continue
 			}
+
+			fields = append(
+				fields,
+				structField{
+					Name: name.Name,
+					Container: "",
+					Auto: auto,
+					ROnly: readonly,
+				})
 		}
 	}
 
