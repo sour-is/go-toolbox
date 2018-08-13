@@ -2,14 +2,15 @@ package session // import "sour.is/x/toolbox/ident/session"
 
 import (
 	"net/http"
-		"time"
+	"time"
+
+	"strings"
 
 	"github.com/patrickmn/go-cache"
-	"sour.is/x/toolbox/ident"
-	"sour.is/x/toolbox/uuid"
 	"github.com/spf13/viper"
+	"sour.is/x/toolbox/ident"
 	"sour.is/x/toolbox/log"
-	"strings"
+	"sour.is/x/toolbox/uuid"
 )
 
 var store *cache.Cache
@@ -20,7 +21,7 @@ var userRoles map[string][]string
 var userGroups map[string][]string
 
 var sessionExpire = 10 * time.Minute
-var cookieExpire =  24 * time.Hour
+var cookieExpire = 24 * time.Hour
 
 func init() {
 	store = cache.New(cookieExpire, 30*time.Second)
@@ -30,14 +31,14 @@ func init() {
 
 // User is an ident.Ident
 type User struct {
-	Ident  string   `json:"ident"`
-	Aspect string   `json:"aspect"`
-	Name   string   `json:"name"`
-	Active bool     `json:"active"`
-	Groups map[string]struct{} `json:"groups"`
-	Roles  map[string]struct{} `json:"roles"`
-	Session string `json:"session"`
-	Cookie  string `json:"cookie"`
+	Ident   string              `json:"ident"`
+	Aspect  string              `json:"aspect"`
+	Name    string              `json:"name"`
+	Active  bool                `json:"active"`
+	Groups  map[string]struct{} `json:"groups"`
+	Roles   map[string]struct{} `json:"roles"`
+	Session string              `json:"session"`
+	Cookie  string              `json:"cookie"`
 }
 
 // Config sets up the session module
@@ -62,8 +63,8 @@ func Config() {
 	}
 }
 
-// GetSessionId attempts to read a session id out of request
-func getSessionID(r *http.Request) string {
+// httpSessionId attempts to read a session id out of request
+func httpSessionID(r *http.Request) string {
 
 	// Try reading from cookies
 	cookie, err := r.Cookie(cookieName)
@@ -90,10 +91,11 @@ func getSessionID(r *http.Request) string {
 
 // CheckSession is called by ident to lookup the user
 func CheckSession(r *http.Request) ident.Ident {
-	id := getSessionID(r)
+	id := httpSessionID(r)
 	return GetSessionID(id)
 }
 
+// GetSessionID returns a user ident from cache
 func GetSessionID(id string) ident.Ident {
 	if id == "" {
 		return User{}
@@ -111,14 +113,14 @@ func GetSessionID(id string) ident.Ident {
 }
 
 // NewSession creates a new session and returns an ident.Ident
-func NewSession(ident, aspect, display string, groups []string, roles []string) (ident.Ident) {
+func NewSession(ident, aspect, display string, groups []string, roles []string) ident.Ident {
 	u := User{
-		Ident:  ident,
-		Aspect: aspect,
-		Name:   display,
-		Active: true,
-		Groups: make(map[string]struct{}),
-		Roles: make(map[string]struct{}),
+		Ident:   ident,
+		Aspect:  aspect,
+		Name:    display,
+		Active:  true,
+		Groups:  make(map[string]struct{}),
+		Roles:   make(map[string]struct{}),
 		Session: "S" + uuid.V4(),
 		Cookie:  "C" + uuid.V4(),
 	}
@@ -150,6 +152,7 @@ func NewSession(ident, aspect, display string, groups []string, roles []string) 
 
 	return u
 }
+
 // DeleteSession removes the session
 func DeleteSession(id string) {
 	u, ok := store.Get(id)
@@ -165,10 +168,12 @@ func DeleteSession(id string) {
 func (u User) GetIdentity() string {
 	return u.Ident
 }
+
 // GetAspect returns the current aspect of user
 func (u User) GetAspect() string {
 	return u.Aspect
 }
+
 // HasRole returns true if any roles match
 func (u User) HasRole(r ...string) bool {
 	for _, k := range r {
@@ -178,6 +183,7 @@ func (u User) HasRole(r ...string) bool {
 	}
 	return false
 }
+
 // HasGroup returns true if any groups match
 func (u User) HasGroup(g ...string) bool {
 	for _, k := range g {
@@ -187,17 +193,20 @@ func (u User) HasGroup(g ...string) bool {
 	}
 	return false
 }
+
 // IsActive returns true if user is active
 func (u User) IsActive() bool {
 	return u.Active
 }
+
 // GetDisplay returns the display name of user
 func (u User) GetDisplay() string {
 	return u.Name
 }
 
+// GetCookie returns a formated cookie value
 func (u User) GetCookie() *http.Cookie {
-	return &http.Cookie {
+	return &http.Cookie{
 		Name:     cookieName,
 		Value:    u.Cookie,
 		HttpOnly: true,
