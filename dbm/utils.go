@@ -141,17 +141,24 @@ func (tx *Tx) Replace(
 ) (found bool, err error) {
 	var num uint64
 	auto, dest, err := d.StructMap(o, d.Auto)
-	var row sq.RowScanner
 
 	if num, err = tx.Count(d.Table, where); err == nil && num == 0 {
 		if tx.Returns {
-			if len(auto) > 0 {
-				log.Debug("RETURNING ", auto, " FOR ", d.Auto)
-				insert = insert.Suffix(`RETURNING "` + strings.Join(auto, `","`) + "\"")
+			if len(d.Auto) > 0 {
+				log.Debug("RETURNING ", d.Auto, " FOR ", auto)
+				insert = insert.Suffix(`RETURNING "` + strings.Join(d.Auto, `","`) + "\"")
+				log.Debug(insert.ToSql())
+				row := insert.QueryRow()
+				err = row.Scan(dest...)
+				if err != nil {
+					log.Debug(err.Error())
+					return
+				}
+			} else {
+				log.Debug(insert.ToSql())
+				insert.Exec()
 			}
 
-			log.Debug(insert.ToSql())
-			row = insert.QueryRow()
 		} else {
 			log.Debug(insert.ToSql())
 
@@ -161,28 +168,40 @@ func (tx *Tx) Replace(
 				log.Debug(err.Error())
 				return
 			}
-			var lastId int64
-			lastId, err = result.LastInsertId()
+
+			var lastID int64
+			lastID, err = result.LastInsertId()
 			if err != nil {
 				log.Debug(err.Error())
 				return
 			}
-			row = tx.Select(auto, d.Table).Where(sq.Eq{d.Auto[0]: lastId}).QueryRow()
+
+			row := tx.Select(auto, d.View).Where(sq.Eq{d.Auto[0]: lastID}).QueryRow()
+			err = row.Scan(dest...)
+			if err != nil {
+				log.Debug(err.Error())
+				return
+			}
 		}
 
 	} else if err == nil && num > 0 {
-
 		found = true
 		update = update.Where(where)
 
 		if tx.Returns {
-			if len(auto) > 0 {
-				log.Debug("RETURNING ", auto, " FOR ", d.Auto)
-				update = update.Suffix(`RETURNING "` + strings.Join(auto, `","`) + "\"")
+			if len(d.Auto) > 0 {
+				log.Debug("RETURNING ", d.Auto, " FOR ", auto)
+				update = update.Suffix(`RETURNING "` + strings.Join(d.Auto, `","`) + "\"")
+				row := update.QueryRow()
+				err = row.Scan(dest...)
+				if err != nil {
+					log.Debug(err.Error())
+					return
+				}
+			} else {
+				log.Debug(update.ToSql())
+				update.Exec()
 			}
-
-			log.Debug(update.ToSql())
-			row = update.QueryRow()
 		} else {
 			log.Debug(update.ToSql())
 			var result sql.Result
@@ -202,14 +221,14 @@ func (tx *Tx) Replace(
 				found = false
 				err = fmt.Errorf("update Failed. %d rows affected", num)
 			}
-			row = tx.Select(auto, d.Table).Where(where).QueryRow()
-		}
-	}
 
-	err = row.Scan(dest...)
-	if err != nil {
-		log.Debug(err.Error())
-		return
+			row := tx.Select(auto, d.View).Where(where).QueryRow()
+			err = row.Scan(dest...)
+			if err != nil {
+				log.Debug(err.Error())
+				return
+			}
+		}
 	}
 
 	return
