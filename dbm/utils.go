@@ -146,7 +146,7 @@ func (tx *Tx) Replace(
 		if tx.Returns {
 			if len(d.Auto) > 0 {
 				log.Debug("RETURNING ", d.Auto, " FOR ", auto)
-				insert = insert.Suffix(`RETURNING "` + strings.Join(d.Auto, `","`) + "\"")
+				insert = insert.Suffix(`RETURNING "` + strings.Join(auto, `","`) + "\"")
 				log.Debug(insert.ToSql())
 				row := insert.QueryRow()
 				err = row.Scan(dest...)
@@ -191,7 +191,7 @@ func (tx *Tx) Replace(
 		if tx.Returns {
 			if len(d.Auto) > 0 {
 				log.Debug("RETURNING ", d.Auto, " FOR ", auto)
-				update = update.Suffix(`RETURNING "` + strings.Join(d.Auto, `","`) + "\"")
+				update = update.Suffix(`RETURNING "` + strings.Join(auto, `","`) + "\"")
 				row := update.QueryRow()
 				err = row.Scan(dest...)
 				if err != nil {
