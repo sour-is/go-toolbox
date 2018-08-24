@@ -1,13 +1,14 @@
 package session // import "sour.is/x/toolbox/ident/session"
 
 import (
-		"net/http/httptest"
+	"net/http/httptest"
 	"testing"
 
-	. "github.com/smartystreets/goconvey/convey"
-	"sour.is/x/toolbox/ident"
-	"github.com/spf13/viper"
 	"strings"
+
+	. "github.com/smartystreets/goconvey/convey"
+	"github.com/spf13/viper"
+	"sour.is/x/toolbox/ident"
 )
 
 func TestSession(t *testing.T) {
@@ -31,7 +32,7 @@ func TestSession(t *testing.T) {
 		So(ident.IdentSet, ShouldContainKey, "session")
 	})
 
-	sess := NewSession("ident", "aspect", "display name", nil, nil)
+	sess := NewSession("ident", "aspect", "display name", nil, nil, nil)
 
 	Convey("Given a valid session", t, func() {
 		Convey("When the authorization header is not set", func() {
@@ -60,7 +61,7 @@ func TestSession(t *testing.T) {
 		})
 
 		Convey("When the authorization header is set", func() {
-			req.Header.Set("authorization", "session " + sess.(User).Session)
+			req.Header.Set("authorization", "session "+sess.(User).Meta["session"])
 
 			u := ident.GetIdent("session", req)
 
@@ -80,7 +81,7 @@ func TestSession(t *testing.T) {
 		})
 
 		Convey("If the session has been deleted", func() {
-			DeleteSession(sess.(User).Session)
+			DeleteSession(sess.(User).Meta["session"])
 
 			u := ident.GetIdent("session", req)
 

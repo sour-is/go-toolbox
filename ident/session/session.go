@@ -31,14 +31,13 @@ func init() {
 
 // User is an ident.Ident
 type User struct {
-	Ident   string              `json:"ident"`
-	Aspect  string              `json:"aspect"`
-	Name    string              `json:"name"`
-	Active  bool                `json:"active"`
-	Groups  map[string]struct{} `json:"groups"`
-	Roles   map[string]struct{} `json:"roles"`
-	Session string              `json:"session"`
-	Cookie  string              `json:"cookie"`
+	Ident  string              `json:"ident"`
+	Aspect string              `json:"aspect"`
+	Name   string              `json:"name"`
+	Active bool                `json:"active"`
+	Groups map[string]struct{} `json:"groups"`
+	Roles  map[string]struct{} `json:"roles"`
+	Meta   map[string]string   `json:"meta"`
 }
 
 // Config sets up the session module
@@ -103,8 +102,8 @@ func GetSessionID(id string) ident.Ident {
 
 	if user, ok := store.Get(id); ok == true {
 		u := user.(User)
-		store.Set(u.Session, u, sessionExpire)
-		store.Set(u.Session, u, cookieExpire)
+		store.Set(u.Meta["session"], u, sessionExpire)
+		store.Set(u.Meta["cookie"], u, cookieExpire)
 
 		return u
 	}
@@ -113,17 +112,22 @@ func GetSessionID(id string) ident.Ident {
 }
 
 // NewSession creates a new session and returns an ident.Ident
-func NewSession(ident, aspect, display string, groups []string, roles []string) ident.Ident {
-	u := User{
-		Ident:   ident,
-		Aspect:  aspect,
-		Name:    display,
-		Active:  true,
-		Groups:  make(map[string]struct{}),
-		Roles:   make(map[string]struct{}),
-		Session: "S" + uuid.V4(),
-		Cookie:  "C" + uuid.V4(),
+func NewSession(ident, aspect, display string, groups []string, roles []string, meta map[string]string) ident.Ident {
+	if meta == nil {
+		meta = make(map[string]string)
 	}
+
+	u := User{
+		Ident:  ident,
+		Aspect: aspect,
+		Name:   display,
+		Active: true,
+		Groups: make(map[string]struct{}),
+		Roles:  make(map[string]struct{}),
+		Meta:   meta,
+	}
+	u.Meta["session"] = "S" + uuid.V4()
+	u.Meta["cookie"] = "C" + uuid.V4()
 
 	if g, ok := userGroups[ident]; ok {
 		groups = append(groups, g...)
@@ -147,8 +151,8 @@ func NewSession(ident, aspect, display string, groups []string, roles []string) 
 		u.Roles[roles[i]] = struct{}{}
 	}
 
-	store.Set(u.Session, u, sessionExpire)
-	store.Set(u.Cookie, u, cookieExpire)
+	store.Set(u.Meta["session"], u, sessionExpire)
+	store.Set(u.Meta["cookie"], u, cookieExpire)
 
 	return u
 }
@@ -160,8 +164,8 @@ func DeleteSession(id string) {
 		return
 	}
 
-	store.Delete(u.(User).Session)
-	store.Delete(u.(User).Cookie)
+	store.Delete(u.(User).Meta["session"])
+	store.Delete(u.(User).Meta["cookie"])
 }
 
 // GetIdentity returns the identity of user
@@ -208,7 +212,7 @@ func (u User) GetDisplay() string {
 func (u User) GetCookie() *http.Cookie {
 	return &http.Cookie{
 		Name:     cookieName,
-		Value:    u.Cookie,
+		Value:    u.Meta["cookie"],
 		HttpOnly: true,
 		Secure:   viper.GetBool("idm.session.secure"),
 		Path:     "/",
