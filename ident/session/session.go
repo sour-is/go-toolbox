@@ -107,7 +107,7 @@ func GetSessionID(id string) ident.Ident {
 		return u
 	}
 
-	return User{}
+	return ident.Anonymous
 }
 
 // NewSession creates a new session and returns an ident.Ident
