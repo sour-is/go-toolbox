@@ -9,7 +9,6 @@ import (
 	"github.com/patrickmn/go-cache"
 	"github.com/spf13/viper"
 	"sour.is/x/toolbox/ident"
-	"sour.is/x/toolbox/log"
 	"sour.is/x/toolbox/uuid"
 )
 
@@ -68,7 +67,7 @@ func httpSessionID(r *http.Request) string {
 	// Try reading from cookies
 	cookie, err := r.Cookie(cookieName)
 	if err != nil {
-		log.Debug(err)
+		return ""
 	}
 
 	if cookie != nil {
