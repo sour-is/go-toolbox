@@ -97,7 +97,7 @@ func CheckSession(r *http.Request) ident.Ident {
 // GetSessionID returns a user ident from cache
 func GetSessionID(id string) ident.Ident {
 	if id == "" {
-		return ident.NewNullUser("anon", "none", "Guest User", false)
+		return ident.Anonymous
 	}
 
 	if user, ok := store.Get(id); ok == true {

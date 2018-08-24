@@ -30,6 +30,8 @@ type Ident interface {
 	GetDisplay() string
 }
 
+var Anonymous = NewNullUser("anon", "none", "Guest User", false)
+
 type IdentConfig map[string]string
 type IdentConfigs map[string]IdentConfig
 type IdentHandler func(r *http.Request) Ident
@@ -70,7 +72,7 @@ func GetIdent(authList string, r *http.Request) Ident {
 		}
 	}
 
-	return NewNullUser("anon", "none", "Guest User", false)
+	return Anonymous
 }
 
 type NullUser struct {
