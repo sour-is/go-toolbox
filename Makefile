@@ -14,4 +14,5 @@ ANSIBLE_HOST="phoenix"
 release: inc-patch
 	git commit -am "release version $(VERSION)"
 	git tag -a "v$(VERSION)" -m "tag version $(VERSION)"
+	git push
 	git push --tags
