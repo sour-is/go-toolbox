@@ -1,6 +1,7 @@
 package syslog
 
 import (
+	"fmt"
 	"io"
 	"log/syslog"
 	"os"
@@ -137,6 +138,7 @@ func (s StripCtrlWriter) Write(b []byte) (n int, err error) {
 			break
 		}
 
+		fmt.Printf("i:%d j: %d", i, j)
 		b[i] = b[j]
 		j++
 	}
