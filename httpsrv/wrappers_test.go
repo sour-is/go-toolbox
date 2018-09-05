@@ -4,13 +4,15 @@ import (
 	"net/http"
 	"testing"
 
+	"net/http/httptest"
+
 	"github.com/bouk/monkey"
 	. "github.com/smartystreets/goconvey/convey"
 	"github.com/spf13/viper"
-	"net/http/httptest"
 	"sour.is/x/toolbox/ident"
 )
 
+// TestIdentWrapper tests reading identity from http request
 func TestIdentWrapper(t *testing.T) {
 
 	Convey("Given a HTTP Request validate handler completes", t, func() {

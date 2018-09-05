@@ -10,6 +10,7 @@ func init() {
 	ident.Register("header", NewUser)
 }
 
+// User implements ident.Ident
 type User struct {
 	ident  string
 	aspect string
@@ -17,6 +18,7 @@ type User struct {
 	active bool
 }
 
+// NewUser reads user info from http request
 func NewUser(r *http.Request) ident.Ident {
 
 	config := ident.Config["header"]
@@ -64,26 +66,32 @@ func NewUser(r *http.Request) ident.Ident {
 	}
 }
 
+// GetIdentity returns username
 func (m User) GetIdentity() string {
 	return m.ident
 }
 
+// GetAspect returns aspect
 func (m User) GetAspect() string {
 	return m.aspect
 }
 
+// HasRole returns bool for tested roles
 func (m User) HasRole(r ...string) bool {
 	return m.active
 }
 
+// HasGroup returns bool for tested groups
 func (m User) HasGroup(g ...string) bool {
 	return m.active
 }
 
+// IsActive returns bool for logged in state
 func (m User) IsActive() bool {
 	return m.active
 }
 
+// GetDisplay returns human friendly name
 func (m User) GetDisplay() string {
 	return m.name
 }

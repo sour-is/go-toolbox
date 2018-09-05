@@ -26,7 +26,8 @@
 
 required = [
     "github.com/vektah/gqlgen",
-    "github.com/vektah/dataloaden"
+    "github.com/vektah/dataloaden",
+    "github.com/vektah/gorunpkg"
 ]
 
 [[constraint]]

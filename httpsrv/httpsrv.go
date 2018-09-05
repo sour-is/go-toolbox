@@ -8,12 +8,13 @@ import (
 	"time"
 
 	"encoding/json"
+	"sort"
+	"sync"
+
 	"github.com/gorilla/mux"
 	"github.com/spf13/viper"
-	"sort"
 	"sour.is/x/toolbox/ident"
 	"sour.is/x/toolbox/log"
-	"sync"
 )
 
 // Example Usage
@@ -38,11 +39,14 @@ var modules = make(map[string]ModuleHandler)
 
 // SignalStartup channel is closed when httpsrv starts up
 var SignalStartup = make(chan struct{})
+
 // SignalShutdown channel is closed when httpsrv shuts down
 var SignalShutdown = make(chan struct{})
+
 // WaitShutdown registers services to wait for graceful shutdown
 var WaitShutdown sync.WaitGroup
-// NewRouter
+
+// NewRouter creates a router to handle requests
 func NewRouter() *mux.Router {
 	router := mux.NewRouter().StrictSlash(true)
 
@@ -116,6 +120,7 @@ func NewRouter() *mux.Router {
 
 	return router
 }
+
 // Config reads settings from viper
 func Config() {
 	if viper.IsSet("http.fileserver") {
@@ -139,12 +144,14 @@ func Config() {
 		})
 	}
 }
+
 // RegisterModule stores a module
 func RegisterModule(name string, fn ModuleHandler) {
 	name = strings.ToLower(name)
 
 	modules[name] = fn
 }
+
 // Run startup a new server
 func Run() {
 	router := NewRouter()
@@ -161,8 +168,8 @@ func Run() {
 
 	if viper.GetBool("http.tls") {
 		cfg := &tls.Config{
-			MinVersion:               tls.VersionTLS12,
-			CurvePreferences:         []tls.CurveID{tls.CurveP521, tls.CurveP384, tls.CurveP256},
+			MinVersion:       tls.VersionTLS12,
+			CurvePreferences: []tls.CurveID{tls.CurveP521, tls.CurveP384, tls.CurveP256},
 		}
 
 		srv.TLSConfig = cfg
@@ -193,6 +200,7 @@ func Run() {
 	}
 	close(SignalStartup)
 }
+
 // Shutdown graceful shutdown of server
 func Shutdown() {
 	close(SignalShutdown)
@@ -241,6 +249,7 @@ func getAppInfo(w http.ResponseWriter, _ *http.Request) {
 
 	w.Write([]byte(s))
 }
+
 // swagger:operation GET /v1/app-info appInfo v1-get-app-info
 //
 // Get App Info
@@ -268,6 +277,7 @@ type ResultError struct {
 	Code int    `json:"code"`
 	Msg  string `json:"msg"`
 }
+
 // WriteError write an error message
 func WriteError(w http.ResponseWriter, code int, msg string) {
 	w.Header().Set("Content-Type", "application/json")
@@ -276,6 +286,7 @@ func WriteError(w http.ResponseWriter, code int, msg string) {
 		log.Error(err)
 	}
 }
+
 // WriteObject write object as json
 func WriteObject(w http.ResponseWriter, code int, o interface{}) {
 	w.Header().Set("Content-Type", "application/json")
@@ -284,12 +295,14 @@ func WriteObject(w http.ResponseWriter, code int, o interface{}) {
 		log.Error(err)
 	}
 }
+
 // WriteText writes plain text
 func WriteText(w http.ResponseWriter, code int, o string) {
 	w.Header().Set("Content-Type", "text/plain")
 	w.WriteHeader(code)
 	w.Write([]byte(o))
 }
+
 // ResultWindow represents a windowed struct of items.
 // swagger:model ResultWindow
 type ResultWindow struct {
@@ -300,6 +313,7 @@ type ResultWindow struct {
 	Offset  uint64      `json:"offset"`
 	Items   interface{} `json:"items"`
 }
+
 // WriteWindow writes a window object of items
 func WriteWindow(w http.ResponseWriter, code int, results, limit, offset uint64, o interface{}) {
 	w.Header().Set("Content-Type", "application/json")

@@ -8,6 +8,7 @@ import (
 	"sour.is/x/toolbox/ident"
 )
 
+// TestMock tests handling of requests
 func TestMock(t *testing.T) {
 
 	Convey("On init mock should register itself.", t, func() {

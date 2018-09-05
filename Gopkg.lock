@@ -183,6 +183,12 @@
   revision = "487f817525ba0d79e6e4d1f1f4501464d6417e2a"
 
 [[projects]]
+  branch = "master"
+  name = "github.com/vektah/gorunpkg"
+  packages = ["."]
+  revision = "c4ab2c9cf7b96860d2c7e0897124bf0427ca2398"
+
+[[projects]]
   name = "github.com/vektah/gqlgen"
   packages = [
     ".",
@@ -235,6 +241,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "3e4e45e2845f7fde60a3522a9d164fec5ca9ba0df6d85dbbb89badc25e88b832"
+  inputs-digest = "ec20acf218848cbb1cc5d48dc3e7e9f259607c1f83a06b09cc98138dd6ca3246"
   solver-name = "gps-cdcl"
   solver-version = 1

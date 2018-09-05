@@ -13,6 +13,7 @@ import (
 	"sour.is/x/toolbox/ident"
 )
 
+// TestRubicon tests the rubicon ident methods
 func TestRubicon(t *testing.T) {
 	req := http.Request{}
 	req.URL = new(url.URL)

@@ -19,12 +19,14 @@ func init() {
 	ident.Register("rubicon", NewRubicon)
 }
 
+// User implements the ident.Ident interface
 type User struct {
 	ident    string
 	name     string
 	loggedIn bool
 }
 
+// IdmUser is the responce from rubicon api
 type IdmUser struct {
 	UserId    int    `json:"userId"`
 	UserName  string `json:"userName"`
@@ -33,6 +35,7 @@ type IdmUser struct {
 	LastName  string `json:"lastName"`
 }
 
+// NewRubicon checks requests and returns an ident.Ident
 func NewRubicon(r *http.Request) ident.Ident {
 	c := ident.Config["rubicon"]
 
@@ -95,21 +98,32 @@ func NewRubicon(r *http.Request) ident.Ident {
 	}
 }
 
+// GetIdentity returns username
 func (u User) GetIdentity() string {
 	return u.ident
 }
+
+// GetAspect returns aspect
 func (u User) GetAspect() string {
 	return "rubicon"
 }
+
+// HasRole returns bool for tested roles
 func (u User) HasRole(r ...string) bool {
 	return true
 }
+
+// HasGroup returns bool for tested groups
 func (u User) HasGroup(g ...string) bool {
 	return true
 }
+
+// IsActive returns bool for logged in state
 func (u User) IsActive() bool {
 	return u.loggedIn
 }
+
+// GetDisplay returns human friendly name
 func (u User) GetDisplay() string {
 	return u.name
 }
