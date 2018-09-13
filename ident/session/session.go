@@ -67,7 +67,7 @@ func httpSessionID(r *http.Request) string {
 	// Try reading from cookies
 	cookie, err := r.Cookie(cookieName)
 	if err != nil {
-		return ""
+		// do nothing.
 	}
 
 	if cookie != nil {

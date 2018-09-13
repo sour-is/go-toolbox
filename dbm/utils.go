@@ -18,8 +18,8 @@ func Count(tx *Tx, table string, where interface{}) (count uint64, err error) {
 type FetchMap func(row *sql.Rows) error
 
 // Fetch fetch rows and pass through supplied function
-func Fetch(tx *Tx, table string, cols []string, where interface{}, limit, offset uint64, fn FetchMap) (err error) {
-	return tx.Fetch(table, cols, where, limit, offset, fn)
+func Fetch(tx *Tx, table string, cols []string, where interface{}, limit, offset uint64, order []string, fn FetchMap) (err error) {
+	return tx.Fetch(table, cols, where, limit, offset, order, fn)
 }
 
 // Insert begin new insert statement.
@@ -73,7 +73,7 @@ func (tx *Tx) Count(table string, where interface{}) (count uint64, err error) {
 }
 
 // Fetch fetch rows and pass through supplied function
-func (tx *Tx) Fetch(table string, cols []string, where interface{}, limit, offset uint64, fn FetchMap) (err error) {
+func (tx *Tx) Fetch(table string, cols []string, where interface{}, limit, offset uint64, order []string, fn FetchMap) (err error) {
 	s := sq.Select(cols...)
 	s = s.PlaceholderFormat(tx.Placeholder)
 	s = s.RunWith(tx.Tx)
@@ -85,6 +85,9 @@ func (tx *Tx) Fetch(table string, cols []string, where interface{}, limit, offse
 	}
 	if where != nil {
 		s = s.Where(where)
+	}
+	if len(order) > 0 {
+		s = s.OrderBy(order...)
 	}
 	log.Debug(s.ToSql())
 	rows, err := s.Query()
