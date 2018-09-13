@@ -47,8 +47,8 @@ func TestDbInfo(t *testing.T) {
 			{"graphCol4", 3},
 		}
 		for _, tt := range tests {
-			i, err := d.Index(tt.input)
-			So(err, ShouldBeNil)
+			i, ok := d.Index(tt.input)
+			So(ok, ShouldBeTrue)
 			So(i, ShouldEqual, tt.expect)
 		}
 
