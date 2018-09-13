@@ -33,8 +33,8 @@ func TestDbInfo(t *testing.T) {
 		So(d.Table, ShouldEqual, "table_name")
 		So(d.View, ShouldEqual, "view_name")
 
-		tests := []struct{
-			input string
+		tests := []struct {
+			input  string
 			expect interface{}
 		}{
 			{"Col1", 0},
@@ -52,8 +52,8 @@ func TestDbInfo(t *testing.T) {
 			So(i, ShouldEqual, tt.expect)
 		}
 
-		tests = []struct{
-			input string
+		tests = []struct {
+			input  string
 			expect interface{}
 		}{
 			{"Col1", "Col1"},
@@ -71,8 +71,8 @@ func TestDbInfo(t *testing.T) {
 			So(i, ShouldEqual, tt.expect)
 		}
 
-		tests = []struct{
-			input string
+		tests = []struct {
+			input  string
 			expect interface{}
 		}{
 			{"Col1", "Col1"},

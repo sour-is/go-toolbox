@@ -16,38 +16,53 @@ type DbInfo struct {
 	index map[string]int
 	Auto  []string
 }
+
 // SCol returns the struct column names
-func (d DbInfo) SCol(column string) (string, error) {
-	idx, err := d.Index(column)
+func (d DbInfo) SCol(column string) (s string, err error) {
+	idx, ok := d.Index(column)
+	if !ok {
+		err = fmt.Errorf("column not found on table: %v", column)
+		return
+	}
 	return d.SCols[idx], err
 }
+
 // GCol returns the graphql column names
-func (d DbInfo) GCol(column string) (string, error) {
-	idx, err := d.Index(column)
+func (d DbInfo) GCol(column string) (s string, err error) {
+	idx, ok := d.Index(column)
+	if !ok {
+		err = fmt.Errorf("column not found on table: %v", column)
+		return
+	}
 	return d.GCols[idx], err
 }
+
 // Col returns the mapped column names
-func (d DbInfo) Col(column string) (string, error) {
-	idx, err := d.Index(column)
+func (d DbInfo) Col(column string) (s string, err error) {
+	idx, ok := d.Index(column)
+	if !ok {
+		err = fmt.Errorf("column not found on table: %v", column)
+		return
+	}
 	return d.Cols[idx], err
 }
+
 // ColPanic returns the mapped column names will panic if col does not exist
 func (d DbInfo) ColPanic(column string) string {
-	idx, err := d.Index(column)
-	if err != nil {
+	idx, ok := d.Index(column)
+	if !ok {
+		err := fmt.Errorf("column not found on table: %v", column)
 		panic(err)
 	}
 	return d.Cols[idx]
 }
-// Index returns the column number
-func (d DbInfo) Index(column string) (idx int, err error) {
-	var ok bool
-	if idx, ok = d.index[column]; !ok {
-		err = fmt.Errorf("column not found on table: %v", column)
-	}
 
+// Index returns the column number
+func (d DbInfo) Index(column string) (idx int, ok bool) {
+	idx, ok = d.index[column]
 	return
 }
+
 // GetDbInfo builds a metadata struct
 func GetDbInfo(o interface{}) (d DbInfo) {
 	t := reflect.TypeOf(o)
@@ -83,7 +98,6 @@ func GetDbInfo(o interface{}) (d DbInfo) {
 		if tag == "" {
 			tag = graphql
 		}
-
 
 		if tag == "-" {
 			continue
