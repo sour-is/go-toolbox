@@ -18,10 +18,13 @@ type testStruct struct {
 }
 
 type dbTable struct {
-	Col1 int       `table:"table_name" view:"view_name"`
-	Col2 string    `db:"col2,AUTO"`
-	Col3 []float32 `json:"col3" graphql:"graphCol3"`
-	Col4 uint64    `graphql:"graphCol4"`
+	Col1      int       `table:"table_name" view:"view_name"`
+	Col2      string    `db:"col2,AUTO"`
+	Col3      []float32 `graphql:"graphCol3" json:"col3"`
+	Col4      uint64    `graphql:"graphCol4"`
+	ID        int       `db:"id"`
+	JSONvalue string    `db:"json_value" graphql:"jsonValue"`
+	ColID     int       `db:"col_id"`
 }
 
 // TestDbInfo test the DbInfo function
@@ -81,6 +84,26 @@ func TestDbInfo(t *testing.T) {
 			{"Col3", "col3"},
 			{"graphCol3", "col3"},
 			{"graphCol4", "graphCol4"},
+		}
+		for _, tt := range tests {
+			i, err := d.Col(tt.input)
+			So(err, ShouldBeNil)
+			So(i, ShouldEqual, tt.expect)
+		}
+
+		tests = []struct {
+			input  string
+			expect interface{}
+		}{
+			{"Col1", "Col1"},
+			{"col2", "col2"},
+			{"col2", "col2"},
+			{"col3", "col3"},
+			{"graphCol3", "col3"},
+			{"graphCol4", "graphCol4"},
+			{"id", "id"},
+			{"jsonValue", "json_value"},
+			{"colID", "col_id"},
 		}
 		for _, tt := range tests {
 			i, err := d.Col(tt.input)

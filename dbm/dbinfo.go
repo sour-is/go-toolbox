@@ -120,7 +120,12 @@ func GetDbInfo(o interface{}) (d DbInfo) {
 			d.index[graphql] = len(d.Cols)
 		} else if !ok && graphql == "" {
 			a := []rune(field.Name)
-			a[0] = unicode.ToLower(a[0])
+			for i := 0; i < len(a); i++ {
+				if unicode.IsLower(a[i]) {
+					break
+				}
+				a[i] = unicode.ToLower(a[i])
+			}
 			graphql = string(a)
 			d.index[graphql] = len(d.Cols)
 		}
