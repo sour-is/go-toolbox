@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"reflect"
 	"strings"
+	"unicode"
 )
 
 // DbInfo database model metadata
@@ -117,10 +118,16 @@ func GetDbInfo(o interface{}) (d DbInfo) {
 		}
 		if _, ok := d.index[graphql]; !ok && graphql != "" {
 			d.index[graphql] = len(d.Cols)
+		} else if !ok && graphql == "" {
+			a := []rune(field.Name)
+			a[0] = unicode.ToLower(a[0])
+			graphql = string(a)
+			d.index[graphql] = len(d.Cols)
 		}
 
 		d.Cols = append(d.Cols, tag)
 		d.SCols = append(d.SCols, field.Name)
+		d.GCols = append(d.GCols, graphql)
 	}
 	if d.View == "" {
 		d.View = d.Table
