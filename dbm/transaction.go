@@ -1,13 +1,15 @@
 package dbm
 
 import (
+	"context"
 	"database/sql"
 	"fmt"
-	"github.com/jmoiron/sqlx"
 	"runtime/debug"
+	"sync"
+
+	"github.com/jmoiron/sqlx"
 	"sour.is/x/toolbox/log"
 	"sour.is/x/toolbox/uuid"
-	"sync"
 
 	sq "github.com/Masterminds/squirrel"
 )
@@ -19,24 +21,31 @@ type Tx struct {
 	Placeholder sq.PlaceholderFormat
 	Returns     bool
 }
+
 // NewTx create new transaction
-func (db DB) NewTx() (tx *Tx, err error) {
+func (db DB) NewTx(ctx context.Context) (tx *Tx, err error) {
 	tx = new(Tx)
-	tx.Tx, err = db.Conn.Begin()
+	tx.Tx, err = db.Conn.BeginTx(ctx, nil)
 	tx.Placeholder = db.Placeholder
 	tx.DbType = db.DbType
 	tx.Returns = db.Returns
 
 	return
 }
+
 // Transaction starts a new database tranaction and executes the supplied func.
 func Transaction(txFunc func(*Tx) error) (err error) {
-	return stdDB.Transaction(txFunc)
+	return stdDB.TransactionContext(context.Background(), txFunc)
 }
 
 // Transaction starts a new database transction and executes the supplied func.
-func (db DB) Transaction(txFunc func(*Tx) error) (err error) {
-	tx, err := db.NewTx()
+func (db DB) Transaction(fn func(*Tx) error) error {
+	return db.TransactionContext(context.Background(), fn)
+}
+
+// TransactionContext starts a new database transction with context and executes the supplied func.
+func (db DB) TransactionContext(ctx context.Context, txFunc func(*Tx) error) (err error) {
+	tx, err := db.NewTx(ctx)
 
 	if err != nil {
 		log.Error(err.Error())
@@ -63,10 +72,12 @@ func (db DB) Transaction(txFunc func(*Tx) error) (err error) {
 	err = txFunc(tx)
 	return err
 }
+
 // Transactionx starts a new database tranaction and executes the supplied func.
 func Transactionx(txFunc func(*sqlx.Tx) error) (err error) {
 	return stdDB.Transactionx(txFunc)
 }
+
 // Transactionx starts a new database tranaction and executes the supplied func.
 func (db DB) Transactionx(txFunc func(*sqlx.Tx) error) (err error) {
 	dbx := sqlx.NewDb(db.Conn, db.DbType)
@@ -112,7 +123,7 @@ func (db DB) TransactionContinue(TxID string, txFunc func(*Tx, string) error) (e
 	if TxID == "" {
 
 		TxID = uuid.V4()
-		tx, err = db.NewTx()
+		tx, err = db.NewTx(context.Background())
 		if err != nil {
 			log.Error(err.Error())
 			return

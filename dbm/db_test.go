@@ -2,6 +2,7 @@ package dbm // import "sour.is/x/toolbox/dbm"
 
 import (
 	"bytes"
+	"context"
 	"testing"
 
 	sqlmock "github.com/DATA-DOG/go-sqlmock"
@@ -10,6 +11,7 @@ import (
 
 	"database/sql"
 	"fmt"
+
 	"github.com/spf13/viper"
 	"sour.is/x/toolbox/log"
 )
@@ -57,7 +59,7 @@ func TestConfig(t *testing.T) {
 
 		var db DB
 		db, err = GetDB("db.test")
-		db.NewTx()
+		db.NewTx(context.Background())
 
 		// we make sure that all expectations were met
 		if err := mock.ExpectationsWereMet(); err != nil {
