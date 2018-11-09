@@ -12,6 +12,7 @@ import (
 	"sour.is/x/toolbox/uuid"
 
 	sq "github.com/Masterminds/squirrel"
+	opentracing "github.com/opentracing/opentracing-go"
 )
 
 // Tx database transaction
@@ -25,9 +26,12 @@ type Tx struct {
 
 // NewTx create new transaction
 func (db DB) NewTx(ctx context.Context) (tx *Tx, err error) {
+	sp, nctx := opentracing.StartSpanFromContext(ctx, "NewTx")
+	defer sp.Finish()
+
 	tx = new(Tx)
-	tx.Context = ctx
-	tx.Tx, err = db.Conn.BeginTx(ctx, nil)
+	tx.Context = nctx
+	tx.Tx, err = db.Conn.BeginTx(nctx, nil)
 	tx.Placeholder = db.Placeholder
 	tx.DbType = db.DbType
 	tx.Returns = db.Returns

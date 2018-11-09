@@ -15,13 +15,15 @@ import (
 
 import (
 	"database/sql"
-	"github.com/spf13/viper"
 	"regexp"
-	"sour.is/x/toolbox/log"
 	"strings"
 
-	sq "github.com/Masterminds/squirrel"
+	"github.com/spf13/viper"
+	"sour.is/x/toolbox/log"
+
 	"time"
+
+	sq "github.com/Masterminds/squirrel"
 )
 
 // DB database connection and settings
@@ -60,7 +62,9 @@ func GetDB(pfx string) (db DB, err error) {
 	if maxLifetime == 0 {
 		maxLifetime = 5
 	}
-	conn.SetConnMaxLifetime(5 * time.Minute)
+	conn.SetMaxOpenConns(5)
+	conn.SetMaxIdleConns(3)
+	conn.SetConnMaxLifetime(25 * time.Minute)
 
 	if err = conn.Ping(); err != nil {
 		log.Error(err)

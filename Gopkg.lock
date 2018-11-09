@@ -2,6 +2,20 @@
 
 
 [[projects]]
+  name = "github.com/99designs/gqlgen"
+  packages = [
+    "cmd",
+    "codegen",
+    "codegen/templates",
+    "graphql",
+    "graphql/introspection",
+    "internal/gopath",
+    "internal/imports"
+  ]
+  revision = "6f486bde038887adf67c3e3766624ef111ea95cf"
+  version = "v0.6.0"
+
+[[projects]]
   name = "github.com/DATA-DOG/go-sqlmock"
   packages = ["."]
   revision = "d76b18b42f285b792bf985118980ce9eacea9d10"
@@ -11,13 +25,19 @@
   branch = "v1"
   name = "github.com/Masterminds/squirrel"
   packages = ["."]
-  revision = "b127ed9be03443fe3c0877e391130e3dd3f3107a"
+  revision = "3ba160b0147ff6bb7375178c07fe0da94865c8a6"
 
 [[projects]]
-  branch = "master"
+  name = "github.com/agnivade/levenshtein"
+  packages = ["."]
+  revision = "834b435c3df04fba060c8d74a40d849ab2c4a090"
+  version = "v1.0.1"
+
+[[projects]]
   name = "github.com/bouk/monkey"
   packages = ["."]
   revision = "5df1f207ff77e025801505ae4d903133a0b4353f"
+  version = "v1.0.0"
 
 [[projects]]
   branch = "master"
@@ -35,7 +55,7 @@
   branch = "master"
   name = "github.com/gopherjs/gopherjs"
   packages = ["js"]
-  revision = "8dffc02ea1cb8398bb73f30424697c60fcf8d4c5"
+  revision = "d547d1d9531ed93dbdebcbff7f83e7c876a1e0ee"
 
 [[projects]]
   name = "github.com/gorilla/context"
@@ -50,7 +70,6 @@
   version = "v1.6.2"
 
 [[projects]]
-  branch = "master"
   name = "github.com/hashicorp/hcl"
   packages = [
     ".",
@@ -64,7 +83,8 @@
     "json/scanner",
     "json/token"
   ]
-  revision = "ef8a98b0bbce4a65b5aa4c368430a80ddc533168"
+  revision = "8cb6e5b959231cc1119e43259c4a608f9c51a241"
+  version = "v1.0.0"
 
 [[projects]]
   name = "github.com/jmoiron/sqlx"
@@ -85,7 +105,7 @@
   branch = "master"
   name = "github.com/lann/builder"
   packages = ["."]
-  revision = "1b87b36280d04fe7882d1512bf038ea2967ad534"
+  revision = "47ae307949d02aa1f1069fdafc00ca08e1dbabac"
 
 [[projects]]
   branch = "master"
@@ -100,10 +120,19 @@
   version = "v1.8.0"
 
 [[projects]]
-  branch = "master"
   name = "github.com/mitchellh/mapstructure"
   packages = ["."]
-  revision = "bb74f1db0675b241733089d5a1faa5dd8b0ef57b"
+  revision = "3536a929edddb9a5b34bd6861dc4a9647cb459fe"
+  version = "v1.1.2"
+
+[[projects]]
+  name = "github.com/opentracing/opentracing-go"
+  packages = [
+    ".",
+    "log"
+  ]
+  revision = "1949ddbfd147afd4d964a9f00b24eb291e0e7c38"
+  version = "v1.0.2"
 
 [[projects]]
   name = "github.com/patrickmn/go-cache"
@@ -149,63 +178,82 @@
     ".",
     "mem"
   ]
-  revision = "787d034dfe70e44075ccc060d346146ef53270ad"
-  version = "v1.1.1"
+  revision = "d40851caa0d747393da1ffb28f7f9d8b4eeffebd"
+  version = "v1.1.2"
 
 [[projects]]
   name = "github.com/spf13/cast"
   packages = ["."]
-  revision = "8965335b8c7107321228e3e3702cab9832751bac"
-  version = "v1.2.0"
+  revision = "8c9545af88b134710ab1cd196795e7f2388358d7"
+  version = "v1.3.0"
 
 [[projects]]
-  branch = "master"
   name = "github.com/spf13/jwalterweatherman"
   packages = ["."]
-  revision = "7c0cea34c8ece3fbeb2b27ab9b59511d360fb394"
+  revision = "4a4406e478ca629068e7768fc33f3f044173c0a6"
+  version = "v1.0.0"
 
 [[projects]]
   name = "github.com/spf13/pflag"
   packages = ["."]
-  revision = "583c0c0531f06d5278b7d917446061adc344b5cd"
-  version = "v1.0.1"
+  revision = "298182f68c66c05229eb03ac171abe6e309ee79a"
+  version = "v1.0.3"
 
 [[projects]]
   name = "github.com/spf13/viper"
   packages = ["."]
-  revision = "b5e8006cbee93ec955a89ab31e0e3ce3204f3736"
-  version = "v1.0.2"
+  revision = "2c12c60302a5a0e62ee102ca9bc996277c2f64f5"
+  version = "v1.2.1"
+
+[[projects]]
+  name = "github.com/urfave/cli"
+  packages = ["."]
+  revision = "cfb38830724cc34fedffe9a2a29fb54fa9169cd1"
+  version = "v1.20.0"
 
 [[projects]]
   branch = "master"
   name = "github.com/vektah/dataloaden"
   packages = ["."]
-  revision = "487f817525ba0d79e6e4d1f1f4501464d6417e2a"
+  revision = "484aef20ae775ac84ab9d65de21c8f65f7499791"
 
 [[projects]]
   branch = "master"
   name = "github.com/vektah/gorunpkg"
   packages = ["."]
-  revision = "c4ab2c9cf7b96860d2c7e0897124bf0427ca2398"
+  revision = "2c603e7a186c368795ac30a2cf023be99288065f"
 
 [[projects]]
   name = "github.com/vektah/gqlgen"
+  packages = ["."]
+  revision = "6f486bde038887adf67c3e3766624ef111ea95cf"
+  version = "v0.6.0"
+
+[[projects]]
+  branch = "master"
+  name = "github.com/vektah/gqlparser"
   packages = [
     ".",
-    "codegen",
-    "codegen/templates",
-    "neelance/common",
-    "neelance/errors",
-    "neelance/schema"
+    "ast",
+    "gqlerror",
+    "lexer",
+    "parser",
+    "validator",
+    "validator/rules"
   ]
-  revision = "cb87a2cb66f5a64749f6464900b1c12bca47ed67"
-  version = "0.2.1"
+  revision = "07406bbdde4196e396e2f40c24defe84e9243ad5"
+
+[[projects]]
+  branch = "master"
+  name = "golang.org/x/net"
+  packages = ["context"]
+  revision = "03003ca0c849e57b6ea29a4bab8d3cb6e4d568fe"
 
 [[projects]]
   branch = "master"
   name = "golang.org/x/sys"
   packages = ["unix"]
-  revision = "a200a19cb90b19de298170992778b1fda7217bd6"
+  revision = "66b7b1311ac80bbafcd2daeef9a5e6e2cd1e2399"
 
 [[projects]]
   name = "golang.org/x/text"
@@ -226,11 +274,13 @@
   packages = [
     "go/ast/astutil",
     "go/buildutil",
+    "go/internal/cgo",
     "go/loader",
     "imports",
-    "internal/fastwalk"
+    "internal/fastwalk",
+    "internal/gopathwalk"
   ]
-  revision = "16699b2d33e2654d743c50b4525ab7e73e346238"
+  revision = "4e34152f16764ffb54b96842e6a72195df6e2d07"
 
 [[projects]]
   name = "gopkg.in/yaml.v2"
@@ -241,6 +291,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "ec20acf218848cbb1cc5d48dc3e7e9f259607c1f83a06b09cc98138dd6ca3246"
+  inputs-digest = "44062ed69ba073af0c43e94780812d1cc0e45c02d2fd7633489934c7fc95e253"
   solver-name = "gps-cdcl"
   solver-version = 1

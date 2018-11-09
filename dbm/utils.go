@@ -58,7 +58,7 @@ func (tx *Tx) Count(table string, where interface{}) (count uint64, err error) {
 
 	log.Debug(s.ToSql())
 
-	err = s.QueryRowContext(tx.Context).ScanContext(tx.Context, &count)
+	err = s.QueryRowContext(tx.Context).Scan(&count)
 
 	if err != nil {
 		if err == sql.ErrNoRows {
@@ -152,7 +152,7 @@ func (tx *Tx) Replace(
 				insert = insert.Suffix(`RETURNING "` + strings.Join(auto, `","`) + "\"")
 				log.Debug(insert.ToSql())
 				row := insert.QueryRowContext(tx.Context)
-				err = row.ScanContext(tx.Context, dest...)
+				err = row.Scan(dest...)
 				if err != nil {
 					log.Debug(err.Error())
 					return
@@ -179,8 +179,8 @@ func (tx *Tx) Replace(
 				return
 			}
 
-			row := tx.Select(auto, d.View).Where(sq.Eq{d.Auto[0]: lastID}).QueryRowContext(tx.Context)
-			err = row.ScanContext(tx.Context, dest...)
+			row := tx.Select(auto, d.View).Where(sq.Eq{d.Auto[0]: lastID}).QueryRow()
+			err = row.Scan(dest...)
 			if err != nil {
 				log.Debug(err.Error())
 				return
@@ -196,7 +196,7 @@ func (tx *Tx) Replace(
 				log.Debug("RETURNING ", d.Auto, " FOR ", auto)
 				update = update.Suffix(`RETURNING "` + strings.Join(auto, `","`) + "\"")
 				row := update.QueryRowContext(tx.Context)
-				err = row.ScanContext(tx.Context, dest...)
+				err = row.Scan(dest...)
 				if err != nil {
 					log.Debug(err.Error())
 					return
@@ -226,7 +226,7 @@ func (tx *Tx) Replace(
 			}
 
 			row := tx.Select(auto, d.View).Where(where).QueryRowContext(tx.Context)
-			err = row.ScanContext(tx.Context, dest...)
+			err = row.Scan(dest...)
 			if err != nil {
 				log.Debug(err.Error())
 				return
