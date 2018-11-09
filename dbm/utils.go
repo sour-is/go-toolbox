@@ -58,7 +58,7 @@ func (tx *Tx) Count(table string, where interface{}) (count uint64, err error) {
 
 	log.Debug(s.ToSql())
 
-	err = s.QueryRow().Scan(&count)
+	err = s.QueryRowContext(tx.Context).ScanContext(tx.Context, &count)
 
 	if err != nil {
 		if err == sql.ErrNoRows {
@@ -90,7 +90,7 @@ func (tx *Tx) Fetch(table string, cols []string, where interface{}, limit, offse
 		s = s.OrderBy(order...)
 	}
 	log.Debug(s.ToSql())
-	rows, err := s.Query()
+	rows, err := s.QueryContext(tx.Context)
 	if err != nil {
 		return
 	}
@@ -151,22 +151,22 @@ func (tx *Tx) Replace(
 				log.Debug("RETURNING ", d.Auto, " FOR ", auto)
 				insert = insert.Suffix(`RETURNING "` + strings.Join(auto, `","`) + "\"")
 				log.Debug(insert.ToSql())
-				row := insert.QueryRow()
-				err = row.Scan(dest...)
+				row := insert.QueryRowContext(tx.Context)
+				err = row.ScanContext(tx.Context, dest...)
 				if err != nil {
 					log.Debug(err.Error())
 					return
 				}
 			} else {
 				log.Debug(insert.ToSql())
-				insert.Exec()
+				insert.ExecContext(tx.Context)
 			}
 
 		} else {
 			log.Debug(insert.ToSql())
 
 			var result sql.Result
-			result, err = insert.Exec()
+			result, err = insert.ExecContext(tx.Context)
 			if err != nil {
 				log.Debug(err.Error())
 				return
@@ -179,8 +179,8 @@ func (tx *Tx) Replace(
 				return
 			}
 
-			row := tx.Select(auto, d.View).Where(sq.Eq{d.Auto[0]: lastID}).QueryRow()
-			err = row.Scan(dest...)
+			row := tx.Select(auto, d.View).Where(sq.Eq{d.Auto[0]: lastID}).QueryRowContext(tx.Context)
+			err = row.ScanContext(tx.Context, dest...)
 			if err != nil {
 				log.Debug(err.Error())
 				return
@@ -195,21 +195,21 @@ func (tx *Tx) Replace(
 			if len(d.Auto) > 0 {
 				log.Debug("RETURNING ", d.Auto, " FOR ", auto)
 				update = update.Suffix(`RETURNING "` + strings.Join(auto, `","`) + "\"")
-				row := update.QueryRow()
-				err = row.Scan(dest...)
+				row := update.QueryRowContext(tx.Context)
+				err = row.ScanContext(tx.Context, dest...)
 				if err != nil {
 					log.Debug(err.Error())
 					return
 				}
 			} else {
 				log.Debug(update.ToSql())
-				update.Exec()
+				update.ExecContext(tx.Context)
 			}
 		} else {
 			log.Debug(update.ToSql())
 			var result sql.Result
 
-			result, err = update.Exec()
+			result, err = update.ExecContext(tx.Context)
 			if err != nil {
 				log.Warning(err.Error())
 				return
@@ -225,8 +225,8 @@ func (tx *Tx) Replace(
 				err = fmt.Errorf("update Failed. %d rows affected", num)
 			}
 
-			row := tx.Select(auto, d.View).Where(where).QueryRow()
-			err = row.Scan(dest...)
+			row := tx.Select(auto, d.View).Where(where).QueryRowContext(tx.Context)
+			err = row.ScanContext(tx.Context, dest...)
 			if err != nil {
 				log.Debug(err.Error())
 				return

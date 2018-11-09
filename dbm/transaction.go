@@ -17,6 +17,7 @@ import (
 // Tx database transaction
 type Tx struct {
 	*sql.Tx
+	context.Context
 	DbType      string
 	Placeholder sq.PlaceholderFormat
 	Returns     bool
@@ -25,6 +26,7 @@ type Tx struct {
 // NewTx create new transaction
 func (db DB) NewTx(ctx context.Context) (tx *Tx, err error) {
 	tx = new(Tx)
+	tx.Context = ctx
 	tx.Tx, err = db.Conn.BeginTx(ctx, nil)
 	tx.Placeholder = db.Placeholder
 	tx.DbType = db.DbType
@@ -36,6 +38,11 @@ func (db DB) NewTx(ctx context.Context) (tx *Tx, err error) {
 // Transaction starts a new database tranaction and executes the supplied func.
 func Transaction(txFunc func(*Tx) error) (err error) {
 	return stdDB.TransactionContext(context.Background(), txFunc)
+}
+
+// TransactionContext starts a new database tranaction and executes the supplied func with context.
+func TransactionContext(ctx context.Context, txFunc func(*Tx) error) (err error) {
+	return stdDB.TransactionContext(ctx, txFunc)
 }
 
 // Transaction starts a new database transction and executes the supplied func.
