@@ -59,7 +59,7 @@ func TestConfig(t *testing.T) {
 
 		var db DB
 		db, err = GetDB("db.test")
-		db.NewTx(context.Background())
+		db.NewTx(context.Background(), false)
 
 		// we make sure that all expectations were met
 		if err := mock.ExpectationsWereMet(); err != nil {

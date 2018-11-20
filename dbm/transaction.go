@@ -25,13 +25,19 @@ type Tx struct {
 }
 
 // NewTx create new transaction
-func (db DB) NewTx(ctx context.Context) (tx *Tx, err error) {
+func (db DB) NewTx(ctx context.Context, readonly bool) (tx *Tx, err error) {
 	sp, nctx := opentracing.StartSpanFromContext(ctx, "NewTx")
 	defer sp.Finish()
 
+	opts := new(sql.TxOptions)
+	if readonly {
+		opts.Isolation = sql.LevelReadCommitted
+		opts.ReadOnly = true
+	}
+
 	tx = new(Tx)
 	tx.Context = nctx
-	tx.Tx, err = db.Conn.BeginTx(nctx, nil)
+	tx.Tx, err = db.Conn.BeginTx(nctx, opts)
 	tx.Placeholder = db.Placeholder
 	tx.DbType = db.DbType
 	tx.Returns = db.Returns
@@ -56,7 +62,42 @@ func (db DB) Transaction(fn func(*Tx) error) error {
 
 // TransactionContext starts a new database transction with context and executes the supplied func.
 func (db DB) TransactionContext(ctx context.Context, txFunc func(*Tx) error) (err error) {
-	tx, err := db.NewTx(ctx)
+	tx, err := db.NewTx(ctx, false)
+
+	if err != nil {
+		log.Error(err.Error())
+		return
+	}
+	defer func() {
+		if p := recover(); p != nil {
+			switch p := p.(type) {
+			case error:
+				err = p
+			default:
+				err = fmt.Errorf("%s", p)
+			}
+		}
+		if err != nil {
+			tx.Rollback()
+			log.Error(err.Error())
+
+			debug.PrintStack()
+			return
+		}
+		err = tx.Commit()
+	}()
+	err = txFunc(tx)
+	return err
+}
+
+// QueryContext starts a new database tranaction and executes the supplied func with context.
+func QueryContext(ctx context.Context, txFunc func(*Tx) error) (err error) {
+	return stdDB.QueryContext(ctx, txFunc)
+}
+
+// QueryContext starts a new database transction with context and executes the supplied func.
+func (db DB) QueryContext(ctx context.Context, txFunc func(*Tx) error) (err error) {
+	tx, err := db.NewTx(ctx, true)
 
 	if err != nil {
 		log.Error(err.Error())
@@ -134,7 +175,7 @@ func (db DB) TransactionContinue(TxID string, txFunc func(*Tx, string) error) (e
 	if TxID == "" {
 
 		TxID = uuid.V4()
-		tx, err = db.NewTx(context.Background())
+		tx, err = db.NewTx(context.Background(), false)
 		if err != nil {
 			log.Error(err.Error())
 			return
