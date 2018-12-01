@@ -1,5 +1,5 @@
 
-package resolver
+package resolvers
 
 import (
 	"context"
