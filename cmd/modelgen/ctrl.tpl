@@ -10,6 +10,7 @@ import (
 
 	model "<...model...>"
 	"sour.is/x/toolbox/dbm"
+	"sour.is/x/toolbox/dbm/qry"
 	"sour.is/x/toolbox/log"
 
 	opentracing "github.com/opentracing/opentracing-go"
@@ -25,6 +26,22 @@ const (
 	Update
 )
 
+// NotFoundError matching row not found
+type NotFoundError string
+
+// Error format message as string
+func (n NotFoundError) Error() string {
+	return string(n)
+}
+
+// ParseError failed to parse query
+type ParseError string
+
+// Error format message as string
+func (n ParseError) Error() string {
+	return string(n)
+}
+
 {{range .Types}}
 // {{.Name}} adds transaction to model
 type {{.Name}} struct {
@@ -32,7 +49,7 @@ type {{.Name}} struct {
 	Where sq.Eq
 	Tx *dbm.Tx
 }
-func get{{.Name}}Tx(tx *dbm.Tx, q QryInput) (lis []model.{{.Name}}, err error) {
+func get{{.Name}}Tx(tx *dbm.Tx, q qry.Input) (lis []model.{{.Name}}, err error) {
 	sp, _ := opentracing.StartSpanFromContext(tx.Context, "ctrl.get{{.Name}}Tx")
 	defer sp.Finish()
 	
@@ -155,7 +172,7 @@ func Put{{.Name}}(id uint64, fn func(Mode, dbm.DbInfo, {{.Name}}) error) (o mode
 			var mode = Insert
 
 			if id != 0 {
-				lis, gErr := gfn(tx, QryInput{d, co.Where, 1, 0, nil})
+				lis, gErr := gfn(tx, qry.Input{d, co.Where, 1, 0, nil})
 				if gErr != nil {
 					err = gErr
 					return
@@ -199,10 +216,10 @@ func List{{.Name}}(where interface{}, limit, offset uint64, order []string) (lis
 func List{{.Name}}Context(ctx context.Context, where interface{}, limit, offset uint64, order []string) (lis []model.{{.Name}}, err error) {
 	d := dbm.GetDbInfo(model.{{.Name}}{})
 
-	return List{{.Name}}Qry(ctx, QryInput{d, where, limit, offset, order})
+	return List{{.Name}}Qry(ctx, qry.Input{d, where, limit, offset, order})
 }
 // List{{.Name}}Qry queries a list of {{.Name}} with Context
-func List{{.Name}}Qry(ctx context.Context, q QryInput) (lis []model.{{.Name}}, err error) {
+func List{{.Name}}Qry(ctx context.Context, q qry.Input) (lis []model.{{.Name}}, err error) {
 		fn := get{{.Name}}Tx
     
         // ----
@@ -224,7 +241,7 @@ func List{{.Name}}ByIDContext(ctx context.Context, ids []uint64) (lis []model.{{
         // ----
 		where := sq.Eq{d.ColPanic("ID"): ids}
 		count = uint64(len(ids))
-		lis, err = fn(ctx, QryInput{d, where, count, 0, nil})
+		lis, err = fn(ctx, qry.Input{d, where, count, 0, nil})
 		return
 }
 // List{{.Name}}Count will count the number of items returned
@@ -239,7 +256,7 @@ func List{{.Name}}CountContext(ctx context.Context, where interface{}, limit, of
 		// ----
 		err = dbm.QueryContext(ctx, func(tx *dbm.Tx) (err error) {
 			count, _ = dbm.Count(tx, d.View, where)
-			lis, err = fn(tx, QryInput{d, where, limit, offset, nil})
+			lis, err = fn(tx, qry.Input{d, where, limit, offset, nil})
 			return
 		})
 		return

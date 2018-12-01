@@ -11,6 +11,7 @@ import (
 
 	ctrl "<...ctrl...>"
 	model "<...model...>"
+
 	"sour.is/x/toolbox/ident"
 )
 
@@ -18,7 +19,7 @@ type contextKey struct {
    name string
 }
 func (c *contextKey) String() string {
-    return "github.rakops.com/prospecting/prospr-api/pkg/loader context key " + c.name
+    return "loader context key " + c.name
 }
 
 // ManagerKey defines the context key for finding the dataloader
@@ -26,10 +27,23 @@ var ManagerKey = contextKey{"loader.Manger"}
 
 // Manager holds all of the loaders for lazy loading from database
 type Manager struct {
-Ident     ident.Ident
+    mu sync.RWMutex
+    Ident     ident.Ident
 {{range .Types}}
 {{.Name}}    {{.Name}}Loader
 {{end}}
+}
+func (m *Manager) GetIdent() *ident.Ident {
+    m.mu.RLock()
+    defer m.mu.RUnlock()
+
+    return &m.Ident
+}
+func (m *Manager) SetIdent(u ident.Ident) {
+    m.mu.Lock()
+    defer m.mu.Unlock()
+
+    m.Ident = u
 }
 
 func Get(id ident.Ident) *Manager {
@@ -39,7 +53,7 @@ func GetContext(ctx context.Context, id ident.Ident) *Manager {
 	return &Manager{
 		Ident: id,
 
-        {{range .}}
+        {{range .Types}}
         {{.Name}}: {{.Name}}Loader{
 			maxBatch: 1000,
 			wait:     75 * time.Millisecond,

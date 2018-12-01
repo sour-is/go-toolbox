@@ -20,7 +20,7 @@ import (
 )
 
 func init() {
-    {{range .}}
+    {{range .Types}}
     httpsrv.IdentRegister("{{.Name}}", httpsrv.IdentRoutes{
       {Name: "get-{{spineCase .Name}}", Method: "GET", Pattern: "/v1/{{spineCase .Name}}", HandlerFunc: get{{.Name}} },
       {Name: "get-{{spineCase .Name}}-by-id", Method: "GET", Pattern: "/v1/{{spineCase .Name}}({ids})", HandlerFunc: get{{.Name}}ByID},
@@ -33,7 +33,7 @@ func init() {
     {{end}}
 }
 
-{{range .}}
+{{range .Types}}
 // swagger:operation GET /v1/{{spineCase .Name}} {{spineCase .Name}} get-{{spineCase .Name}}
 //
 // Get {{.Name}}
