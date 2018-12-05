@@ -12,7 +12,7 @@ import (
 
 // Input is a query for a given table
 type Input struct {
-	dbm.DbInfo
+	*dbm.DbInfo
 	Search interface{}
 	Limit  uint64
 	Offset uint64
@@ -22,7 +22,7 @@ type Input struct {
 // Qry builds a query for a table based on input
 func Qry(db dbm.DbInfo, input *gql.QueryInput) (out Input, err error) {
 
-	out.DbInfo = db
+	out.DbInfo = &db
 	out.Search = nil
 	out.Limit = 0
 	out.Offset = 0
