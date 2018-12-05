@@ -28,10 +28,11 @@ import (
 
 // DB database connection and settings
 type DB struct {
-	Conn        *sql.DB
-	DbType      string
-	Placeholder sq.PlaceholderFormat
-	Returns     bool
+	Conn             *sql.DB
+	DbType           string
+	Placeholder      sq.PlaceholderFormat
+	Returns          bool
+	TxOptionsDisable bool
 }
 
 // GetDB returns a database connection.
@@ -41,6 +42,7 @@ func GetDB(pfx string) (db DB, err error) {
 	connect := viper.GetString(pfx + ".connect")
 	maxConn := viper.GetInt(pfx + ".max_conn")
 	maxLifetime := viper.GetInt(pfx + ".max_lifetime")
+	txOptionsDisable := viper.GetBool(pfx + ".tx_options_disable")
 
 	if dbType == "" {
 		log.Fatal("Database Type is not set!")
@@ -74,6 +76,7 @@ func GetDB(pfx string) (db DB, err error) {
 	db.Conn = conn
 	db.DbType = dbType
 	db.Placeholder = sq.Question
+	db.TxOptionsDisable = txOptionsDisable
 	if strings.Contains(db.DbType, "postgres") {
 		db.Placeholder = sq.Dollar
 		db.Returns = true

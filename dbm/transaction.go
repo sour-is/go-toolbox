@@ -30,7 +30,7 @@ func (db DB) NewTx(ctx context.Context, readonly bool) (tx *Tx, err error) {
 	defer sp.Finish()
 
 	opts := new(sql.TxOptions)
-	if readonly {
+	if readonly && !db.TxOptionsDisable {
 		opts.Isolation = sql.LevelReadCommitted
 		opts.ReadOnly = true
 	}
