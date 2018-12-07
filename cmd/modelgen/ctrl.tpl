@@ -55,7 +55,7 @@ func get{{.Name}}Tx(tx *dbm.Tx, q qry.Input) (lis []model.{{.Name}}, err error) 
 	
 	var o model.{{.Name}}
 	if q.DbInfo == nil {
-		d = dbm.GetDbInfo(o)
+		d := dbm.GetDbInfo(o)
 		q.DbInfo = &d
 	}
 	dcols, dest, err := q.StructMap(&o, nil)
@@ -176,7 +176,7 @@ func Put{{.Name}}(id uint64, fn func(Mode, dbm.DbInfo, {{.Name}}) error) (o mode
 			var mode = Insert
 
 			if id != 0 {
-				lis, gErr := gfn(tx, qry.Input{d, co.Where, 1, 0, nil})
+				lis, gErr := gfn(tx, qry.Input{&d, co.Where, 1, 0, nil})
 				if gErr != nil {
 					err = gErr
 					return
@@ -220,7 +220,7 @@ func List{{.Name}}(where interface{}, limit, offset uint64, order []string) (lis
 func List{{.Name}}Context(ctx context.Context, where interface{}, limit, offset uint64, order []string) (lis []model.{{.Name}}, err error) {
 	d := dbm.GetDbInfo(model.{{.Name}}{})
 
-	return List{{.Name}}Qry(ctx, qry.Input{d, where, limit, offset, order})
+	return List{{.Name}}Qry(ctx, qry.Input{&d, where, limit, offset, order})
 }
 // List{{.Name}}Qry queries a list of {{.Name}} with Context
 func List{{.Name}}Qry(ctx context.Context, q qry.Input) (lis []model.{{.Name}}, err error) {
@@ -245,7 +245,7 @@ func List{{.Name}}ByIDContext(ctx context.Context, ids []uint64) (lis []model.{{
         // ----
 		where := sq.Eq{d.ColPanic("ID"): ids}
 		count = uint64(len(ids))
-		lis, err = fn(ctx, qry.Input{d, where, count, 0, nil})
+		lis, err = fn(ctx, qry.Input{&d, where, count, 0, nil})
 		return
 }
 // List{{.Name}}Count will count the number of items returned
@@ -260,7 +260,7 @@ func List{{.Name}}CountContext(ctx context.Context, where interface{}, limit, of
 		// ----
 		err = dbm.QueryContext(ctx, func(tx *dbm.Tx) (err error) {
 			count, _ = dbm.Count(tx, d.View, where)
-			lis, err = fn(tx, qry.Input{d, where, limit, offset, nil})
+			lis, err = fn(tx, qry.Input{&d, where, limit, offset, nil})
 			return
 		})
 		return
