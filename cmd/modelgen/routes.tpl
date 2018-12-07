@@ -11,7 +11,7 @@ import (
 
     ctrl "<...ctrl...>"
     model "<...model...>"
-    
+
     "sour.is/x/toolbox/dbm/rsql/squirrel"
     "sour.is/x/toolbox/dbm"
     "sour.is/x/toolbox/httpsrv"

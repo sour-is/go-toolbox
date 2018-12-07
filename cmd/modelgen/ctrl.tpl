@@ -55,7 +55,8 @@ func get{{.Name}}Tx(tx *dbm.Tx, q qry.Input) (lis []model.{{.Name}}, err error) 
 	
 	var o model.{{.Name}}
 	if q.DbInfo == nil {
-		q.DbInfo = dbm.GetDbInfo(o)
+		d = dbm.GetDbInfo(o)
+		q.DbInfo = &d
 	}
 	dcols, dest, err := q.StructMap(&o, nil)
 	if err != nil {
