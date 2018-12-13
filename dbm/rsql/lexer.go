@@ -5,19 +5,20 @@ import (
 	"unicode/utf8"
 )
 
+// Lexer reads tokens from input
 type Lexer struct {
 	input string
 	position int
 	readPosition int
 	rune rune
 }
-
+// NewLexer returns a new lexing generator
 func NewLexer(in string) *Lexer {
 	l := &Lexer{input: in}
 	l.readRune()
 	return l
 }
-
+// NextToken returns the next token from lexer
 func (l *Lexer) NextToken() Token {
 	var tok Token
 
@@ -71,6 +72,10 @@ func (l *Lexer) NextToken() Token {
 			r := l.rune
 			l.readRune()
 			tok.Type, tok.Literal = TokNEQ, string(r) + string(l.rune)
+		} else if l.peekRune() == '~' {
+			r := l.rune
+			l.readRune()
+			tok.Type, tok.Literal = TokNLIKE, string(r) + string(l.rune)
 		} else {
 			tok = newToken(TokIllegal, l.rune)
 			return tok
@@ -135,11 +140,11 @@ func (l *Lexer) readRune() {
 func (l *Lexer) peekRune() rune {
 	if l.readPosition >= len(l.input) {
 		return 0
-	} else {
-		r, _ := utf8.DecodeRuneInString(l.input[l.readPosition:])
-		return r
 	}
+	r, _ := utf8.DecodeRuneInString(l.input[l.readPosition:])
+	return r
 }
+
 func (l *Lexer) skipSpace() {
 	for unicode.IsSpace(l.rune) {
 		l.readRune()

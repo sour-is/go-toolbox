@@ -18,6 +18,7 @@ const (
 	TokRBracket = "]"
 
 	TokLIKE = "~"
+	TokNLIKE= "!~"
 	TokNOT  = "!"
 	TokLT   = "<"
 	TokGT   = ">"
@@ -41,7 +42,9 @@ var keywords = map[string]TokenType {
 	"or":    TokOR,
 }
 
+// TokenType is a token enumeration
 type TokenType string
+// Token is a type and literal pair
 type Token struct {
 	Type    TokenType
 	Literal string

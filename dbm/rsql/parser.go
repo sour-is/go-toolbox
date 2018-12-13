@@ -6,6 +6,7 @@ import (
 	"strings"
 )
 
+// Precidence enumerations
 const (
 	_  = iota
 	PrecedenceLowest
@@ -32,6 +33,7 @@ type (
 	infixParseFn func(expression Expression) Expression
 )
 
+// Parser reads lexed values and builds an AST
 type Parser struct {
 	l *Lexer
 	errors []string
@@ -43,6 +45,7 @@ type Parser struct {
 	infixParseFns  map[TokenType]infixParseFn
 }
 
+// NewParser returns a parser for a given lexer
 func NewParser(l *Lexer) *Parser {
 	p := &Parser{l: l}
 
@@ -80,6 +83,7 @@ func (p *Parser) registerPrefix(tokenType TokenType, fn prefixParseFn) {
 func (p *Parser) registerInfix(tokenType TokenType, fn infixParseFn) {
 	p.infixParseFns[tokenType] = fn
 }
+// Errors returns a list of errors while parsing
 func (p *Parser) Errors() []string {
 	return p.errors
 }
@@ -103,10 +107,9 @@ func (p *Parser) expectPeek(t TokenType) bool {
 	if p.peekTokenIs(t) {
 		p.nextToken()
 		return true
-	} else {
-		p.peekError(t)
-		return false
 	}
+	p.peekError(t)
+	return false
 }
 func (p *Parser) peekPrecedence() int {
 	if p, ok := precidences[p.peekToken.Type]; ok {
@@ -120,7 +123,7 @@ func (p *Parser) curPrecedence() int {
 	}
 	return PrecedenceLowest
 }
-
+// ParseProgram builds a program AST from lexer
 func (p *Parser) ParseProgram() *Program {
 	program := &Program{}
 	program.Statements = []Statement{}
