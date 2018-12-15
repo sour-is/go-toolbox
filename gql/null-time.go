@@ -1,4 +1,4 @@
-package phoenix
+package gql
 
 import (
 	"bytes"
