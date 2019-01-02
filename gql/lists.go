@@ -186,7 +186,7 @@ func (e ListStrings) MarshalJSON() (out []byte, err error) {
 
 	var arr []string
 	for _, s := range e {
-		arr = append(arr, s)
+		arr = append(arr, fmt.Sprintf("'%s'", strings.Replace("'", "''", s)))
 	}
 	_, err = b.WriteString(strings.Join(arr, ","))
 	if err != nil {
