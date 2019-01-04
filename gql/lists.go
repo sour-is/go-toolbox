@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"strconv"
 	"strings"
+	"unicode"
 )
 
 // ListIDs is a list of ID values.
@@ -122,7 +123,6 @@ func (e *ListStrings) Scan(value interface{}) (err error) {
 		str = string(v)
 	case []rune:
 		str = string(v)
-
 	default:
 		return fmt.Errorf("array must be uint64, got: %T", value)
 	}
@@ -133,7 +133,23 @@ func (e *ListStrings) Scan(value interface{}) (err error) {
 		return nil
 	}
 
-	for _, s := range strings.Split(str, ",") {
+	lastQuote := rune(0)
+	f := func(c rune) bool {
+		switch {
+		case c == lastQuote:
+			lastQuote = rune(0)
+			return false
+		case lastQuote != rune(0):
+			return false
+		case unicode.In(c, unicode.Quotation_Mark):
+			lastQuote = c
+			return false
+		default:
+			return c == ','
+		}
+	}
+
+	for _, s := range strings.FieldsFunc(str, f) {
 		*e = append(*e, strings.Trim(s, `"`))
 	}
 
@@ -168,7 +184,24 @@ func (e *ListStrings) UnmarshalJSON(in []byte) error {
 	if str == "" {
 		return nil
 	}
-	for _, s := range strings.Split(str, ",") {
+
+	lastQuote := rune(0)
+	f := func(c rune) bool {
+		switch {
+		case c == lastQuote:
+			lastQuote = rune(0)
+			return false
+		case lastQuote != rune(0):
+			return false
+		case unicode.In(c, unicode.Quotation_Mark):
+			lastQuote = c
+			return false
+		default:
+			return c == ','
+		}
+	}
+
+	for _, s := range strings.FieldsFunc(str, f) {
 		s = strings.Trim(s, `"`)
 		*e = append(*e, s)
 	}
