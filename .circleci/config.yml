@@ -17,6 +17,7 @@ jobs:
 
       - run: mkdir -p ${TEST_RESULTS}/tests
       - run: go get github.com/jstemmer/go-junit-report
+      - run: go get -u github.com/golang/dep/cmd/dep
       - run: go install github.com/golang/dep/cmd/dep
 
       - run: dep ensure
