@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io"
 	"strconv"
+	"strings"
 
 	"github.com/vektah/gqlgen/graphql"
 )
@@ -34,6 +35,10 @@ func MarshalUint64(t uint64) graphql.Marshaler {
 func UnmarshalUint64(v interface{}) (uint64, error) {
 	switch t := v.(type) {
 	case string:
+		t = strings.Trim(t, `"'`)
+		if t == "" {
+			return 0, nil
+		}
 		return strconv.ParseUint(t, 10, 64)
 	case int:
 		return uint64(t), nil
@@ -63,6 +68,10 @@ func MarshalUint32(t uint32) graphql.Marshaler {
 func UnmarshalUint32(v interface{}) (uint32, error) {
 	switch t := v.(type) {
 	case string:
+		t = strings.Trim(t, `"'`)
+		if t == "" {
+			return 0, nil
+		}
 		u, err := strconv.ParseUint(t, 10, 32)
 		return uint32(u), err
 	case int:
