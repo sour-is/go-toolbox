@@ -16,3 +16,8 @@ release: inc-patch
 	git tag -a "v$(VERSION)" -m "tag version $(VERSION)"
 	git push
 	git push --tags
+
+test:
+	TMP=$(shell mktemp) && \
+	go test -v ./... 2>&1 | tee "$$TMP" && \
+	grep total "$$TMP"|cut -d' ' -f 1|/usr/bin/paste -s -d+ -|bc

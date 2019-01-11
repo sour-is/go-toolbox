@@ -1,6 +1,7 @@
 package gql
 
 import "testing"
+import . "github.com/smartystreets/goconvey/convey"
 
 func TestUnmarshalUint64(t *testing.T) {
 	type test struct {
@@ -13,40 +14,51 @@ func TestUnmarshalUint64(t *testing.T) {
 		{"0", 0, false},
 		{"1", 1, false},
 		{`""`, 0, false},
+		{"xxx", 0, true},
+		{3, 3, false},
 	}
 
-	for i, v := range tt {
-		r, err := UnmarshalUint64(v.In)
+	Convey("Tests for UnmarshalUint64", t, func() {
+		for _, v := range tt {
+			r, err := UnmarshalUint64(v.In)
 
-		if err != nil && !v.Err {
-			t.Fatalf("Test %d: Failed %v", i, err)
-		}
+			if v.Err {
+				So(err, ShouldNotBeNil)
+			} else {
+				So(err, ShouldBeNil)
+			}
 
-		if r != v.Out {
-			t.Fatalf("Test %d: Failed %d != %d", i, r, v.Out)
+			So(r, ShouldEqual, v.Out)
 		}
-	}
+	})
 }
 
 func TestUnmarshalUint32(t *testing.T) {
 	type test struct {
 		In  interface{}
 		Out uint32
+		Err bool
 	}
 	tt := []test{
-		{"", 0},
-		{"0", 0},
-		{"1", 1},
-		{`""`, 0},
+		{"", 0, false},
+		{"0", 0, false},
+		{"1", 1, false},
+		{`""`, 0, false},
+		{"xxx", 0, true},
+		{3, 3, false},
 	}
 
-	for i, v := range tt {
-		r, err := UnmarshalUint32(v.In)
-		if err != nil {
-			t.Fatalf("Test %d: Failed %v", i, err)
+	Convey("Tests for UnmarshalUint32", t, func() {
+		for _, v := range tt {
+			r, err := UnmarshalUint32(v.In)
+
+			if v.Err {
+				So(err, ShouldNotBeNil)
+			} else {
+				So(err, ShouldBeNil)
+			}
+
+			So(r, ShouldEqual, v.Out)
 		}
-		if r != v.Out {
-			t.Fatalf("Test %d: Failed %d != %d", i, r, v.Out)
-		}
-	}
+	})
 }
