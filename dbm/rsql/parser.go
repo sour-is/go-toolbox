@@ -8,7 +8,7 @@ import (
 
 // Precidence enumerations
 const (
-	_  = iota
+	_ = iota
 	PrecedenceLowest
 	PrecedenceAND
 	PrecedenceOR
@@ -17,28 +17,28 @@ const (
 )
 
 var precidences = map[TokenType]int{
-	TokEQ: PrecedenceCompare,
-	TokNEQ: PrecedenceCompare,
-	TokLT: PrecedenceCompare,
-	TokLE: PrecedenceCompare,
-	TokGT: PrecedenceCompare,
-	TokGE: PrecedenceCompare,
+	TokEQ:   PrecedenceCompare,
+	TokNEQ:  PrecedenceCompare,
+	TokLT:   PrecedenceCompare,
+	TokLE:   PrecedenceCompare,
+	TokGT:   PrecedenceCompare,
+	TokGE:   PrecedenceCompare,
 	TokLIKE: PrecedenceCompare,
-	TokOR: PrecedenceOR,
-	TokAND: PrecedenceAND,
+	TokOR:   PrecedenceOR,
+	TokAND:  PrecedenceAND,
 }
 
 type (
 	prefixParseFn func() Expression
-	infixParseFn func(expression Expression) Expression
+	infixParseFn  func(expression Expression) Expression
 )
 
 // Parser reads lexed values and builds an AST
 type Parser struct {
-	l *Lexer
+	l      *Lexer
 	errors []string
 
-	curToken Token
+	curToken  Token
 	peekToken Token
 
 	prefixParseFns map[TokenType]prefixParseFn
@@ -77,12 +77,20 @@ func NewParser(l *Lexer) *Parser {
 	return p
 }
 
+// DefaultParse sets up a default lex/parse and returns the program
+func DefaultParse(in string) *Program {
+	l := NewLexer(in)
+	p := NewParser(l)
+	return p.ParseProgram()
+}
+
 func (p *Parser) registerPrefix(tokenType TokenType, fn prefixParseFn) {
 	p.prefixParseFns[tokenType] = fn
 }
 func (p *Parser) registerInfix(tokenType TokenType, fn infixParseFn) {
 	p.infixParseFns[tokenType] = fn
 }
+
 // Errors returns a list of errors while parsing
 func (p *Parser) Errors() []string {
 	return p.errors
@@ -123,6 +131,7 @@ func (p *Parser) curPrecedence() int {
 	}
 	return PrecedenceLowest
 }
+
 // ParseProgram builds a program AST from lexer
 func (p *Parser) ParseProgram() *Program {
 	program := &Program{}
@@ -220,7 +229,7 @@ func (p *Parser) parseArray() Expression {
 	return array
 }
 func (p *Parser) parseExpressionList(end TokenType) []Expression {
-    var list []Expression
+	var list []Expression
 
 	if p.peekTokenIs(end) {
 		p.nextToken()
@@ -228,11 +237,11 @@ func (p *Parser) parseExpressionList(end TokenType) []Expression {
 	}
 
 	p.nextToken()
-    list = append(list, p.parseExpression(PrecedenceHighest))
-    for p.peekTokenIs(TokOR) {
-    	p.nextToken()
-    	p.nextToken()
-    	list = append(list, p.parseExpression(PrecedenceHighest))
+	list = append(list, p.parseExpression(PrecedenceHighest))
+	for p.peekTokenIs(TokOR) {
+		p.nextToken()
+		p.nextToken()
+		list = append(list, p.parseExpression(PrecedenceHighest))
 	}
 
 	if !p.expectPeek(end) {
@@ -243,8 +252,8 @@ func (p *Parser) parseExpressionList(end TokenType) []Expression {
 }
 func (p *Parser) parseInfixExpression(left Expression) Expression {
 	expression := &InfixExpression{
-		Token: p.curToken,
-		Left: left,
+		Token:    p.curToken,
+		Left:     left,
 		Operator: p.curToken.Literal,
 	}
 
