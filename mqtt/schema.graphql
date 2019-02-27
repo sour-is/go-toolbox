@@ -1,0 +1,16 @@
+extend type Mutation {
+    mqttPublish(
+        topic:   String!
+        message: String!
+    ): Boolean!
+}
+
+extend type Subscription {
+    """MQTT Stream"""
+    mqtt(topic: String! qos: Int = 0): MQTTMessage!
+}
+
+type MQTTMessage {
+    topic: String!
+    message: String!
+}

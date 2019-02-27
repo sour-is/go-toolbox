@@ -199,7 +199,9 @@ func (u User) HasGroup(g ...string) bool {
 
 // IsActive returns true if user is active
 func (u User) IsActive() bool {
-	return u.Active
+	user := GetSessionID(u.Meta["session"])
+
+	return user.IsActive()
 }
 
 // GetDisplay returns the display name of user

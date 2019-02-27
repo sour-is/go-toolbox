@@ -1,0 +1,20 @@
+## merucry config
+type MercurySpace {
+    id:         ID!
+    space:      String!
+    tags:       [String!]!
+    notes:      [String!]!
+    list:       [MercuryValue!]!
+}
+
+type MercuryValue {
+    name:       String!
+    seq:        ID!
+    tags:       [String!]!
+    notes:      [String!]!
+    values:     [String!]!
+}
+
+extend type Query {
+    config(space: String query: QueryInput): [MercurySpace!]!
+}

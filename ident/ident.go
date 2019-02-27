@@ -19,6 +19,7 @@ import (
 	"sour.is/x/toolbox/log"
 )
 
+// Ident interface for a logged in user
 type Ident interface {
 	GetIdentity() string
 	GetAspect() string
@@ -30,20 +31,31 @@ type Ident interface {
 	GetDisplay() string
 }
 
+// Anonymous is a logged out user
 var Anonymous = NewNullUser("anon", "none", "Guest User", false)
 
+// IdentConfig key values to pass to an ident handler
 type IdentConfig map[string]string
+
+// IdentConfigs configs for each handler
 type IdentConfigs map[string]IdentConfig
+
+// IdentHandler handler function to read ident from HTTP request
 type IdentHandler func(r *http.Request) Ident
 
+// IdentSet set of handlers for ident
 var IdentSet = make(map[string]IdentHandler)
+
+// Config configs for handlers
 var Config = IdentConfigs{}
 
+// Register a ident handler
 func Register(name string, fn IdentHandler) {
 	name = strings.ToLower(name)
 	IdentSet[name] = fn
 }
 
+// RegisterConfig for an ident handler
 func RegisterConfig(name string, config map[string]string) {
 	if _, ok := IdentSet[name]; !ok {
 		log.Fatalf("IDENT: No handler registered for %s", name)
@@ -55,6 +67,7 @@ func RegisterConfig(name string, config map[string]string) {
 	Config[name] = config
 }
 
+// GetIdent read ident from a list of ident handlers
 func GetIdent(authList string, r *http.Request) Ident {
 	for _, name := range strings.Fields(authList) {
 		var i IdentHandler
@@ -73,38 +86,4 @@ func GetIdent(authList string, r *http.Request) Ident {
 	}
 
 	return Anonymous
-}
-
-type NullUser struct {
-	Ident  string `json:"ident"`
-	Aspect string `json:"aspect"`
-	Name   string `json:"name"`
-	Active bool   `json:"active"`
-}
-
-func NewNullUser(ident, aspect, name string, active bool) NullUser {
-	return NullUser{ident, aspect, name, active}
-}
-func (m NullUser) GetIdentity() string {
-	return m.Ident
-}
-func (m NullUser) GetAspect() string {
-	return m.Aspect
-}
-func (m NullUser) HasRole(r ...string) bool {
-	return m.Active
-}
-func (m NullUser) HasGroup(g ...string) bool {
-	return m.Active
-}
-func (m NullUser) IsActive() bool {
-	return m.Active
-}
-func (m NullUser) GetDisplay() string {
-	return m.Name
-}
-func (m NullUser) MakeHandlerFunc() func(r *http.Request) Ident {
-	return func(r *http.Request) Ident {
-		return m
-	}
 }
