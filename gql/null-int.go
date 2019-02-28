@@ -1,4 +1,4 @@
-package prospr
+package gql
 
 import (
 	"database/sql"
@@ -11,65 +11,6 @@ import (
 	"github.com/vektah/gqlgen/graphql"
 	"sour.is/x/toolbox/log"
 )
-
-// MarshalNullInt32 is a nullable int marshaller
-func MarshalNullInt32(b sql.NullInt32) graphql.Marshaler {
-	return graphql.WriterFunc(func(w io.Writer) {
-		if b.Valid {
-			_, err := w.Write([]byte(fmt.Sprintf("%v", b.Int32)))
-			if err != nil {
-				log.Error(err)
-			}
-		} else {
-			_, err := w.Write([]byte("null"))
-			if err != nil {
-				log.Error(err)
-			}
-		}
-	})
-}
-
-// UnmarshalNullInt32 is a nullable int unmarshaller
-func UnmarshalNullInt32(v interface{}) (i sql.NullInt32, err error) {
-	switch v := v.(type) {
-	case string:
-		if v == "<nil>" || v == "null" || v == "" {
-			return
-		}
-		i.Int32, err = strconv.ParseInt(v, 10, 32)
-		if err == nil {
-			i.Valid = true
-		} else {
-			log.Error(err)
-		}
-
-		return
-
-	case int:
-		i.Valid = true
-		i.Int32 = int32(v)
-		return
-
-	case nil:
-		return
-
-	case json.Number:
-		i.Int32, err = v.Int32()
-		if err == nil {
-			i.Valid = true
-		} else {
-			log.Error(err)
-		}
-
-		return
-
-	default:
-		err = fmt.Errorf("%T is not a int32 or null", v)
-		log.Error(err)
-
-		return
-	}
-}
 
 // MarshalNullInt64 is a nullable int marshaller
 func MarshalNullInt64(b sql.NullInt64) graphql.Marshaler {
@@ -177,7 +118,7 @@ func (n NullUint64) Value() (driver.Value, error) {
 	return fmt.Sprintf("%v", n.Uint64), nil
 }
 
-// MarshalNullUint overrides the default data type of NullUint for graphQL
+// MarshalNullUint64 overrides the default data type of NullUint for graphQL
 func MarshalNullUint64(t uint64) graphql.Marshaler {
 	return graphql.WriterFunc(func(w io.Writer) {
 		_, err := io.WriteString(w, strconv.FormatUint(t, 10))
@@ -187,7 +128,7 @@ func MarshalNullUint64(t uint64) graphql.Marshaler {
 	})
 }
 
-// UnmarshalNullUint overrides the default data type of NullUint for graphQL
+// UnmarshalNullUint64 overrides the default data type of NullUint for graphQL
 func UnmarshalNullUint64(v interface{}) (n NullUint64, err error) {
 	if v == nil {
 		n.Uint64, n.Valid = 0, false
