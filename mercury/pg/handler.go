@@ -67,7 +67,7 @@ func (p postgresHandler) GetObjects(search mercury.NamespaceSearch, pgm *rsql.Pr
 }
 
 func (postgresHandler) GetRules(user ident.Ident) (rules mercury.Rules) {
-	rules, err := GetRules(user.GetIdentity())
+	rules, err := GetRules(user)
 	if err != nil {
 		return nil
 	}

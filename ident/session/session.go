@@ -187,6 +187,14 @@ func (u User) HasRole(r ...string) bool {
 	return false
 }
 
+// GetRoles returns list of roles
+func (u User) GetRoles() (lis []string) {
+	for r := range u.Roles {
+		lis = append(lis, r)
+	}
+	return
+}
+
 // HasGroup returns true if any groups match
 func (u User) HasGroup(g ...string) bool {
 	for _, k := range g {
@@ -195,6 +203,14 @@ func (u User) HasGroup(g ...string) bool {
 		}
 	}
 	return false
+}
+
+// GetGroups returns list of groups
+func (u User) GetGroups() (lis []string) {
+	for g := range u.Groups {
+		lis = append(lis, g)
+	}
+	return
 }
 
 // IsActive returns true if user is active

@@ -78,6 +78,13 @@ func TestSession(t *testing.T) {
 			So(u.HasRole("writer"), ShouldBeTrue)
 			So(u.HasRole("reader"), ShouldBeTrue)
 
+			switch u := u.(type) {
+			case User:
+				So(u.GetGroups(), ShouldContain, "admin")
+				So(u.GetRoles(), ShouldContain, "writer")
+				So(u.GetRoles(), ShouldContain, "reader")
+			}
+
 		})
 
 		Convey("If the session has been deleted", func() {
