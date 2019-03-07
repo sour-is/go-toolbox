@@ -392,7 +392,7 @@ func WriteConfig(tx *dbm.Tx, config mercury.ArraySpace) (err error) {
 	if len(newNames) > 0 {
 		err = tx.Fetch(
 			fmt.Sprintf("generate_series( 1, %d )", len(newNames)),
-			[]string{"nextval('phoenix.mercury_spaces_id_seq')"},
+			[]string{"nextval('mercury_spaces_id_seq')"},
 			nil, 0, 0, nil,
 			func(row *sql.Rows) error {
 				var u uint64

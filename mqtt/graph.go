@@ -1,4 +1,6 @@
-/* modules:
+/*Package mqtt implements a mqtt pub/sub interface
+
+modules:
 MQTTMessage:
 	model: sour.is/x/toolbox/mqtt.GraphMessage
 */
