@@ -2,6 +2,7 @@ package mercury
 
 import (
 	"context"
+	"strings"
 
 	"sour.is/x/toolbox/gql"
 	"sour.is/x/toolbox/ident"
@@ -52,4 +53,12 @@ func (GraphMercury) RegistryStore(ctx context.Context, space string, attributes 
 	}
 
 	return
+}
+
+// Value returns a joined value
+func (GraphMercury) Value(ctx context.Context, value *Value) (string, error) {
+	if value == nil {
+		return "", nil
+	}
+	return strings.Join(value.Values, "\n"), nil
 }

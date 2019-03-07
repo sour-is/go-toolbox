@@ -13,6 +13,7 @@ type MercuryValue {
     tags:       [String!]!
     notes:      [String!]!
     values:     [String!]!
+    value:      String!
 }
 
 extend type Query {
