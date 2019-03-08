@@ -27,18 +27,15 @@ func (e *ListIDs) Scan(value interface{}) (err error) {
 		return fmt.Errorf("array must be uint64, got: %T", value)
 	}
 
-	*e = ListIDs{}
-	str = strings.Trim(str, `{}`)
-	if len(str) == 0 {
-		return nil
+	if e == nil {
+		*e = ListIDs{}
 	}
 
-	for _, s := range strings.Split(str, ",") {
+	for _, s := range splitComma(string(str)) {
 		an, err := strconv.ParseUint(s, 10, 64)
 		if err != nil {
-			return fmt.Errorf("%s is not a valid uint64", s)
+			return fmt.Errorf("%d is not a valid uint64", an)
 		}
-
 		*e = append(*e, an)
 	}
 
@@ -68,13 +65,11 @@ func (e ListIDs) Value() (v driver.Value, err error) {
 
 // UnmarshalJSON implements the JSON interface for ListIDs.
 func (e *ListIDs) UnmarshalJSON(in []byte) error {
-	in = bytes.Trim(in, `[]`)
-	str := string(in)
-	if str == "" {
-		return nil
+	if e == nil {
+		*e = ListIDs{}
 	}
-	for _, s := range strings.Split(str, ",") {
-		s = strings.Trim(s, `"`)
+
+	for _, s := range splitComma(string(in)) {
 		an, err := strconv.ParseUint(s, 10, 64)
 		if err != nil {
 			return fmt.Errorf("%d is not a valid uint64", an)
@@ -127,30 +122,12 @@ func (e *ListStrings) Scan(value interface{}) (err error) {
 		return fmt.Errorf("array must be uint64, got: %T", value)
 	}
 
-	*e = ListStrings{}
-	str = strings.Trim(str, `{}`)
-	if len(str) == 0 {
-		return nil
+	if e == nil {
+		*e = ListStrings{}
 	}
 
-	lastQuote := rune(0)
-	f := func(c rune) bool {
-		switch {
-		case c == lastQuote:
-			lastQuote = rune(0)
-			return false
-		case lastQuote != rune(0):
-			return false
-		case unicode.In(c, unicode.Quotation_Mark):
-			lastQuote = c
-			return false
-		default:
-			return c == ','
-		}
-	}
-
-	for _, s := range strings.FieldsFunc(str, f) {
-		*e = append(*e, strings.Trim(s, `"`))
+	for _, s := range splitComma(string(str)) {
+		*e = append(*e, s)
 	}
 
 	return nil
@@ -179,30 +156,11 @@ func (e ListStrings) Value() (v driver.Value, err error) {
 
 // UnmarshalJSON implements the JSON interface for ListStrings.
 func (e *ListStrings) UnmarshalJSON(in []byte) error {
-	in = bytes.Trim(in, `[]`)
-	str := string(in)
-	if str == "" {
-		return nil
+	if e == nil {
+		*e = ListStrings{}
 	}
 
-	lastQuote := rune(0)
-	f := func(c rune) bool {
-		switch {
-		case c == lastQuote:
-			lastQuote = rune(0)
-			return false
-		case lastQuote != rune(0):
-			return false
-		case unicode.In(c, unicode.Quotation_Mark):
-			lastQuote = c
-			return false
-		default:
-			return c == ','
-		}
-	}
-
-	for _, s := range strings.FieldsFunc(str, f) {
-		s = strings.Trim(s, `"`)
+	for _, s := range splitComma(string(in)) {
 		*e = append(*e, s)
 	}
 
@@ -232,4 +190,36 @@ func (e ListStrings) MarshalJSON() (out []byte, err error) {
 	}
 
 	return b.Bytes(), nil
+}
+
+func splitComma(s string) []string {
+	s = strings.Trim(s, `{}[]`)
+	if len(s) == 0 {
+		return nil
+	}
+
+	lastQuote := rune(0)
+	f := func(c rune) bool {
+		switch {
+		case c == lastQuote:
+			lastQuote = rune(0)
+			return false
+		case lastQuote != rune(0):
+			return false
+		case unicode.In(c, unicode.Quotation_Mark):
+			lastQuote = c
+			return false
+		default:
+			return c == ','
+		}
+	}
+	lis := strings.FieldsFunc(s, f)
+
+	var out []string
+	for _, s := range lis {
+		s = strings.Trim(s, `'`)
+		out = append(out, s)
+	}
+
+	return out
 }
