@@ -148,7 +148,7 @@ func (o SpaceTx) Save() (err error) {
 		d.ColPanic("Notes"): gql.ListStrings(o.Notes),
 		d.ColPanic("Tags"):  gql.ListStrings(o.Tags),
 	}
-
+	log.Debug("REPLACE ", setMap, " WHERE ", o.Where)
 	// ----
 	_, err = o.Tx.Replace(
 		d, op, o.Where,
@@ -358,9 +358,14 @@ func WriteConfig(tx *dbm.Tx, config mercury.ArraySpace) (err error) {
 
 	// update spaces
 	for _, u := range updateSpaces {
+		s, ok := spaceMap[u.Space]
+		if !ok {
+			continue
+		}
+
 		_, err = PutSpace(u.ID, func(mode Mode, db dbm.DbInfo, o SpaceTx) (err error) {
-			o.Notes = u.Notes
-			o.Tags = u.Tags
+			o.Notes = s.Notes
+			o.Tags = s.Tags
 
 			return o.Save()
 		})
