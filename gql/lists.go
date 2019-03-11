@@ -7,6 +7,7 @@ import (
 	"strconv"
 	"strings"
 	"unicode"
+	"unicode/utf8"
 )
 
 // ListIDs is a list of ID values.
@@ -110,6 +111,7 @@ type ListStrings []string
 
 // Scan implements the Scanner interface for ListIDs.
 func (e *ListStrings) Scan(value interface{}) (err error) {
+
 	var str string
 	switch v := value.(type) {
 	case string:
@@ -124,6 +126,11 @@ func (e *ListStrings) Scan(value interface{}) (err error) {
 
 	if e == nil {
 		*e = ListStrings{}
+	}
+
+	str = trim(str, '{', '}')
+	if len(str) == 0 {
+		return nil
 	}
 
 	for _, s := range splitComma(string(str)) {
@@ -144,7 +151,7 @@ func (e ListStrings) Value() (v driver.Value, err error) {
 
 	var arr []string
 	for _, s := range e {
-		arr = append(arr, s)
+		arr = append(arr, `"`+s+`"`)
 	}
 	_, err = b.WriteString(strings.Join(arr, ",") + "}")
 	if err != nil {
@@ -159,9 +166,15 @@ func (e *ListStrings) UnmarshalJSON(in []byte) error {
 	if e == nil {
 		*e = ListStrings{}
 	}
+	s := string(in)
 
-	for _, s := range splitComma(string(in)) {
-		*e = append(*e, s)
+	s = trim(s, '[', ']')
+	if len(s) == 0 {
+		return nil
+	}
+
+	for _, p := range splitComma(s) {
+		*e = append(*e, p)
 	}
 
 	return nil
@@ -193,11 +206,6 @@ func (e ListStrings) MarshalJSON() (out []byte, err error) {
 }
 
 func splitComma(s string) []string {
-	s = strings.Trim(s, `{}[]`)
-	if len(s) == 0 {
-		return nil
-	}
-
 	lastQuote := rune(0)
 	f := func(c rune) bool {
 		switch {
@@ -217,9 +225,29 @@ func splitComma(s string) []string {
 
 	var out []string
 	for _, s := range lis {
-		s = strings.Trim(s, `'`)
+		s = trim(s, '"', '"')
 		out = append(out, s)
 	}
 
 	return out
+}
+
+func trim(s string, start, end rune) string {
+	r0, size0 := utf8.DecodeRuneInString(s)
+	if size0 == 0 {
+		return s
+	}
+	if r0 != start {
+		return s
+	}
+
+	r1, size1 := utf8.DecodeLastRuneInString(s)
+	if size1 == 0 {
+		return s
+	}
+	if r1 != end {
+		return s
+	}
+
+	return s[size0 : len(s)-size1]
 }

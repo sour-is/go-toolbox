@@ -49,16 +49,23 @@ func (lis ArraySpace) StringList() string {
 func (lis ArraySpace) String() string {
 	nsLen := 1
 	attLen := 1
+	tagLen := 1
 
 	for _, o := range lis {
 		if nsLen <= len(o.Space) {
 			nsLen = len(o.Space) + 1
 		}
 		for _, v := range o.List {
-			l := len(v.Name) + len(strings.Join(v.Tags, " "))
+			l := len(v.Name)
 
 			if attLen <= l {
 				attLen = l + 1
+			}
+
+			t := len(strings.Join(v.Tags, " "))
+
+			if tagLen <= t {
+				tagLen = t + 1
 			}
 		}
 	}
@@ -86,19 +93,21 @@ func (lis ArraySpace) String() string {
 				buf.WriteString("\n")
 			}
 			buf.WriteString(o.Space)
-			nameLen := len(v.Name)
+			buf.WriteString(strings.Repeat(" ", nsLen-len(o.Space)))
+
 			if len(v.Tags) > 0 {
 				t := strings.Join(v.Tags, " ")
-				nameLen += len(t)
 
 				buf.WriteRune(' ')
 				buf.WriteString(t)
-				buf.WriteRune(' ')
+				buf.WriteString(strings.Repeat(" ", tagLen-len(t)))
 			} else {
-				buf.WriteString(strings.Repeat(" ", nsLen-len(o.Space)))
+				buf.WriteString(strings.Repeat(" ", tagLen+1))
 			}
+
 			buf.WriteString(v.Name)
 			buf.WriteString(strings.Repeat(" ", attLen-len(v.Name)))
+
 			switch len(v.Values) {
 			case 0:
 				buf.WriteString(":")
@@ -112,7 +121,7 @@ func (lis ArraySpace) String() string {
 				buf.WriteString(v.Values[0])
 				buf.WriteString("\n")
 				for _, s := range v.Values[1:] {
-					buf.WriteString(strings.Repeat(" ", nsLen+attLen))
+					buf.WriteString(strings.Repeat(" ", nsLen+attLen+tagLen+1))
 					buf.WriteString(":")
 					buf.WriteString(s)
 					buf.WriteString("\n")
