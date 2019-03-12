@@ -1,114 +1,136 @@
 package rsql
 
 import (
-	"testing"
 	"fmt"
 	"strings"
+	"testing"
+
+	. "github.com/smartystreets/goconvey/convey"
 )
 
 func TestIdentifierExpression(t *testing.T) {
 	input := `foobar`
 
-	l := NewLexer(input)
-	p := NewParser(l)
+	Convey("Identifier Expressions", t, func() {
+		l := NewLexer(input)
+		p := NewParser(l)
 
-	program := p.ParseProgram()
-	checkParserErrors(t, p)
+		program := p.ParseProgram()
+		checkParserErrors(t, p)
 
-	if len(program.Statements) != 1 {
-		t.Fatalf("program has not envough statements. got=%d", len(program.Statements))
-	}
+		So(len(program.Statements), ShouldEqual, 1)
+		// if len(program.Statements) != 1 {
+		// 	t.Fatalf("program has not envough statements. got=%d", len(program.Statements))
+		// }
+	})
 }
 
 func TestIntegerExpression(t *testing.T) {
 	input := `5`
 
-	l := NewLexer(input)
-	p := NewParser(l)
+	Convey("IntegerExpression", t, func() {
+		l := NewLexer(input)
+		p := NewParser(l)
 
-	program := p.ParseProgram()
-	checkParserErrors(t, p)
+		program := p.ParseProgram()
+		checkParserErrors(t, p)
 
-	if len(program.Statements) != 1 {
-		t.Fatalf("program has not envough statements. got=%d", len(program.Statements))
-	}
-	stmt, ok := program.Statements[0].(*ExpressionStatement)
-	if !ok {
-		t.Fatalf("program.Statements[0] is not ExpressionStatement got=%T",
-			program.Statements[0])
-	}
+		So(len(program.Statements), ShouldEqual, 1)
+		// if len(program.Statements) != 1 {
+		// 	t.Fatalf("program has not enough statements. got=%d", len(program.Statements))
+		// }
 
-	literal, ok := stmt.Expression.(*Integer)
-	if !ok {
-		t.Fatalf("stmt.Expression is not Integer got=%T",
-			stmt.Expression)
-	}
+		stmt, ok := program.Statements[0].(*ExpressionStatement)
+		So(program.Statements[0], ShouldHaveSameTypeAs, &ExpressionStatement{})
+		So(ok, ShouldBeTrue)
+		// if !ok {
+		// 	t.Fatalf("program.Statements[0] is not ExpressionStatement got=%T",
+		// 		program.Statements[0])
+		// }
 
-	if literal.Value != 5 {
-		t.Errorf("literal.Value not %d. got=%d", 5, literal.Value)
-	}
+		literal, ok := stmt.Expression.(*Integer)
+		So(literal, ShouldHaveSameTypeAs, &Integer{})
+		So(ok, ShouldBeTrue)
+		// if !ok {
+		// 	t.Fatalf("stmt.Expression is not Integer got=%T",
+		// 		stmt.Expression)
+		// }
 
-	if literal.TokenLiteral() != "5" {
-		t.Errorf("literal.TokenLiteral not %v. got=%v", "5", literal.TokenLiteral())
-	}
+		So(literal.Value, ShouldEqual, 5)
+		// if literal.Value != 5 {
+		// 	t.Errorf("literal.Value not %d. got=%d", 5, literal.Value)
+		// }
+
+		So(literal.TokenLiteral(), ShouldEqual, "5")
+		// if literal.TokenLiteral() != "5" {
+		// 	t.Errorf("literal.TokenLiteral not %v. got=%v", "5", literal.TokenLiteral())
+		// }
+	})
 }
 
 func TestInfixExpression(t *testing.T) {
-	tests := []struct{
-		input string
-		left string
+	tests := []struct {
+		input    string
+		left     string
 		operator string
-		right int64
-	} {
+		right    int64
+	}{
 		{"foo == 1", "foo", "==", 1},
-		{"bar >  2", "bar", ">",  2},
-		{"bin <  3", "bin", "<",  3},
+		{"bar >  2", "bar", ">", 2},
+		{"bin <  3", "bin", "<", 3},
 		{"baz != 4", "baz", "!=", 4},
 		{"buf >= 5", "buf", ">=", 5},
 		{"goz <= 6", "goz", "<=", 6},
 	}
+	Convey("Infix Expressions", t, func() {
+		for _, tt := range tests {
+			l := NewLexer(tt.input)
+			p := NewParser(l)
+			program := p.ParseProgram()
+			checkParserErrors(t, p)
 
-	for _, tt := range tests {
-		l := NewLexer(tt.input)
-		p := NewParser(l)
-		program := p.ParseProgram()
-		checkParserErrors(t, p)
+			So(len(program.Statements), ShouldEqual, 1)
+			// if len(program.Statements) != 1 {
+			// 	t.Fatalf("program has not envough statements. got=%d", len(program.Statements))
+			// }
 
-		if len(program.Statements) != 1 {
-			t.Fatalf("program has not envough statements. got=%d", len(program.Statements))
+			stmt, ok := program.Statements[0].(*ExpressionStatement)
+			So(stmt, ShouldHaveSameTypeAs, &ExpressionStatement{})
+			So(ok, ShouldBeTrue)
+			// if !ok {
+			// 	t.Fatalf("program.Statements[0] is not ExpressionStatement got=%T",
+			// 		program.Statements[0])
+			// }
+
+			exp, ok := stmt.Expression.(*InfixExpression)
+			So(exp, ShouldHaveSameTypeAs, &InfixExpression{})
+			So(ok, ShouldBeTrue)
+			// if !ok {
+			// 	t.Fatalf("stmt.Expression is not InfixExpression got=%T",
+			// 		stmt.Expression)
+			// }
+
+			if !testIdentifier(t, exp.Left, tt.left) {
+				return
+			}
+
+			So(exp.Operator, ShouldEqual, tt.operator)
+			// if exp.Operator != tt.operator {
+			// 	t.Fatalf("exp.Operator is not '%v'. got '%v'", tt.operator, exp.Operator)
+			// }
+
+			if testInteger(t, exp.Right, tt.right) {
+				return
+			}
 		}
-
-		stmt, ok := program.Statements[0].(*ExpressionStatement)
-		if !ok {
-			t.Fatalf("program.Statements[0] is not ExpressionStatement got=%T",
-				program.Statements[0])
-		}
-
-		exp, ok := stmt.Expression.(*InfixExpression)
-		if !ok {
-			t.Fatalf("stmt.Expression is not InfixExpression got=%T",
-				stmt.Expression)
-		}
-
-		if !testIdentifier(t, exp.Left, tt.left) {
-			return
-		}
-
-		if exp.Operator != tt.operator {
-			t.Fatalf("exp.Operator is not '%v'. got '%v'", tt.operator, exp.Operator)
-		}
-
-		if testInteger(t, exp.Right, tt.right) {
-			return
-		}
-	}
+	})
 }
 
 func TestOperatorPrecedenceParsing(t *testing.T) {
 	tests := []struct {
-		input string
+		input  string
 		expect string
-	} {
+	}{
 		{
 			"foo == 1; bar == 2.0",
 			"((foo==1);(bar==2.0))",
@@ -118,19 +140,20 @@ func TestOperatorPrecedenceParsing(t *testing.T) {
 			`((((director=="name's");(actor=eq="name's"));((Year=le=2000),(Year>=2010)));((one<=-1.0),(two!=true)))`,
 		},
 	}
+	Convey("Operator Precidence Parsing", t, func() {
+		for _, tt := range tests {
+			l := NewLexer(tt.input)
+			p := NewParser(l)
+			program := p.ParseProgram()
+			checkParserErrors(t, p)
 
-	for _, tt := range tests {
-		l := NewLexer(tt.input)
-		p := NewParser(l)
-		program := p.ParseProgram()
-		checkParserErrors(t, p)
-
-		actual := program.String()
-		if actual != tt.expect {
-			t.Errorf("expcected=%q, got=%q", tt.expect, actual)
+			actual := program.String()
+			So(actual, ShouldEqual, tt.expect)
+			// if actual != tt.expect {
+			// 	t.Errorf("expcected=%q, got=%q", tt.expect, actual)
+			// }
 		}
-
-	}
+	})
 }
 
 func TestParsingArray(t *testing.T) {

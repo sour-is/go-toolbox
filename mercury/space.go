@@ -47,25 +47,25 @@ func (lis ArraySpace) StringList() string {
 
 // String format config as string
 func (lis ArraySpace) String() string {
-	nsLen := 1
-	attLen := 1
-	tagLen := 1
+	nsLen := 0
+	attLen := 0
+	tagLen := 0
 
 	for _, o := range lis {
 		if nsLen <= len(o.Space) {
-			nsLen = len(o.Space) + 1
+			nsLen = len(o.Space)
 		}
 		for _, v := range o.List {
 			l := len(v.Name)
 
 			if attLen <= l {
-				attLen = l + 1
+				attLen = l
 			}
 
 			t := len(strings.Join(v.Tags, " "))
 
 			if tagLen <= t {
-				tagLen = t + 1
+				tagLen = t
 			}
 		}
 	}
@@ -96,28 +96,29 @@ func (lis ArraySpace) String() string {
 			buf.WriteString(strings.Repeat(" ", nsLen-len(o.Space)))
 
 			if len(v.Tags) > 0 {
+				buf.WriteRune(' ')
 				t := strings.Join(v.Tags, " ")
 
-				buf.WriteRune(' ')
 				buf.WriteString(t)
 				buf.WriteString(strings.Repeat(" ", tagLen-len(t)))
 			} else {
-				buf.WriteString(strings.Repeat(" ", tagLen+1))
+				buf.WriteString(strings.Repeat(" ", tagLen))
 			}
 
+			buf.WriteRune(' ')
 			buf.WriteString(v.Name)
 			buf.WriteString(strings.Repeat(" ", attLen-len(v.Name)))
 
 			switch len(v.Values) {
 			case 0:
-				buf.WriteString(":")
+				buf.WriteString(" :")
 				buf.WriteString("\n")
 			case 1:
-				buf.WriteString(":")
+				buf.WriteString(" :")
 				buf.WriteString(v.Values[0])
 				buf.WriteString("\n")
 			default:
-				buf.WriteString(":")
+				buf.WriteString(" :")
 				buf.WriteString(v.Values[0])
 				buf.WriteString("\n")
 				for _, s := range v.Values[1:] {
@@ -263,6 +264,15 @@ func (lis ArraySpace) ToSpaceMap() SpaceMap {
 		out[c.Space] = c
 	}
 	return out
+}
+
+// ToArray converts SpaceMap to ArraySpace
+func (m SpaceMap) ToArray() ArraySpace {
+	var a ArraySpace
+	for _, s := range m {
+		a = append(a, s)
+	}
+	return a
 }
 
 // Value stores the attributes for space values
