@@ -19,13 +19,11 @@ func parseText(body io.Reader) (config SpaceMap, err error) {
 	scanner := bufio.NewScanner(body)
 	for scanner.Scan() {
 		line := scanner.Text()
-		// log.Debug(line)
 		if len(line) == 0 {
 			continue
 		}
 
 		if line[0] == '#' {
-
 			if strings.HasPrefix(line, "# @") {
 				sp := strings.Fields(strings.TrimPrefix(line, "# @"))
 				space = sp[0]
@@ -49,15 +47,17 @@ func parseText(body io.Reader) (config SpaceMap, err error) {
 			notes = append(notes, strings.TrimPrefix(line, "# "))
 			continue
 		}
-		// log.Debug("NOTES: ", notes)
 
 		sp := strings.SplitN(line, ":", 2)
+		fields := strings.Fields(sp[0])
+
 		if len(sp) < 2 {
+			space := fields[0]
+			if _, ok := config[space]; !ok {
+				config[space] = Space{Space: space}
+			}
 			continue
 		}
-
-		fields := strings.Fields(sp[0])
-		// log.Debug(fields, sp[1])
 
 		if len(fields) > 1 {
 			space, name = fields[0], fields[len(fields)-1]
