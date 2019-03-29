@@ -143,7 +143,7 @@ func (hl HandlerList) WriteObjects(spaces ArraySpace) error {
 	}
 
 	for i, hldr := range hl {
-		log.Debug("WRITE ", hldr.Match)
+		log.Debug("WRITE MATCH ", hldr.Match)
 		err := hldr.WriteObjects(matches[i])
 		if err != nil {
 			return err

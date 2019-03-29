@@ -444,9 +444,7 @@ func WriteConfig(tx *dbm.Tx, config mercury.ArraySpace) (err error) {
 	}
 
 	// write all values to db.
-	if len(attrs) > 0 {
-		err = WriteValues(tx, squirrel.Eq{dbm.GetDbInfo(Value{}).ColPanic("ID"): curIDs}, attrs)
-	}
+	err = WriteValues(tx, squirrel.Eq{dbm.GetDbInfo(Value{}).ColPanic("ID"): curIDs}, attrs)
 	log.Debugf("WROTE %d ATTRS", len(attrs))
 
 	return
@@ -509,6 +507,7 @@ func WriteSpaces(tx *dbm.Tx, lis []Space) (err error) {
 func WriteValues(tx *dbm.Tx, delete squirrel.Sqlizer, lis []Value) (err error) {
 	d := dbm.GetDbInfo(Value{})
 
+	log.Debug("DELETE ", delete)
 	_, err = tx.Delete(d.Table).Where(delete).Exec()
 	if err != nil {
 		return

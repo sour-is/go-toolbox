@@ -19,3 +19,22 @@ type MercuryValue {
 extend type Query {
     config(space: String query: QueryInput): [MercurySpace!]!
 }
+
+extend type Mutation {
+    writeConfig(payload: [MercurySpaceInput!]!): String!
+    writeConfigText(payload: String!): String!
+}
+
+input MercurySpaceInput {
+    space:      String!
+    tags:       [String!]!
+    notes:      [String!]!
+    list:       [MercuryValueInput!]!
+}
+
+input MercuryValueInput {
+    name:       String!
+    tags:       [String!]!
+    notes:      [String!]!
+    values:     [String!]!
+}

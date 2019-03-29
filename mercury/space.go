@@ -47,6 +47,85 @@ func (lis ArraySpace) StringList() string {
 
 // String format config as string
 func (lis ArraySpace) String() string {
+	attLen := 0
+	tagLen := 0
+
+	for _, o := range lis {
+		for _, v := range o.List {
+			l := len(v.Name)
+			if attLen <= l {
+				attLen = l
+			}
+
+			t := len(strings.Join(v.Tags, " "))
+			if tagLen <= t {
+				tagLen = t
+			}
+		}
+	}
+
+	var buf strings.Builder
+	for _, o := range lis {
+		if len(o.Notes) > 0 {
+			buf.WriteString("# ")
+			buf.WriteString(strings.Join(o.Notes, "\n# "))
+			buf.WriteRune('\n')
+		}
+
+		buf.WriteString("@")
+		buf.WriteString(o.Space)
+		if len(o.Tags) > 0 {
+			buf.WriteRune(' ')
+			buf.WriteString(strings.Join(o.Tags, " "))
+		}
+		buf.WriteRune('\n')
+
+		for _, v := range o.List {
+			if len(v.Notes) > 0 {
+				buf.WriteString("# ")
+				buf.WriteString(strings.Join(v.Notes, "\n# "))
+				buf.WriteString("\n")
+			}
+
+			buf.WriteString(v.Name)
+			buf.WriteString(strings.Repeat(" ", attLen-len(v.Name)+1))
+
+			if len(v.Tags) > 0 {
+				t := strings.Join(v.Tags, " ")
+				buf.WriteString(t)
+				buf.WriteString(strings.Repeat(" ", tagLen-len(t)+1))
+			} else {
+				buf.WriteString(strings.Repeat(" ", tagLen+1))
+			}
+
+			switch len(v.Values) {
+			case 0:
+				buf.WriteString("\n")
+			case 1:
+				buf.WriteString(" :")
+				buf.WriteString(v.Values[0])
+				buf.WriteString("\n")
+			default:
+				buf.WriteString(" :")
+				buf.WriteString(v.Values[0])
+				buf.WriteString("\n")
+				for _, s := range v.Values[1:] {
+					buf.WriteString(strings.Repeat(" ", attLen+tagLen+3))
+					buf.WriteString(":")
+					buf.WriteString(s)
+					buf.WriteString("\n")
+				}
+			}
+		}
+
+		buf.WriteRune('\n')
+	}
+
+	return buf.String()
+}
+
+// OldString format config as old style string
+func (lis ArraySpace) OldString() string {
 	nsLen := 0
 	attLen := 0
 	tagLen := 0
@@ -82,16 +161,6 @@ func (lis ArraySpace) String() string {
 				buf.WriteRune(' ')
 				buf.WriteString(strings.Join(o.Tags, " "))
 			}
-		} else if len(o.Tags) > 0 {
-			buf.WriteString("# @")
-			buf.WriteString(o.Space)
-			if len(o.Tags) > 0 {
-				buf.WriteRune(' ')
-				buf.WriteString(strings.Join(o.Tags, " "))
-			}
-		}
-
-		if len(o.Notes) > 0 || len(o.Tags) > 0 {
 			buf.WriteRune('\n')
 			buf.WriteRune('\n')
 		}
@@ -112,7 +181,7 @@ func (lis ArraySpace) String() string {
 				buf.WriteString(t)
 				buf.WriteString(strings.Repeat(" ", tagLen-len(t)))
 			} else {
-				buf.WriteString(strings.Repeat(" ", tagLen+1))
+				buf.WriteString(strings.Repeat(" ", tagLen))
 			}
 
 			buf.WriteRune(' ')
@@ -132,7 +201,7 @@ func (lis ArraySpace) String() string {
 				buf.WriteString(v.Values[0])
 				buf.WriteString("\n")
 				for _, s := range v.Values[1:] {
-					buf.WriteString(strings.Repeat(" ", nsLen+attLen+tagLen+3))
+					buf.WriteString(strings.Repeat(" ", nsLen+attLen+tagLen+1))
 					buf.WriteString(":")
 					buf.WriteString(s)
 					buf.WriteString("\n")
