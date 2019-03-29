@@ -16,6 +16,8 @@ func TestArraySpace_String(t *testing.T) {
 			[]Space{
 				{
 					Space: "space",
+					Tags:  []string{},
+					Notes: []string{},
 					List: []Value{
 						{
 							Seq:    1,
@@ -27,13 +29,15 @@ func TestArraySpace_String(t *testing.T) {
 					},
 				},
 			},
-			"space tag name :value\n",
+			"@space\nname tag  :value\n\n",
 		},
 
 		{
 			[]Space{
 				{
 					Space: "space",
+					Tags:  []string{},
+					Notes: []string{},
 					List: []Value{
 						{
 							Seq:    1,
@@ -45,7 +49,7 @@ func TestArraySpace_String(t *testing.T) {
 					},
 				},
 			},
-			"space name :value\n",
+			"@space\nname   :value\n\n",
 		},
 
 		{
@@ -56,7 +60,7 @@ func TestArraySpace_String(t *testing.T) {
 					Tags:  []string{},
 				},
 			},
-			"# notes\n# @space\n\n",
+			"# notes\n@space\n\n",
 		},
 
 		{
@@ -67,7 +71,7 @@ func TestArraySpace_String(t *testing.T) {
 					Tags:  []string{"tag"},
 				},
 			},
-			"# notes\n# @space tag\n\n",
+			"# notes\n@space tag\n\n",
 		},
 	}
 	Convey("ArraySpace to string", t, func() {

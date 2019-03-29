@@ -103,7 +103,7 @@ func (appConfig) GetObjects(search mercury.NamespaceSearch, _ *rsql.Program, _ [
 		keys := viper.AllKeys()
 		sort.Strings(keys)
 
-		for _, key := range keys {
+		for i, key := range keys {
 			var val []string
 
 			s := viper.GetString(key)
@@ -114,9 +114,13 @@ func (appConfig) GetObjects(search mercury.NamespaceSearch, _ *rsql.Program, _ [
 			} else if viper.IsSet(key) {
 				val = viper.GetStringSlice(key)
 				log.Debug("slice ", val)
+			} else {
+				v := viper.Get(key)
+				val = strings.Split(fmt.Sprintf("%#v", v), "\n")
 			}
 
 			space.List = append(space.List, mercury.Value{
+				Seq:    uint64(i),
 				Name:   key,
 				Values: val,
 			})
@@ -130,8 +134,9 @@ func (appConfig) GetObjects(search mercury.NamespaceSearch, _ *rsql.Program, _ [
 			Space: appDotPriority,
 		}
 
-		for _, key := range mercury.Registry {
+		for i, key := range mercury.Registry {
 			space.List = append(space.List, mercury.Value{
+				Seq:    uint64(i),
 				Name:   key.Match,
 				Values: []string{fmt.Sprint(key.Priority)},
 			})
