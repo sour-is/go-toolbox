@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
+
 	"github.com/spf13/viper"
 	"sour.is/x/toolbox/log"
 )
@@ -59,6 +60,7 @@ const (
 	methodPOST      = "POST"
 	vaultPKIAuth    = "v1/auth/cert/login"
 	vaultLookupSelf = "v1/auth/token/lookup-self"
+
 //	vaultRenewSelf  = "v1/auth/token/renew-self"
 )
 
@@ -73,6 +75,10 @@ func config() error {
 
 	vault.Addr = viper.GetString("vault.addr")
 	vault.Secret = viper.GetString("vault.secret")
+
+	if vault.Secret == "" {
+		return nil
+	}
 
 	if viper.IsSet("vault.ca") {
 		b, err := ioutil.ReadFile(viper.GetString("vault.ca"))
@@ -202,6 +208,7 @@ func certAuth(pki pki) error {
 
 	return nil
 }
+
 /*
 func tokenRenewer(timeout time.Duration) {
 	ticker60m := time.NewTicker(timeout)
