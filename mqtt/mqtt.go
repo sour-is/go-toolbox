@@ -23,6 +23,10 @@ func (m Message) Topic() string {
 	return string(m.TopicName)
 }
 
+func (m Message) String() string {
+	return fmt.Sprintf("%s: %s", m.Topic(), string(m.Message))
+}
+
 // JSON unmarshalls content into passed struct.
 func (m Message) JSON(s interface{}) error {
 	return json.Unmarshal(m.Message, s)
@@ -32,6 +36,8 @@ func (m Message) JSON(s interface{}) error {
 func NewMessage(topic string, s interface{}) (m Message, err error) {
 	m.TopicName = []byte(topic)
 	switch v := s.(type) {
+	case fmt.Stringer:
+		m.Message = []byte(v.String())
 	case []byte:
 		m.Message = v
 	case string:
@@ -74,10 +80,11 @@ func (c Client) Terminate() {
 	c.mutex.Lock()
 	defer c.mutex.Unlock()
 
-	for _, topics := range c.Topics {
+	for name, topics := range c.Topics {
 		for _, ch := range topics {
 			close(ch)
 		}
+		delete(c.Topics, name)
 	}
 
 	c.Client.Terminate()

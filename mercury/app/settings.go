@@ -3,6 +3,8 @@ package app
 import (
 	"fmt"
 	"math"
+	"os"
+	"os/user"
 	"sort"
 	"strings"
 
@@ -17,60 +19,11 @@ import (
 const (
 	appDotSettings = "app.settings"
 	appDotPriority = "app.priority"
+	appDotHost     = "app.host"
 )
 
-type appDefault struct {
-	dummy.IndexDummy
-	dummy.ObjectsDummy
-	dummy.WriteDummy
-	dummy.NotifyDummy
-}
-
 func init() {
-	mercury.Register("*", 0, appDefault{})
 	mercury.Register("app.*", math.MaxInt64, appConfig{})
-}
-
-// Rules returns nil
-func (appDefault) GetRules(u ident.Ident) (lis mercury.Rules) {
-
-	if u.HasRole("admin") {
-		lis = append(lis,
-			mercury.Rule{
-				Role:  "admin",
-				Type:  "NS",
-				Match: "*",
-			},
-			mercury.Rule{
-				Role:  "write",
-				Type:  "NS",
-				Match: "*",
-			},
-			mercury.Rule{
-				Role:  "admin",
-				Type:  "GR",
-				Match: "*",
-			},
-		)
-	} else if u.HasRole("write") {
-		lis = append(lis,
-			mercury.Rule{
-				Role:  "write",
-				Type:  "NS",
-				Match: "*",
-			},
-		)
-	} else if u.HasRole("read") {
-		lis = append(lis,
-			mercury.Rule{
-				Role:  "read",
-				Type:  "NS",
-				Match: "*",
-			},
-		)
-	}
-
-	return lis
 }
 
 type appConfig struct {
@@ -87,6 +40,10 @@ func (appConfig) GetIndex(search mercury.NamespaceSearch, _ *rsql.Program) (lis 
 
 	if search.Match(appDotPriority) {
 		lis = append(lis, mercury.Space{Space: appDotPriority})
+	}
+
+	if search.Match(appDotHost) {
+		lis = append(lis, mercury.Space{Space: appDotHost})
 	}
 
 	return
@@ -144,6 +101,73 @@ func (appConfig) GetObjects(search mercury.NamespaceSearch, _ *rsql.Program, _ [
 
 		lis = append(lis, space)
 	}
+
+	if search.Match(appDotHost) {
+		if usr, err := user.Current(); err != nil {
+			space := mercury.Space{
+				Space: appDotHost,
+			}
+
+			hostname, _ := os.Hostname()
+			wd, _ := os.Getwd()
+			grp, _ := usr.GroupIds()
+			space.List = []mercury.Value{
+				{
+					Seq:    1,
+					Name:   "hostname",
+					Values: []string{hostname},
+				},
+				{
+					Seq:    2,
+					Name:   "username",
+					Values: []string{usr.Username},
+				},
+				{
+					Seq:    3,
+					Name:   "uid",
+					Values: []string{usr.Uid},
+				},
+				{
+					Seq:    4,
+					Name:   "gid",
+					Values: []string{usr.Gid},
+				},
+				{
+					Seq:    5,
+					Name:   "display",
+					Values: []string{usr.Name},
+				},
+				{
+					Seq:    6,
+					Name:   "home",
+					Values: []string{usr.HomeDir},
+				},
+				{
+					Seq:    7,
+					Name:   "groups",
+					Values: grp,
+				},
+				{
+					Seq:    8,
+					Name:   "pid",
+					Values: []string{fmt.Sprintf("%v", os.Getpid())},
+				},
+				{
+					Seq:    9,
+					Name:   "wd",
+					Values: []string{wd},
+				},
+				{
+					Seq:    10,
+					Name:   "environ",
+					Values: os.Environ(),
+				},
+			}
+
+			lis = append(lis, space)
+		}
+	}
+
 	return
 }
 
@@ -161,6 +185,11 @@ func (appConfig) GetRules(u ident.Ident) (lis mercury.Rules) {
 				Role:  "read",
 				Type:  "NS",
 				Match: appDotPriority,
+			},
+			mercury.Rule{
+				Role:  "read",
+				Type:  "NS",
+				Match: appDotHost,
 			},
 		)
 	}
