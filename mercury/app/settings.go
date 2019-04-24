@@ -103,7 +103,7 @@ func (appConfig) GetObjects(search mercury.NamespaceSearch, _ *rsql.Program, _ [
 	}
 
 	if search.Match(appDotHost) {
-		if usr, err := user.Current(); err != nil {
+		if usr, err := user.Current(); err == nil {
 			space := mercury.Space{
 				Space: appDotHost,
 			}
