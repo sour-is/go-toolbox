@@ -76,7 +76,7 @@ func Terminate() {
 
 // Terminate closes all subsciptions and terminates connection.
 func (c Client) Terminate() {
-	log.Debug("cleaning up subscriptions")
+	log.Debug("Terminate subscriptions")
 	c.mutex.Lock()
 	defer c.mutex.Unlock()
 
@@ -102,6 +102,8 @@ func Subscribe(topic string, qos int8) (<-chan Message, func(), error) {
 
 // New connects to MQTT
 func New(c *ConnectOptions) (Client, error) {
+	log.Debugs("New Connection", "network", c.Network, "address", c.Address)
+
 	client := Client{
 		Client: client.New(
 			&client.Options{

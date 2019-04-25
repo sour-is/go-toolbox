@@ -13,8 +13,25 @@ type Logger struct {
 	sync.Mutex
 }
 
+// NewLogger creates a new MQTT Logger
+func NewLogger(topic string, level event.Level) event.Logger {
+	return &Logger{topic: topic, level: level}
+}
+
 // WriteEvent ouputs an event to MQTT
-func (m *Logger) WriteEvent(e *event.Event) {
-	s, _ := NewMessage(m.topic, *e)
+func (l *Logger) WriteEvent(e *event.Event) {
+	if l.level < e.Level {
+		return
+	}
+
+	s, _ := NewMessage(l.topic, *e)
 	Publish(s)
+}
+
+// SetVerbose sets the event verbose level
+func (l *Logger) SetVerbose(level event.Level) {
+	l.Lock()
+	defer l.Unlock()
+
+	l.level = level
 }
