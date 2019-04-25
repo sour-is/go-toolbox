@@ -31,11 +31,13 @@ func TestDefaultLog(t *testing.T) {
 		})
 		Convey("With Verbose set to Debug", func() {
 			SetOutput(debug)
+			b.Reset()
 
 			Debug("Test\nMultiline")
 			w.Flush()
 			So(b.String(), ShouldContainSubstring, "DBUG")
 			So(b.String(), ShouldContainSubstring, "Test")
+			So(b.String(), ShouldContainSubstring, "log_test.go")
 			So(b.String(), ShouldContainSubstring, ".... Multiline")
 			b.Reset()
 
@@ -119,6 +121,7 @@ func TestDefaultLog(t *testing.T) {
 
 		Convey("With Verbose set to None", func() {
 			SetOutput(none)
+			b.Reset()
 
 			Debug("Test")
 			w.Flush()
@@ -205,6 +208,7 @@ func TestDefaultLog(t *testing.T) {
 
 		Convey("Testing fatal and panic outputs", func() {
 			SetOutput(debug)
+			b.Reset()
 
 			So(func() { Panic("Test\nMultiline") }, ShouldPanic)
 			w.Flush()
@@ -239,11 +243,11 @@ func TestDefaultLog(t *testing.T) {
 			So(b.String(), ShouldContainSubstring, " Test")
 			So(b.String(), ShouldContainSubstring, ".... Multiline")
 			b.Reset()
-
 		})
 
 		Convey("Nil Functions should do nothing.", func() {
 			SetOutput(none)
+			b.Reset()
 
 			NilPrint("PRINT")
 			NilPrintf("PRINTF")
@@ -266,7 +270,6 @@ func TestDefaultLog(t *testing.T) {
 			w.Flush()
 			So(b.String(), ShouldContainSubstring, "")
 			b.Reset()
-
 		})
 
 	})

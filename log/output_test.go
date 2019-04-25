@@ -22,12 +22,12 @@ func TestStdLog(t *testing.T) {
 		{
 			name: "basic error",
 			args: args{event.VerbError, "something happened"},
-			out:  out{"ERR", "something happened", "output_test.go", "log.TestStdLog.func1"},
+			out:  out{"ERR", "something happened", "output_test.go"},
 		},
 		{
 			name: "warning with tags",
 			args: args{event.VerbWarning, "something happened\nwith another line", tag.Tags{"foo": tag.Value("bar"), "bin": tag.Value("baz")}},
-			out:  out{"WARN", "something happened", "with another line", "foo", "bar", "bin", "baz", "output_test.go", "log.TestStdLog.func1"},
+			out:  out{"WARN", "something happened", "with another line", "foo", "bar", "bin", "baz", "output_test.go"},
 		},
 	}
 
@@ -36,7 +36,7 @@ func TestStdLog(t *testing.T) {
 			var b bytes.Buffer
 			logger := loggers.NewStdLogger(&b, scheme.MonoScheme, event.VerbDebug)
 
-			Output(logger, 2, tt.args...)
+			Output(logger, 0, tt.args...)
 			txt := b.String()
 			for _, out := range tt.out {
 				So(txt, ShouldContainSubstring, out)
@@ -82,7 +82,7 @@ func TestJSONLog(t *testing.T) {
 		{
 			name: "warning with tags",
 			args: args{event.VerbWarning, "something happened\nwith another line", tag.Tags{"foo": tag.Value("bar"), "bin": tag.Value("baz")}},
-			out:  out{"WARN", "something happened", "with another line", "foo", "bar", "bin", "baz", "output_test.go", "log.TestJSONLog.func1"},
+			out:  out{"WARN", "something happened", "with another line", "foo", "bar", "bin", "baz", "output_test.go"},
 		},
 	}
 
@@ -91,7 +91,7 @@ func TestJSONLog(t *testing.T) {
 			var b bytes.Buffer
 			logger := loggers.NewJSONLogger(&b, event.VerbDebug)
 
-			Output(logger, 2, tt.args...)
+			Output(logger, 0, tt.args...)
 			txt := b.String()
 			for _, out := range tt.out {
 				So(txt, ShouldContainSubstring, out)
@@ -117,7 +117,7 @@ func TestFanLog(t *testing.T) {
 		{
 			name: "warning with tags",
 			args: args{event.VerbWarning, "something happened\nwith another line", tag.Tags{"foo": tag.Value("bar"), "bin": tag.Value("baz")}},
-			out:  out{"WARN", "something happened", "with another line", "foo", "bar", "bin", "baz", "output_test.go", "log.TestFanLog.func1"},
+			out:  out{"WARN", "something happened", "with another line", "foo", "bar", "bin", "baz", "output_test.go"},
 		},
 	}
 
@@ -131,7 +131,7 @@ func TestFanLog(t *testing.T) {
 
 			logger := loggers.NewFanLogger(event.VerbDebug, logger1, logger2)
 
-			Output(logger, 2, tt.args...)
+			Output(logger, 0, tt.args...)
 
 			txt1 := b1.String()
 			txt2 := b2.String()

@@ -35,7 +35,7 @@ func NewMetaInfo(calldepth int) (m MetaInfo) {
 	m.Time = time.Now()
 	var ok bool
 	var pc uintptr
-	_, m.File, m.Line, ok = runtime.Caller(calldepth - 1)
+	_, m.File, m.Line, ok = runtime.Caller(calldepth)
 	if !ok {
 		m.File = "???"
 		m.Line = 0
