@@ -8,6 +8,7 @@ import (
 	_ "sour.is/x/toolbox/httpsrv/routes"
 	_ "sour.is/x/toolbox/ident/mock"
 	"sour.is/x/toolbox/log"
+	"sour.is/x/toolbox/log/event"
 )
 
 var defaultConfig = `
@@ -27,7 +28,7 @@ name   = "User Name"
 `
 
 func init() {
-	log.SetVerbose(log.Vdebug)
+	log.SetVerbose(event.VerbDebug)
 
 	viper.SetConfigType("toml")
 	viper.ReadConfig(bytes.NewBuffer([]byte(defaultConfig)))

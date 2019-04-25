@@ -1,4 +1,4 @@
-package logtag
+package tag
 
 import (
 	"fmt"
@@ -10,16 +10,18 @@ type Tags map[string]Tag
 
 // Tag is tag value
 type Tag fmt.Stringer
-type value string
+
+// Value implements a tag value stringer.
+type Value string
 
 // String returns a string
-func (v value) String() string {
+func (v Value) String() string {
 	return string(v)
 }
 
 // NewTag formats a value to print.
 func NewTag(in interface{}) Tag {
-	return value(fmt.Sprintf("%v", in))
+	return Value(fmt.Sprintf("%v", in))
 }
 
 // MapToTags convert a interface map to Tags
@@ -27,7 +29,7 @@ func MapToTags(m map[string]interface{}) (tags Tags) {
 	for k, v := range m {
 		switch val := v.(type) {
 		case string:
-			tags[k] = value(val)
+			tags[k] = Value(val)
 		case Tag:
 			tags[k] = val
 		default:
@@ -60,7 +62,12 @@ func (t *Tags) Set(key string, val interface{}) {
 	}
 }
 
-func readTags(tags ...interface{}) Tags {
+// ReadTags read in tags from a list of [string, value]
+func ReadTags(tags ...interface{}) Tags {
+	if len(tags) < 2 {
+		return nil
+	}
+
 	m := make(Tags, len(tags)/2)
 	var key string
 	for _, v := range tags {

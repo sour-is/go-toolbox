@@ -1,23 +1,26 @@
-package logtag
+package loggers
 
 import (
 	"fmt"
 	"log"
 	"log/syslog"
 	"sync"
+
+	"sour.is/x/toolbox/log/event"
+	"sour.is/x/toolbox/log/scheme"
 )
 
 // SysLogLogger outputs an event to SysLog
 type SysLogLogger struct {
 	sync.Mutex
-	scheme Scheme
-
+	scheme scheme.Scheme
+	level  event.Level
 	*syslog.Writer
 }
 
 // NewSysLogger dial syslogger and return it
-func NewSysLogger(addr, tag string) (Logger, error) {
-	l := SysLogLogger{scheme: MonoScheme}
+func NewSysLogger(addr, tag string) (event.Logger, error) {
+	l := SysLogLogger{scheme: scheme.MonoScheme}
 	var err error
 
 	if addr == "local" {
@@ -35,14 +38,22 @@ func NewSysLogger(addr, tag string) (Logger, error) {
 }
 
 // WriteEvent ouputs an event to SysLog
-func (s *SysLogLogger) WriteEvent(e *Event) {
-	_, err := s.Writer.Write([]byte(s.scheme.FmtEvent(*e)))
+func (l *SysLogLogger) WriteEvent(e *event.Event) {
+	_, err := l.Writer.Write([]byte(l.scheme.FmtEvent(*e)))
 	if err != nil {
 		fmt.Println(err)
 	}
 }
 
+// SetVerbose sets the event verbose level
+func (l *SysLogLogger) SetVerbose(level event.Level) {
+	l.Lock()
+	defer l.Unlock()
+
+	l.level = level
+}
+
 // Close passes Close to underlying object.
-func (s *SysLogLogger) Close() (err error) {
-	return s.Writer.Close()
+func (l *SysLogLogger) Close() (err error) {
+	return l.Writer.Close()
 }

@@ -43,6 +43,11 @@ func Test_appConfig_GetRules(t *testing.T) {
 					Type:  "NS",
 					Match: "app.priority",
 				},
+				{
+					Role:  "read",
+					Type:  "NS",
+					Match: "app.host",
+				},
 			},
 		},
 	}

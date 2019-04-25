@@ -42,9 +42,6 @@ func init() {
 }
 
 func main() {
-	log.SetVerbose(log.Vdebug)
-	log.SetFlags(log.Lshortfile | log.LstdFlags)
-
 	fset := token.NewFileSet() // positions are relative to fset
 
 	// Parse src but stop after processing the imports.

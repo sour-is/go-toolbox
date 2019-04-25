@@ -1,18 +1,10 @@
-package logtag
+package event
 
 import (
 	"os"
 	"runtime"
 	"time"
 )
-
-// Event is a log unit
-type Event struct {
-	Level   EventLevel `json:"level"`
-	Meta    MetaInfo   `json:"meta"`
-	Message string     `json:"msg"`
-	Tags    Tags       `json:"tags"`
-}
 
 var hostname string
 var pid int

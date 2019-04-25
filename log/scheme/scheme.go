@@ -1,20 +1,14 @@
-package logtag
+package scheme
 
 import (
 	"fmt"
 	"strings"
+
+	"sour.is/x/toolbox/log/event"
 )
 
 // Constants to define commonly used text values
 const (
-	Tdebug    = "DBUG"
-	Tinfo     = "INFO"
-	Tnotice   = "NOTE"
-	Twarning  = "WARN"
-	Terror    = "ERR "
-	Tcritical = "CRIT"
-	Tcontinue = "...."
-
 	ASCreset  = "\x1B[0m"
 	ASCgrey   = "\x1B[90m"
 	ASCblue   = "\x1B[34m"
@@ -22,43 +16,7 @@ const (
 	ASCyellow = "\x1B[93m"
 	ASCred    = "\x1B[91m"
 	ASCired   = "\x1B[7;91;49m"
-
-	Vnone     EventLevel = 0
-	Vcritical EventLevel = 1 << iota
-	Verror
-	Vwarning
-	Vnotice
-	Vinfo
-	Vdebug
 )
-
-// EventLevel defines the level of event
-type EventLevel int
-
-// MarshalJSON values for EventLevel
-func (e EventLevel) MarshalJSON() ([]byte, error) {
-	return []byte(fmt.Sprintf(`"%v"`, e)), nil
-}
-
-// String returns a text value for event level
-func (e EventLevel) String() string {
-	switch e {
-	case Vcritical:
-		return Tdebug
-	case Verror:
-		return Terror
-	case Vwarning:
-		return Twarning
-	case Vnotice:
-		return Tnotice
-	case Vinfo:
-		return Tinfo
-	case Vdebug:
-		return Tdebug
-	default:
-		return Tcontinue
-	}
-}
 
 // Scheme defines the colors to use in printing a log line
 type Scheme struct {
@@ -81,7 +39,7 @@ type Scheme struct {
 }
 
 // FmtEvent format event using scheme
-func (s Scheme) FmtEvent(e Event) string {
+func (s Scheme) FmtEvent(e event.Event) string {
 	var b strings.Builder
 
 	lines := strings.Split(e.Message, "\n")
@@ -91,17 +49,17 @@ func (s Scheme) FmtEvent(e Event) string {
 	b.WriteRune(' ')
 
 	switch e.Level {
-	case Vcritical:
+	case event.VerbCritical:
 		b.WriteString(s.Critical)
-	case Verror:
+	case event.VerbError:
 		b.WriteString(s.Error)
-	case Vwarning:
+	case event.VerbWarning:
 		b.WriteString(s.Warning)
-	case Vnotice:
+	case event.VerbNotice:
 		b.WriteString(s.Notice)
-	case Vinfo:
+	case event.VerbInfo:
 		b.WriteString(s.Info)
-	case Vdebug:
+	case event.VerbDebug:
 		b.WriteString(s.Debug)
 	default:
 		b.WriteString(s.Continue)
@@ -137,6 +95,7 @@ func (s Scheme) FmtEvent(e Event) string {
 		b.WriteRune(' ')
 		b.WriteString(s.Reset)
 		b.WriteString(strings.TrimSpace(m))
+		b.WriteString(s.Reset)
 		b.WriteString("\n")
 	}
 
@@ -147,13 +106,13 @@ func (s Scheme) FmtEvent(e Event) string {
 var ColorScheme = Scheme{
 	Reset:    ASCreset,
 	Prefix:   ASCgrey,
-	Debug:    ASCgrey + Tdebug + ASCgrey,
-	Info:     ASCblue + Tinfo + ASCgrey,
-	Notice:   ASCgreen + Tnotice + ASCgrey,
-	Warning:  ASCyellow + Twarning + ASCgrey,
-	Error:    ASCred + Terror + ASCgrey,
-	Critical: ASCired + Tcritical + ASCgrey,
-	Continue: ASCgrey + Tcontinue + ASCgrey,
+	Debug:    ASCgrey + event.TxtDebug + ASCgrey,
+	Info:     ASCblue + event.TxtInfo + ASCgrey,
+	Notice:   ASCgreen + event.TxtNotice + ASCgrey,
+	Warning:  ASCyellow + event.TxtWarning + ASCgrey,
+	Error:    ASCred + event.TxtError + ASCgrey,
+	Critical: ASCired + event.TxtCritical + ASCgrey,
+	Continue: ASCgrey + event.TxtContinue + ASCgrey,
 
 	TagPrefix:  ASCgreen,
 	TagInfix:   ASCgrey,
@@ -164,13 +123,13 @@ var ColorScheme = Scheme{
 
 // MonoScheme is a scheme without colors
 var MonoScheme = Scheme{
-	Debug:     Tdebug,
-	Info:      Tinfo,
-	Notice:    Tnotice,
-	Warning:   Twarning,
-	Error:     Terror,
-	Critical:  Tcritical,
-	Continue:  Tcontinue,
+	Debug:     event.TxtDebug,
+	Info:      event.TxtInfo,
+	Notice:    event.TxtNotice,
+	Warning:   event.TxtWarning,
+	Error:     event.TxtError,
+	Critical:  event.TxtCritical,
+	Continue:  event.TxtContinue,
 	Timestamp: "2006-01-02 15:04:05",
 }
 

@@ -10,7 +10,6 @@ import (
 	. "github.com/smartystreets/goconvey/convey"
 
 	"database/sql"
-	"fmt"
 
 	"github.com/spf13/viper"
 	"sour.is/x/toolbox/log"
@@ -36,16 +35,12 @@ connect = """
 func TestMain(m *testing.M) {
 	viper.SetConfigType("toml")
 	viper.ReadConfig(bytes.NewBuffer([]byte(defaultTestConfig)))
-	fmt.Println("HELLO")
-	log.SetVerbose(log.Vdebug)
-	log.SetFlags(log.LstdFlags | log.Lshortfile)
 
 	m.Run()
 }
 
 func TestConfig(t *testing.T) {
 	Convey("Given a mock database", t, func() {
-		log.Println("TEST RUN")
 		var mockDB *sql.DB
 		var err error
 		var mock sqlmock.Sqlmock

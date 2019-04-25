@@ -1,10 +1,13 @@
-package logtag
+package log
 
 import (
 	"bytes"
 	"testing"
 
-	. "github.com/smartystreets/goconvey/convey"
+	"sour.is/x/toolbox/log/event"
+	"sour.is/x/toolbox/log/loggers"
+	"sour.is/x/toolbox/log/scheme"
+	"sour.is/x/toolbox/log/tag"
 )
 
 func TestStdLog(t *testing.T) {
@@ -18,20 +21,20 @@ func TestStdLog(t *testing.T) {
 	}{
 		{
 			name: "basic error",
-			args: args{Verror, "something happened"},
-			out:  out{"ERR", "something happened", "log_test.go", "logtag.TestStdLog.func1"},
+			args: args{event.VerbError, "something happened"},
+			out:  out{"ERR", "something happened", "output_test.go", "log.TestStdLog.func1"},
 		},
 		{
 			name: "warning with tags",
-			args: args{Vwarning, "something happened\nwith another line", Tags{"foo": value("bar"), "bin": value("baz")}},
-			out:  out{"WARN", "something happened", "with another line", "foo", "bar", "bin", "baz", "log_test.go", "logtag.TestStdLog.func1"},
+			args: args{event.VerbWarning, "something happened\nwith another line", tag.Tags{"foo": tag.Value("bar"), "bin": tag.Value("baz")}},
+			out:  out{"WARN", "something happened", "with another line", "foo", "bar", "bin", "baz", "output_test.go", "log.TestStdLog.func1"},
 		},
 	}
 
 	for _, tt := range tests {
 		Convey(tt.name, t, func() {
 			var b bytes.Buffer
-			logger := &StdLogger{out: &b, scheme: MonoScheme}
+			logger := loggers.NewStdLogger(&b, scheme.MonoScheme, event.VerbDebug)
 
 			Output(logger, 2, tt.args...)
 			txt := b.String()
@@ -42,13 +45,13 @@ func TestStdLog(t *testing.T) {
 	}
 
 	Convey("setting values in tag", t, func() {
-		tags := make(Tags)
+		tags := make(tag.Tags)
 		var b bytes.Buffer
-		logger := &StdLogger{out: &b, scheme: MonoScheme}
+		logger := loggers.NewStdLogger(&b, scheme.MonoScheme, event.VerbDebug)
 
 		tags.Set("random", "string")
 		tags.Set("int", 123)
-		tags.Set("event", Event{Message: "hello"})
+		tags.Set("event", event.Event{Message: "hello"})
 
 		Output(logger, 2, "something happened", tags)
 		txt := b.String()
@@ -73,20 +76,20 @@ func TestJSONLog(t *testing.T) {
 	}{
 		{
 			name: "basic error",
-			args: args{Verror, "something happened"},
+			args: args{event.VerbError, "something happened"},
 			out:  out{"ERR", "something happened"},
 		},
 		{
 			name: "warning with tags",
-			args: args{Vwarning, "something happened\nwith another line", Tags{"foo": value("bar"), "bin": value("baz")}},
-			out:  out{"WARN", "something happened", "with another line", "foo", "bar", "bin", "baz", "log_test.go", "logtag.TestJSONLog.func1"},
+			args: args{event.VerbWarning, "something happened\nwith another line", tag.Tags{"foo": tag.Value("bar"), "bin": tag.Value("baz")}},
+			out:  out{"WARN", "something happened", "with another line", "foo", "bar", "bin", "baz", "output_test.go", "log.TestJSONLog.func1"},
 		},
 	}
 
 	for _, tt := range tests {
 		Convey(tt.name, t, func() {
 			var b bytes.Buffer
-			logger := &JSONLogger{out: &b}
+			logger := loggers.NewJSONLogger(&b, event.VerbDebug)
 
 			Output(logger, 2, tt.args...)
 			txt := b.String()
@@ -108,25 +111,25 @@ func TestFanLog(t *testing.T) {
 	}{
 		{
 			name: "basic error",
-			args: args{Verror, "something happened"},
+			args: args{event.VerbError, "something happened"},
 			out:  out{"ERR", "something happened"},
 		},
 		{
 			name: "warning with tags",
-			args: args{Vwarning, "something happened\nwith another line", Tags{"foo": value("bar"), "bin": value("baz")}},
-			out:  out{"WARN", "something happened", "with another line", "foo", "bar", "bin", "baz", "log_test.go", "logtag.TestFanLog.func1"},
+			args: args{event.VerbWarning, "something happened\nwith another line", tag.Tags{"foo": tag.Value("bar"), "bin": tag.Value("baz")}},
+			out:  out{"WARN", "something happened", "with another line", "foo", "bar", "bin", "baz", "output_test.go", "log.TestFanLog.func1"},
 		},
 	}
 
 	for _, tt := range tests {
 		Convey(tt.name, t, func() {
 			var b1 bytes.Buffer
-			logger1 := &StdLogger{out: &b1, scheme: MonoScheme}
+			logger1 := loggers.NewStdLogger(&b1, scheme.MonoScheme, event.VerbDebug)
 
 			var b2 bytes.Buffer
-			logger2 := &JSONLogger{out: &b2}
+			logger2 := loggers.NewJSONLogger(&b2, event.VerbDebug)
 
-			logger := &FanLogger{outs: []Logger{logger1, logger2}}
+			logger := loggers.NewFanLogger(event.VerbDebug, logger1, logger2)
 
 			Output(logger, 2, tt.args...)
 

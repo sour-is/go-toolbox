@@ -1,11 +1,12 @@
 package dbm
 
 import (
-	"github.com/spf13/viper"
 	"sort"
-	"sour.is/x/toolbox/log"
 	"strconv"
 	"strings"
+
+	"github.com/spf13/viper"
+	"sour.is/x/toolbox/log"
 )
 
 type asset struct {
@@ -31,7 +32,7 @@ func Migrate(a asset) (err error) {
 
 		version := 0
 		if err = tx.QueryRow(`select ifnull(max(version), 0) as version from schema_version`).Scan(&version); err != nil {
-			log.Println("DBM: ", err)
+			log.Debug("DBM: ", err)
 			return
 		}
 

@@ -7,205 +7,217 @@ import (
 	"testing"
 
 	"github.com/bouk/monkey"
-	"github.com/smartystreets/goconvey/convey"
+	"sour.is/x/toolbox/log/event"
+	"sour.is/x/toolbox/log/loggers"
+	"sour.is/x/toolbox/log/scheme"
 )
 
 func TestDefaultLog(t *testing.T) {
 	var b bytes.Buffer
 	var w = bufio.NewWriter(&b)
+	var debug = loggers.NewStdLogger(w, scheme.MonoScheme, event.VerbDebug)
+	var color = loggers.NewStdLogger(w, scheme.ColorScheme, event.VerbDebug)
+	var none = loggers.NewStdLogger(w, scheme.MonoScheme, event.VerbNone)
 
-	convey.Convey("Given the standard logger", t, func() {
-		SetOutput(w)
+	Convey("Given the standard logger", t, func() {
+		Convey("Startup Banner", func() {
+			SetOutput(debug)
 
-		StartupBanner()
-		w.Flush()
-		convey.So(b.String(), convey.ShouldNotBeBlank)
-		b.Reset()
+			StartupBanner()
+			w.Flush()
+			So(b.String(), ShouldNotBeBlank)
+			b.Reset()
 
-		convey.Convey("Setting Flags", func() {
-			SetFlags(Ldate | Ltime | Lmicroseconds)
-			convey.So(Flags(), convey.ShouldEqual, Ldate|Ltime|Lmicroseconds)
 		})
-
-		convey.Convey("With Verbose set to Debug", func() {
-			SetVerbose(Vdebug)
-			SetColor(false)
+		Convey("With Verbose set to Debug", func() {
+			SetOutput(debug)
 
 			Debug("Test\nMultiline")
 			w.Flush()
-			convey.So(b.String(), convey.ShouldContainSubstring, "DBUG ] Test")
-			convey.So(b.String(), convey.ShouldContainSubstring, "... ] Multiline")
+			So(b.String(), ShouldContainSubstring, "DBUG")
+			So(b.String(), ShouldContainSubstring, "Test")
+			So(b.String(), ShouldContainSubstring, ".... Multiline")
 			b.Reset()
 
 			Info("Test\nMultiline")
 			w.Flush()
-			convey.So(b.String(), convey.ShouldContainSubstring, "INFO ] Test")
-			convey.So(b.String(), convey.ShouldContainSubstring, "... ] Multiline")
+			So(b.String(), ShouldContainSubstring, "INFO")
+			So(b.String(), ShouldContainSubstring, "Test")
+			So(b.String(), ShouldContainSubstring, ".... Multiline")
 			b.Reset()
 
 			Warning("Test\nMultiline")
 			w.Flush()
-			convey.So(b.String(), convey.ShouldContainSubstring, "WARN ] Test")
-			convey.So(b.String(), convey.ShouldContainSubstring, "... ] Multiline")
+			So(b.String(), ShouldContainSubstring, "WARN")
+			So(b.String(), ShouldContainSubstring, "Test")
+			So(b.String(), ShouldContainSubstring, ".... Multiline")
 			b.Reset()
 
 			Notice("Test\nMultiline")
 			w.Flush()
-			convey.So(b.String(), convey.ShouldContainSubstring, "NOTE ] Test")
-			convey.So(b.String(), convey.ShouldContainSubstring, "... ] Multiline")
+			So(b.String(), ShouldContainSubstring, "NOTE")
+			So(b.String(), ShouldContainSubstring, "Test")
+			So(b.String(), ShouldContainSubstring, ".... Multiline")
 			b.Reset()
 
 			Error("Test\nMultiline")
 			w.Flush()
-			convey.So(b.String(), convey.ShouldContainSubstring, "ERR  ] Test")
-			convey.So(b.String(), convey.ShouldContainSubstring, "... ] Multiline")
+			So(b.String(), ShouldContainSubstring, "ERR ")
+			So(b.String(), ShouldContainSubstring, "Test")
+			So(b.String(), ShouldContainSubstring, ".... Multiline")
 			b.Reset()
 
 			Critical("Test\nMultiline")
 			w.Flush()
-			convey.So(b.String(), convey.ShouldContainSubstring, "CRIT ] Test")
-			convey.So(b.String(), convey.ShouldContainSubstring, "... ] Multiline")
+			So(b.String(), ShouldContainSubstring, "CRIT")
+			So(b.String(), ShouldContainSubstring, "Test")
+			So(b.String(), ShouldContainSubstring, ".... Multiline")
 			b.Reset()
 
 			Debugf("%s", "Test\nMultiline")
 			w.Flush()
-			convey.So(b.String(), convey.ShouldContainSubstring, "DBUG ] Test")
-			convey.So(b.String(), convey.ShouldContainSubstring, "... ] Multiline")
+			So(b.String(), ShouldContainSubstring, "DBUG")
+			So(b.String(), ShouldContainSubstring, "Test")
+			So(b.String(), ShouldContainSubstring, ".... Multiline")
 			b.Reset()
 
 			Infof("%s", "Test\nMultiline")
 			w.Flush()
-			convey.So(b.String(), convey.ShouldContainSubstring, "INFO ] Test")
-			convey.So(b.String(), convey.ShouldContainSubstring, "... ] Multiline")
+			So(b.String(), ShouldContainSubstring, "INFO")
+			So(b.String(), ShouldContainSubstring, "Test")
+			So(b.String(), ShouldContainSubstring, ".... Multiline")
 			b.Reset()
 
 			Warningf("%s", "Test\nMultiline")
 			w.Flush()
-			convey.So(b.String(), convey.ShouldContainSubstring, "WARN ] Test")
-			convey.So(b.String(), convey.ShouldContainSubstring, "... ] Multiline")
+			So(b.String(), ShouldContainSubstring, "WARN")
+			So(b.String(), ShouldContainSubstring, "Test")
+			So(b.String(), ShouldContainSubstring, ".... Multiline")
 			b.Reset()
 
 			Noticef("%s", "Test\nMultiline")
 			w.Flush()
-			convey.So(b.String(), convey.ShouldContainSubstring, "NOTE ] Test")
-			convey.So(b.String(), convey.ShouldContainSubstring, "... ] Multiline")
+			So(b.String(), ShouldContainSubstring, "NOTE")
+			So(b.String(), ShouldContainSubstring, "Test")
+			So(b.String(), ShouldContainSubstring, ".... Multiline")
 			b.Reset()
 
 			Errorf("%s", "Test\nMultiline")
 			w.Flush()
-			convey.So(b.String(), convey.ShouldContainSubstring, "ERR  ] Test")
-			convey.So(b.String(), convey.ShouldContainSubstring, "... ] Multiline")
+			So(b.String(), ShouldContainSubstring, "ERR ")
+			So(b.String(), ShouldContainSubstring, "Test")
+			So(b.String(), ShouldContainSubstring, ".... Multiline")
 			b.Reset()
 
 			Criticalf("%s", "Test\nMultiline")
 			w.Flush()
-			convey.So(b.String(), convey.ShouldContainSubstring, "CRIT ] Test")
-			convey.So(b.String(), convey.ShouldContainSubstring, "... ] Multiline")
+			So(b.String(), ShouldContainSubstring, "CRIT")
+			So(b.String(), ShouldContainSubstring, "Test")
+			So(b.String(), ShouldContainSubstring, ".... Multiline")
 			b.Reset()
 		})
 
-		convey.Convey("With Verbose set to None", func() {
-			SetVerbose(Vnone)
-			SetColor(false)
+		Convey("With Verbose set to None", func() {
+			SetOutput(none)
+
 			Debug("Test")
 			w.Flush()
-			convey.So(b.String(), convey.ShouldEqual, "")
+			So(b.String(), ShouldEqual, "")
 			b.Reset()
 
 			Info("Test")
 			w.Flush()
-			convey.So(b.String(), convey.ShouldEqual, "")
+			So(b.String(), ShouldEqual, "")
 			b.Reset()
 
 			Warning("Test")
 			w.Flush()
-			convey.So(b.String(), convey.ShouldEqual, "")
+			So(b.String(), ShouldEqual, "")
 			b.Reset()
 
 			Notice("Test")
 			w.Flush()
-			convey.So(b.String(), convey.ShouldEqual, "")
+			So(b.String(), ShouldEqual, "")
 			b.Reset()
 
 			Error("Test")
 			w.Flush()
-			convey.So(b.String(), convey.ShouldEqual, "")
+			So(b.String(), ShouldEqual, "")
 			b.Reset()
 
 			Critical("Test")
 			w.Flush()
-			convey.So(b.String(), convey.ShouldEqual, "")
+			So(b.String(), ShouldEqual, "")
 			b.Reset()
 
 			Debugf("%s", "Test")
 			w.Flush()
-			convey.So(b.String(), convey.ShouldContainSubstring, "")
+			So(b.String(), ShouldContainSubstring, "")
 			b.Reset()
 
 			Infof("%s", "Test")
 			w.Flush()
-			convey.So(b.String(), convey.ShouldContainSubstring, "")
+			So(b.String(), ShouldContainSubstring, "")
 			b.Reset()
 
 			Warningf("%s", "Test")
 			w.Flush()
-			convey.So(b.String(), convey.ShouldContainSubstring, "")
+			So(b.String(), ShouldContainSubstring, "")
 			b.Reset()
 
 			Noticef("%s", "Test")
 			w.Flush()
-			convey.So(b.String(), convey.ShouldContainSubstring, "")
+			So(b.String(), ShouldContainSubstring, "")
 			b.Reset()
 
 			Errorf("%s", "Test")
 			w.Flush()
-			convey.So(b.String(), convey.ShouldContainSubstring, "")
+			So(b.String(), ShouldContainSubstring, "")
 			b.Reset()
 
 			Criticalf("%s", "Test")
 			w.Flush()
-			convey.So(b.String(), convey.ShouldContainSubstring, "")
+			So(b.String(), ShouldContainSubstring, "")
 			b.Reset()
 		})
 
-		convey.Convey("With Color and testing Print", func() {
-			SetVerbose(Vdebug)
-			SetColor(true)
+		Convey("With Color and testing Print", func() {
+			SetOutput(color)
+			b.Reset()
 
 			Print("Test\nMultiline")
 			w.Flush()
-			convey.So(b.String(), convey.ShouldContainSubstring, "\x1B[34mINFO \x1B[90m] Test\x1B[0m")
-			convey.So(b.String(), convey.ShouldContainSubstring, "\x1B[90m.... \x1B[90m] Multiline\x1B[0m")
-			b.Reset()
-
-			Println("Test\nMultiline")
-			w.Flush()
-			convey.So(b.String(), convey.ShouldContainSubstring, "\x1B[34mINFO \x1B[90m] Test\x1B[0m")
-			convey.So(b.String(), convey.ShouldContainSubstring, "\x1B[90m.... \x1B[90m] Multiline\x1B[0m")
+			So(b.String(), ShouldContainSubstring, "\x1B[34mINFO\x1B[90m ")
+			So(b.String(), ShouldContainSubstring, "\x1B[0mTest\x1B[0m")
+			So(b.String(), ShouldContainSubstring, "\x1B[90m....\x1B[90m ")
+			So(b.String(), ShouldContainSubstring, "\x1B[0mMultiline\x1B[0m")
 			b.Reset()
 
 			Printf("%s", "Test\nMultiline")
 			w.Flush()
-			convey.So(b.String(), convey.ShouldContainSubstring, "\x1B[34mINFO \x1B[90m] Test\x1B[0m")
-			convey.So(b.String(), convey.ShouldContainSubstring, "\x1B[90m.... \x1B[90m] Multiline\x1B[0m")
+			So(b.String(), ShouldContainSubstring, "\x1B[34mINFO\x1B[90m ")
+			So(b.String(), ShouldContainSubstring, "\x1B[0mTest\x1B[0m")
+			So(b.String(), ShouldContainSubstring, "\x1B[90m....\x1B[90m ")
+			So(b.String(), ShouldContainSubstring, "\x1B[0mMultiline\x1B[0m")
 			b.Reset()
 
 		})
 
-		convey.Convey("Testing fatal and panic outputs", func() {
-			SetVerbose(Vnone)
-			SetColor(false)
+		Convey("Testing fatal and panic outputs", func() {
+			SetOutput(debug)
 
-			convey.So(func() { Panic("Test\nMultiline") }, convey.ShouldPanic)
+			So(func() { Panic("Test\nMultiline") }, ShouldPanic)
 			w.Flush()
-			convey.So(b.String(), convey.ShouldContainSubstring, "ERR  ] Test")
-			convey.So(b.String(), convey.ShouldContainSubstring, "... ] Multiline")
+			So(b.String(), ShouldContainSubstring, "ERR ")
+			So(b.String(), ShouldContainSubstring, " Test")
+			So(b.String(), ShouldContainSubstring, ".... Multiline")
 			b.Reset()
 
-			convey.So(func() { Panicf("%s", "Test\nMultiline") }, convey.ShouldPanic)
+			So(func() { Panicf("%s", "Test\nMultiline") }, ShouldPanic)
 			w.Flush()
-			convey.So(b.String(), convey.ShouldContainSubstring, "ERR  ] Test")
-			convey.So(b.String(), convey.ShouldContainSubstring, "... ] Multiline")
+			So(b.String(), ShouldContainSubstring, "ERR ")
+			So(b.String(), ShouldContainSubstring, " Test")
+			So(b.String(), ShouldContainSubstring, ".... Multiline")
 			b.Reset()
 
 			exitCode := 0
@@ -213,24 +225,25 @@ func TestDefaultLog(t *testing.T) {
 			defer monkey.UnpatchAll()
 
 			Fatal("Test\nMultiline")
-			convey.So(exitCode, convey.ShouldEqual, 1)
+			So(exitCode, ShouldEqual, 1)
 			w.Flush()
-			convey.So(b.String(), convey.ShouldContainSubstring, "CRIT ] Test")
-			convey.So(b.String(), convey.ShouldContainSubstring, "... ] Multiline")
+			So(b.String(), ShouldContainSubstring, "CRIT")
+			So(b.String(), ShouldContainSubstring, " Test")
+			So(b.String(), ShouldContainSubstring, ".... Multiline")
 			b.Reset()
 
 			Fatalf("%s", "Test\nMultiline")
-			convey.So(exitCode, convey.ShouldEqual, 1)
+			So(exitCode, ShouldEqual, 1)
 			w.Flush()
-			convey.So(b.String(), convey.ShouldContainSubstring, "CRIT ] Test")
-			convey.So(b.String(), convey.ShouldContainSubstring, "... ] Multiline")
+			So(b.String(), ShouldContainSubstring, "CRIT")
+			So(b.String(), ShouldContainSubstring, " Test")
+			So(b.String(), ShouldContainSubstring, ".... Multiline")
 			b.Reset()
 
 		})
 
-		convey.Convey("Nil Functions should do nothing.", func() {
-			SetVerbose(Vdebug)
-			SetColor(true)
+		Convey("Nil Functions should do nothing.", func() {
+			SetOutput(none)
 
 			NilPrint("PRINT")
 			NilPrintf("PRINTF")
@@ -251,7 +264,7 @@ func TestDefaultLog(t *testing.T) {
 			NilCriticalf("%s", "CRITF")
 
 			w.Flush()
-			convey.So(b.String(), convey.ShouldContainSubstring, "")
+			So(b.String(), ShouldContainSubstring, "")
 			b.Reset()
 
 		})

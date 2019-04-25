@@ -5,7 +5,6 @@ import (
 	"os"
 
 	"sour.is/x/toolbox/ident"
-	"sour.is/x/toolbox/log"
 	"sour.is/x/toolbox/uuid"
 
 	stdlog "log"
@@ -26,7 +25,7 @@ func doSessionID(_ string, w ResponseWriter, r *http.Request, _ ident.Ident) boo
 	return true
 }
 
-var accessLog = stdlog.New(os.Stdout, "", log.Ldate|log.Ltime|log.LUTC)
+var accessLog = stdlog.New(os.Stdout, "", stdlog.Ldate|stdlog.Ltime|stdlog.LUTC)
 var logFormat = "%s %- 16s\t%- 16v\t%- 6s %- 30s\t%12s %d %s"
 
 func doAccessLog(name string, w ResponseWriter, r *http.Request, id ident.Ident) bool {
