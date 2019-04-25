@@ -39,12 +39,12 @@ func SetVerbose(level event.Level) {
 
 // Print calls Output to print to the standard logger.
 // Arguments are handled in the manner of fmt.Print.
-func Print(v ...interface{}) { Outputs(logger, 2, event.VerbInfo, fmt.Sprint(v...)) }
+func Print(v ...interface{}) { Outputs(logger, 0, event.VerbInfo, fmt.Sprint(v...)) }
 
 // Printf calls Output to print to the standard logger.
 // Arguments are handled in the manner of fmt.Printf.
 func Printf(format string, v ...interface{}) {
-	Outputs(logger, 2, event.VerbInfo, fmt.Sprintf(format, v...))
+	Outputs(logger, 0, event.VerbInfo, fmt.Sprintf(format, v...))
 }
 
 // Write outputs contents of io.Reader to standard logger.
@@ -52,7 +52,7 @@ func Write(r io.Reader) {
 	buf := new(bytes.Buffer)
 	buf.ReadFrom(r)
 
-	Outputs(logger, 2, event.VerbInfo, buf.String())
+	Outputs(logger, 0, event.VerbInfo, buf.String())
 }
 
 // Tee outputs contents of io.Reader to standard logger. and returns a new io.Reader
@@ -64,143 +64,143 @@ func Tee(r io.ReadCloser) (w io.ReadCloser) {
 	str := buf.String()
 	w = ioutil.NopCloser(strings.NewReader(str))
 
-	Outputs(logger, 2, event.VerbInfo, str)
+	Outputs(logger, 0, event.VerbInfo, str)
 
 	return
 }
 
 // Fatal is equivalent to Print() followed by a call to os.Exit(1).
 func Fatal(v ...interface{}) {
-	Outputs(logger, 2, event.VerbCritical, fmt.Sprint(v...))
+	Outputs(logger, 0, event.VerbCritical, fmt.Sprint(v...))
 	os.Exit(1)
 }
 
 // Fatalf is equivalent to Printf() followed by a call to os.Exit(1).
 func Fatalf(format string, v ...interface{}) {
-	Outputs(logger, 2, event.VerbCritical, fmt.Sprintf(format, v...))
+	Outputs(logger, 0, event.VerbCritical, fmt.Sprintf(format, v...))
 	os.Exit(1)
 }
 
 // Panic is equivalent to Print() followed by a call to panic().
 func Panic(v ...interface{}) {
 	s := fmt.Sprint(v...)
-	Outputs(logger, 2, event.VerbError, s)
+	Outputs(logger, 0, event.VerbError, s)
 	panic(s)
 }
 
 // Panicf is equivalent to Printf() followed by a call to panic().
 func Panicf(format string, v ...interface{}) {
 	s := fmt.Sprintf(format, v...)
-	Outputs(logger, 2, event.VerbError, s)
+	Outputs(logger, 0, event.VerbError, s)
 	panic(s)
 }
 
 // Debug outputs to logger with DEBUG level.
-func Debug(v ...interface{}) { Outputs(logger, 2, event.VerbDebug, fmt.Sprint(v...)) }
+func Debug(v ...interface{}) { Outputs(logger, 0, event.VerbDebug, fmt.Sprint(v...)) }
 
 // Debugf formats output to logger with DEBUG level.
 func Debugf(format string, v ...interface{}) {
-	Outputs(logger, 2, event.VerbDebug, fmt.Sprintf(format, v...))
+	Outputs(logger, 0, event.VerbDebug, fmt.Sprintf(format, v...))
 }
 
 // Debugw outputs io.Reader to logger with DEBUG level.
 func Debugw(r io.Reader) {
 	buf := new(bytes.Buffer)
 	buf.ReadFrom(r)
-	Outputs(logger, 2, event.VerbDebug, buf.String())
+	Outputs(logger, 0, event.VerbDebug, buf.String())
 }
 
 // Info outputs to logger with INFO level.
-func Info(v ...interface{}) { Outputs(logger, 2, event.VerbInfo, fmt.Sprint(v...)) }
+func Info(v ...interface{}) { Outputs(logger, 0, event.VerbInfo, fmt.Sprint(v...)) }
 
 // Infof formatted outputs to logger with INFO level.
 func Infof(format string, v ...interface{}) {
-	Outputs(logger, 2, event.VerbInfo, fmt.Sprintf(format, v...))
+	Outputs(logger, 0, event.VerbInfo, fmt.Sprintf(format, v...))
 }
 
 // Infow outputs io.Reader to logger with INFO level.
 func Infow(r io.Reader) {
 	buf := new(bytes.Buffer)
 	buf.ReadFrom(r)
-	Outputs(logger, 2, event.VerbInfo, buf.String())
+	Outputs(logger, 0, event.VerbInfo, buf.String())
 }
 
 // Notice outputs to logger with NOTICE level.
-func Notice(v ...interface{}) { Outputs(logger, 2, event.VerbNotice, fmt.Sprint(v...)) }
+func Notice(v ...interface{}) { Outputs(logger, 0, event.VerbNotice, fmt.Sprint(v...)) }
 
 // Noticef formatted outputs to logger with NOTICE level.
 func Noticef(format string, v ...interface{}) {
-	Outputs(logger, 2, event.VerbNotice, fmt.Sprintf(format, v...))
+	Outputs(logger, 0, event.VerbNotice, fmt.Sprintf(format, v...))
 }
 
 // Noticew outputs io.Reader to logger with NOTICE level.
 func Noticew(r io.Reader) {
 	buf := new(bytes.Buffer)
 	buf.ReadFrom(r)
-	Outputs(logger, 2, event.VerbNotice, buf.String())
+	Outputs(logger, 0, event.VerbNotice, buf.String())
 
 }
 
 // Warning outputs to logger with WARNING level.
-func Warning(v ...interface{}) { Outputs(logger, 2, event.VerbWarning, fmt.Sprint(v...)) }
+func Warning(v ...interface{}) { Outputs(logger, 0, event.VerbWarning, fmt.Sprint(v...)) }
 
 // Warningf formatted outputs to logger with WARNING level.
 func Warningf(format string, v ...interface{}) {
-	Outputs(logger, 2, event.VerbWarning, fmt.Sprintf(format, v...))
+	Outputs(logger, 0, event.VerbWarning, fmt.Sprintf(format, v...))
 }
 
 // Warningw outputs io.Reader to logger with WARNING level.
 func Warningw(r io.Reader) {
 	buf := new(bytes.Buffer)
 	buf.ReadFrom(r)
-	Outputs(logger, 2, event.VerbWarning, buf.String())
+	Outputs(logger, 0, event.VerbWarning, buf.String())
 
 }
 
 // Error outputs to logger with ERROR level.
-func Error(v ...interface{}) { Outputs(logger, 2, event.VerbError, fmt.Sprint(v...)) }
+func Error(v ...interface{}) { Outputs(logger, 0, event.VerbError, fmt.Sprint(v...)) }
 
 // Errorf formatted outputs to logger with ERROR level.
 func Errorf(format string, v ...interface{}) {
-	Outputs(logger, 2, event.VerbError, fmt.Sprintf(format, v...))
+	Outputs(logger, 0, event.VerbError, fmt.Sprintf(format, v...))
 }
 
 // Errorw outputs io.Reader to logger with ERROR level.
 func Errorw(r io.Reader) {
 	buf := new(bytes.Buffer)
 	buf.ReadFrom(r)
-	Outputs(logger, 2, event.VerbError, buf.String())
+	Outputs(logger, 0, event.VerbError, buf.String())
 }
 
 // Critical outputs to logger with CRITICAL level.
-func Critical(v ...interface{}) { Outputs(logger, 2, event.VerbCritical, fmt.Sprint(v...)) }
+func Critical(v ...interface{}) { Outputs(logger, 0, event.VerbCritical, fmt.Sprint(v...)) }
 
 // Criticalf formatted outputs to logger with CRITICAL level.
 func Criticalf(format string, v ...interface{}) {
-	Outputs(logger, 2, event.VerbCritical, fmt.Sprintf(format, v...))
+	Outputs(logger, 0, event.VerbCritical, fmt.Sprintf(format, v...))
 }
 
 // Criticalw outputs io.Reader to logger with CRITICAL level.
 func Criticalw(r io.Reader) {
 	buf := new(bytes.Buffer)
 	buf.ReadFrom(r)
-	Outputs(logger, 2, event.VerbCritical, buf.String())
+	Outputs(logger, 0, event.VerbCritical, buf.String())
 }
 
 // Debugs structured debug message
-func Debugs(msg string, tags ...interface{}) { Outputs(logger, 2, event.VerbDebug, msg, tags...) }
+func Debugs(msg string, tags ...interface{}) { Outputs(logger, 0, event.VerbDebug, msg, tags...) }
 
 // Infos structured debug message
-func Infos(msg string, tags ...interface{}) { Outputs(logger, 2, event.VerbInfo, msg, tags...) }
+func Infos(msg string, tags ...interface{}) { Outputs(logger, 0, event.VerbInfo, msg, tags...) }
 
 // Warnings structured debug message
-func Warnings(msg string, tags ...interface{}) { Outputs(logger, 2, event.VerbWarning, msg, tags...) }
+func Warnings(msg string, tags ...interface{}) { Outputs(logger, 0, event.VerbWarning, msg, tags...) }
 
 // Errors structured debug message
-func Errors(msg string, tags ...interface{}) { Outputs(logger, 2, event.VerbError, msg, tags...) }
+func Errors(msg string, tags ...interface{}) { Outputs(logger, 0, event.VerbError, msg, tags...) }
 
 // Criticals structured debug message
-func Criticals(msg string, tags ...interface{}) { Outputs(logger, 2, event.VerbCritical, msg, tags...) }
+func Criticals(msg string, tags ...interface{}) { Outputs(logger, 0, event.VerbCritical, msg, tags...) }
 
 // These functions do nothing. It makes it easy to comment out
 // debug lines without having to remove the import.

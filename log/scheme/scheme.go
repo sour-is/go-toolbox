@@ -69,6 +69,7 @@ func (s Scheme) FmtEvent(e event.Event) string {
 	fn := e.Meta.Func
 	if !s.LongFile {
 		file = shortFile(e.Meta.File)
+		fn = shortFile(e.Meta.Func)
 	}
 
 	b.WriteString(fmt.Sprintf(" %s[%s:%d] ", fn, file, e.Meta.Line))
