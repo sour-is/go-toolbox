@@ -64,19 +64,19 @@ func (t *Tags) Set(key string, val interface{}) {
 
 // ReadTags read in tags from a list of [string, value]
 func ReadTags(tags ...interface{}) Tags {
-	if len(tags) < 2 {
+	if len(tags) <= 2 {
 		return nil
 	}
 
 	m := make(Tags, len(tags)/2)
 	var key string
-	for _, v := range tags {
-		switch s := v.(type) {
-		case string:
-			key = s
-		default:
+	for i, v := range tags {
+		if i%2 == 0 {
+			key = NewTag(v).String()
+		} else {
 			m[key] = NewTag(v)
 		}
 	}
+
 	return m
 }
