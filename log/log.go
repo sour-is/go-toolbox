@@ -35,10 +35,14 @@ func GetOutput() event.Logger {
 // AddOutput adds a logger to the current loggers
 func AddOutput(l event.Logger) {
 	mu.Lock()
+	defer mu.Unlock()
+
 	switch f := logger.(type) {
 	case *loggers.FanLogger:
-		f.Add(f)
+		fmt.Println("Add Logger")
+		f.Add(l)
 	default:
+		fmt.Println("Newfan Logger")
 		logger = loggers.NewFanLogger(logger.GetVerbose(), logger, l)
 	}
 }
