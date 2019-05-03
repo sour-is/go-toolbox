@@ -39,10 +39,8 @@ func AddOutput(l event.Logger) {
 
 	switch f := logger.(type) {
 	case *loggers.FanLogger:
-		fmt.Println("Add Logger")
 		f.Add(l)
 	default:
-		fmt.Println("Newfan Logger")
 		logger = loggers.NewFanLogger(logger.GetVerbose(), logger, l)
 	}
 }
@@ -209,6 +207,9 @@ func Debugs(msg string, tags ...interface{}) { Outputs(logger, 1, event.VerbDebu
 
 // Infos structured debug message
 func Infos(msg string, tags ...interface{}) { Outputs(logger, 1, event.VerbInfo, msg, tags...) }
+
+// Notices structured debug message
+func Notices(msg string, tags ...interface{}) { Outputs(logger, 1, event.VerbNotice, msg, tags...) }
 
 // Warnings structured debug message
 func Warnings(msg string, tags ...interface{}) { Outputs(logger, 1, event.VerbWarning, msg, tags...) }

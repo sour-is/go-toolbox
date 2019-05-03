@@ -49,7 +49,7 @@ func (hl HandlerList) String() string {
 
 // Register add a handler to registry
 func Register(match string, priority int, hdlr Handler) {
-	fmt.Println("mercury regster ", match)
+	log.Infos("mercury regster", "match", match, "pri", priority)
 	Registry = append(Registry, HandlerItem{Match: match, Priority: priority, Handler: hdlr})
 	sort.Sort(Registry)
 }
