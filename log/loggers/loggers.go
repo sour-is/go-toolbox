@@ -42,6 +42,9 @@ func (l *StdLogger) SetVerbose(level event.Level) {
 	l.level = level
 }
 
+// GetVerbose gets the verbose level
+func (l *StdLogger) GetVerbose() event.Level { return l.level }
+
 // JSONLogger defines an output handler
 type JSONLogger struct {
 	out   io.Writer
@@ -73,6 +76,9 @@ func (l *JSONLogger) SetVerbose(level event.Level) {
 
 	l.level = level
 }
+
+// GetVerbose gets the verbose level
+func (l *JSONLogger) GetVerbose() event.Level { return l.level }
 
 // FanLogger outputs to a list of loggers
 type FanLogger struct {
@@ -107,6 +113,9 @@ func (l *FanLogger) SetVerbose(level event.Level) {
 
 	l.level = level
 }
+
+// GetVerbose gets the verbose level
+func (l *FanLogger) GetVerbose() event.Level { return l.level }
 
 // Add logger to fan
 func (l *FanLogger) Add(logger event.Logger) {

@@ -10,6 +10,7 @@ import (
 type Logger interface {
 	WriteEvent(*Event)
 	SetVerbose(Level)
+	GetVerbose() Level
 }
 
 // Level defines the level of event

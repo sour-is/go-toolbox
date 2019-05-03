@@ -53,6 +53,9 @@ func (l *SysLogLogger) SetVerbose(level event.Level) {
 	l.level = level
 }
 
+// GetVerbose gets the verbose level
+func (l *SysLogLogger) GetVerbose() event.Level { return l.level }
+
 // Close passes Close to underlying object.
 func (l *SysLogLogger) Close() (err error) {
 	return l.Writer.Close()

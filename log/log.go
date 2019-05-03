@@ -14,7 +14,9 @@ import (
 	"sour.is/x/toolbox/log/scheme"
 )
 
-var logger event.Logger = loggers.NewStdLogger(os.Stderr, scheme.ColorScheme, event.VerbNotice)
+var logger event.Logger = loggers.NewFanLogger(event.VerbNotice,
+	loggers.NewStdLogger(os.Stderr, scheme.ColorScheme, event.VerbDebug))
+
 var mu = sync.Mutex{}
 
 // SetOutput sets the output destination for the standard logger.
@@ -28,6 +30,17 @@ func SetOutput(l event.Logger) {
 // GetOutput returns the current logger
 func GetOutput() event.Logger {
 	return logger
+}
+
+// AddOutput adds a logger to the current loggers
+func AddOutput(l event.Logger) {
+	mu.Lock()
+	switch f := logger.(type) {
+	case *loggers.FanLogger:
+		f.Add(f)
+	default:
+		logger = loggers.NewFanLogger(logger.GetVerbose(), logger, l)
+	}
 }
 
 // SetVerbose for the current global logger
