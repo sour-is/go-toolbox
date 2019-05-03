@@ -35,3 +35,6 @@ func (l *Logger) SetVerbose(level event.Level) {
 
 	l.level = level
 }
+
+// GetVerbose gets the verbose level
+func (l *Logger) GetVerbose() event.Level { return l.level }
