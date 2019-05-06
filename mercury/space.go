@@ -220,7 +220,7 @@ func (lis ArraySpace) EnvString() string {
 		for _, v := range o.List {
 			buf.WriteString(o.Space)
 			buf.WriteRune(':')
-			buf.WriteString(o.Space)
+			buf.WriteString(v.Name)
 			switch len(v.Values) {
 			case 0:
 				buf.WriteRune('=')
