@@ -64,7 +64,7 @@ func (t *Tags) Set(key string, val interface{}) {
 
 // ReadTags read in tags from a list of [string, value]
 func ReadTags(tags ...interface{}) Tags {
-	if len(tags) <= 2 {
+	if len(tags) < 2 {
 		return nil
 	}
 
