@@ -56,7 +56,8 @@ func (tx *Tx) Count(table string, where interface{}) (count uint64, err error) {
 		s = s.Where(where)
 	}
 
-	log.Debug(s.ToSql())
+	ss, args, _ := s.ToSql()
+	log.Debug("Count", "sql", ss, "args", args)
 
 	err = s.QueryRowContext(tx.Context).Scan(&count)
 
@@ -89,7 +90,10 @@ func (tx *Tx) Fetch(table string, cols []string, where interface{}, limit, offse
 	if len(order) > 0 {
 		s = s.OrderBy(order...)
 	}
-	log.Debug(s.ToSql())
+
+	sql, args, _ := s.ToSql()
+	log.Debugs("Fetch", "sql", sql, "args", args)
+
 	rows, err := s.QueryContext(tx.Context)
 	if err != nil {
 		return
@@ -148,9 +152,11 @@ func (tx *Tx) Replace(
 	if num, err = tx.Count(d.Table, where); err == nil && num == 0 {
 		if tx.Returns {
 			if len(d.Auto) > 0 {
-				log.Debug("RETURNING ", d.Auto, " FOR ", auto)
 				insert = insert.Suffix(`RETURNING "` + strings.Join(auto, `","`) + "\"")
-				log.Debug(insert.ToSql())
+
+				s, a, _ := insert.ToSql()
+				log.Debugs("Replace", "sql", s, "args", a, "return", d.Auto, "return_for", auto)
+
 				row := insert.QueryRowContext(tx.Context)
 				err = row.Scan(dest...)
 				if err != nil {
@@ -163,7 +169,8 @@ func (tx *Tx) Replace(
 			}
 
 		} else {
-			log.Debug(insert.ToSql())
+			s, a, _ := insert.ToSql()
+			log.Debugs("Replace", "sql", s, "args", a)
 
 			var result sql.Result
 			result, err = insert.ExecContext(tx.Context)
@@ -193,8 +200,11 @@ func (tx *Tx) Replace(
 
 		if tx.Returns {
 			if len(d.Auto) > 0 {
-				log.Debug("RETURNING ", d.Auto, " FOR ", auto)
 				update = update.Suffix(`RETURNING "` + strings.Join(auto, `","`) + "\"")
+
+				s, a, _ := update.ToSql()
+				log.Debugs("Replace", "sql", s, "args", a, "return", d.Auto, "return_for", auto)
+
 				row := update.QueryRowContext(tx.Context)
 				err = row.Scan(dest...)
 				if err != nil {
@@ -206,7 +216,9 @@ func (tx *Tx) Replace(
 				update.ExecContext(tx.Context)
 			}
 		} else {
-			log.Debug(update.ToSql())
+			s, a, _ := update.ToSql()
+			log.Debugs("Replace", "sql", s, "args", a)
+
 			var result sql.Result
 
 			result, err = update.ExecContext(tx.Context)
