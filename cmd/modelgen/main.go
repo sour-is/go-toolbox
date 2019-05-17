@@ -26,6 +26,7 @@ type structMap struct {
 	Table  bool
 	View   bool
 	ROnly  bool
+	HasID  bool
 }
 
 type structField struct {
@@ -75,7 +76,7 @@ func main() {
 				continue
 			}
 
-			smap.Table, smap.View, smap.Fields = procStruct(st)
+			smap.Table, smap.View, smap.Fields, smap.HasID = procStruct(st)
 
 			if smap.Table == false && smap.View == false {
 				// No Table or View == Do not generate.
@@ -123,9 +124,12 @@ func main() {
 	}
 }
 
-func procStruct(st *ast.StructType) (table, view bool, fields []structField) {
+func procStruct(st *ast.StructType) (table, view bool, fields []structField, hasID bool) {
 	for _, field := range st.Fields.List {
 		for _, name := range field.Names {
+			if name.Name == "ID" {
+				hasID = true
+			}
 
 			tag := reflect.StructTag(strings.Trim(field.Tag.Value, "`"))
 

@@ -13,6 +13,7 @@ import (
 )
 
 {{range .Types}}
+{{if .HasID}}
 // nolint: deadcode
 func get{{.Name}}(ctx context.Context, id uint64) (model.{{.Name}}, error) {
     sp, _ := opentracing.StartSpanFromContext(ctx, "get{{.Name}}List")
@@ -21,6 +22,7 @@ func get{{.Name}}(ctx context.Context, id uint64) (model.{{.Name}}, error) {
     ptr, err := ctx.Value(loader.ManagerKey).(*loader.Manager).{{.Name}}.Load(int(id))
     return *ptr, err
 }
+{{end}}
 // nolint: deadcode
 func get{{.Name}}List(ctx context.Context, q qry.Input) (lis []model.{{.Name}}, err error) {
     sp, octx := opentracing.StartSpanFromContext(ctx, "get{{.Name}}List")

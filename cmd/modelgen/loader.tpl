@@ -31,7 +31,7 @@ type Manager struct {
     mu sync.RWMutex
     Ident     ident.Ident
 {{range .Types}}
-{{.Name}}    {{.Name}}Loader
+{{if .HasID}}{{.Name}}    {{.Name}}Loader{{end}}
 {{end}}
 }
 func (m *Manager) GetIdent() *ident.Ident {
@@ -55,16 +55,19 @@ func GetContext(ctx context.Context, id ident.Ident) *Manager {
 		Ident: id,
 
         {{range .Types}}
+		{{if .HasID}}
         {{.Name}}: {{.Name}}Loader{
 			maxBatch: 1000,
 			wait:     75 * time.Millisecond,
 			fetch: fetch{{.Name}}(ctx),
 		},
+		{{end}}
         {{end}}
 	}
 }
 
 {{range .Types}}
+{{if .HasID}}
 func fetch{{.Name}}(ctx context.Context) func(ids []int) (lisP []*model.{{.Name}}, errs []error) {
 	return func(ids []int) (lisP []*model.{{.Name}}, errs []error) {
 		fn := ctrl.List{{.Name}}ByIDContext
@@ -99,4 +102,5 @@ func fetch{{.Name}}(ctx context.Context) func(ids []int) (lisP []*model.{{.Name}
 		return	
 	}
 }
+{{end}}
 {{end}}

@@ -23,7 +23,9 @@ func init() {
     {{range .Types}}
     httpsrv.IdentRegister("{{.Name}}", httpsrv.IdentRoutes{
       {Name: "get-{{spineCase .Name}}", Method: "GET", Pattern: "/v1/{{spineCase .Name}}", HandlerFunc: get{{.Name}} },
-      {Name: "get-{{spineCase .Name}}-by-id", Method: "GET", Pattern: "/v1/{{spineCase .Name}}({ids})", HandlerFunc: get{{.Name}}ByID},
+      {{if .HasID}}
+        {Name: "get-{{spineCase .Name}}-by-id", Method: "GET", Pattern: "/v1/{{spineCase .Name}}({ids})", HandlerFunc: get{{.Name}}ByID},
+      {{end}}
       {{if .ROnly}}{{else}}
           {Name: "post-{{spineCase .Name}}", Method: "POST", Pattern: "/v1/{{spineCase .Name}}", HandlerFunc: post{{.Name}} },
           {Name: "put-{{spineCase .Name}}", Method: "PUT", Pattern: "/v1/{{spineCase .Name}}({ids})", HandlerFunc: put{{.Name}} },
@@ -115,6 +117,7 @@ func get{{.Name}}(w httpsrv.ResponseWriter, r *http.Request, user ident.Ident) {
     w.WriteWindow(http.StatusOK, count, limit, offset, lis)
 }
 
+{{if .HasID}}
 // swagger:operation GET /v1/{{spineCase .Name}}({ids}) {{spineCase .Name}} get-{{.Name}}-by-id
 //
 // Get {{.Name}} by ID
@@ -167,6 +170,7 @@ func get{{.Name}}ByID(w httpsrv.ResponseWriter, r *http.Request, user ident.Iden
     }
     w.WriteWindow(http.StatusOK, count, count, 0, lis)
 }
+{{end}}
 
 {{if .ROnly}}{{else}}
 // swagger:operation POST /v1/{{spineCase .Name}} {{spineCase .Name}} post-{{spineCase .Name}}

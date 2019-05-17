@@ -2,6 +2,7 @@ package scheme
 
 import (
 	"fmt"
+	"sort"
 	"strings"
 
 	"sour.is/x/toolbox/log/event"
@@ -77,7 +78,15 @@ func (s Scheme) FmtEvent(e event.Event) string {
 	b.WriteString(strings.TrimSpace(lines[0]))
 
 	if len(e.Tags) > 0 {
-		for k, v := range e.Tags {
+		var keys []string
+		for k := range e.Tags {
+			keys = append(keys, k)
+		}
+		sort.Strings(keys)
+
+		for _, k := range keys {
+			v := e.Tags[k]
+
 			b.WriteRune(' ')
 			b.WriteString(s.TagPrefix)
 			b.WriteString(k)

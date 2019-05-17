@@ -233,6 +233,7 @@ func List{{.Name}}Qry(ctx context.Context, q qry.Input) (lis []model.{{.Name}}, 
 		})
 		return
 }
+{{if .HasID}}
 // List{{.Name}}ByID will query a list of {{.Name}} by ids
 func List{{.Name}}ByID(ids []uint64) (lis []model.{{.Name}}, count uint64, err error) {
 	return List{{.Name}}ByIDContext(context.Background(), ids)
@@ -248,6 +249,7 @@ func List{{.Name}}ByIDContext(ctx context.Context, ids []uint64) (lis []model.{{
 		lis, err = fn(ctx, qry.Input{&d, where, count, 0, nil})
 		return
 }
+{{end}}
 // List{{.Name}}Count will count the number of items returned
 func List{{.Name}}Count(where interface{}, limit, offset uint64) (lis []model.{{.Name}}, count uint64, err error) {
 	return List{{.Name}}CountContext(context.Background(), where, limit, offset)
