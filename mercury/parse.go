@@ -64,7 +64,7 @@ func parseText(body io.Reader) (config SpaceMap, err error) {
 			continue
 		}
 
-		if sp[0] == "" {
+		if strings.TrimSpace(sp[0]) == "" {
 			if c, ok := config[space]; !ok {
 				c = Space{Space: space}
 				c.List[len(c.List)-1].Values = append(c.List[len(c.List)-1].Values, sp[1])
@@ -83,9 +83,7 @@ func parseText(body io.Reader) (config SpaceMap, err error) {
 			tags = fields[1:]
 		}
 
-		log.Debug("FIELD ", name)
-		log.Debug("TAGS  ", tags)
-		log.Debug("VALUE ", sp[1])
+		log.Debugs("FIELD", "value", sp[1], "name", name, "tags", tags)
 
 		if c, ok := config[space]; !ok {
 			c = Space{Space: space}
@@ -138,7 +136,6 @@ func parseOldText(body io.Reader) (config SpaceMap, err error) {
 	scanner := bufio.NewScanner(body)
 	for scanner.Scan() {
 		line := scanner.Text()
-		// log.Debug(line)
 		if len(line) == 0 {
 			continue
 		}
@@ -168,7 +165,6 @@ func parseOldText(body io.Reader) (config SpaceMap, err error) {
 			notes = append(notes, strings.TrimPrefix(line, "# "))
 			continue
 		}
-		// log.Debug("NOTES: ", notes)
 
 		sp := strings.SplitN(line, ":", 2)
 		if len(sp) < 2 {
@@ -176,7 +172,6 @@ func parseOldText(body io.Reader) (config SpaceMap, err error) {
 		}
 
 		fields := strings.Fields(sp[0])
-		// log.Debug(fields, sp[1])
 
 		if len(fields) > 1 {
 			space, name = fields[0], fields[len(fields)-1]
