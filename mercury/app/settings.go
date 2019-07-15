@@ -67,10 +67,10 @@ func (appConfig) GetObjects(search mercury.NamespaceSearch, _ *rsql.Program, _ [
 
 			if s != "" {
 				val = strings.Split(s, "\n")
-				log.Debug("split ", val)
+				log.NilDebug("split ", val)
 			} else if viper.IsSet(key) {
 				val = viper.GetStringSlice(key)
-				log.Debug("slice ", val)
+				log.NilDebug("slice ", val)
 			} else {
 				v := viper.Get(key)
 				val = strings.Split(fmt.Sprintf("%#v", v), "\n")

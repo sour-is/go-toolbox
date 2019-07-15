@@ -32,23 +32,21 @@ func parseText(body io.Reader) (config SpaceMap, err error) {
 		}
 
 		if strings.HasPrefix(line, "@") {
+			var c Space
+			var ok bool
+
 			sp := strings.Fields(strings.TrimPrefix(line, "@"))
 			log.Debug("SPACE ", sp)
 			space = sp[0]
 
-			if c, ok := config[space]; !ok {
-				c = Space{
-					Space: space,
-					Notes: append(make([]string, 0, len(notes)), notes...),
-					Tags:  append(make([]string, 0, len(sp[1:])), sp[1:]...),
-				}
-				config[space] = c
-			} else {
-				c.Notes = append(make([]string, 0, len(notes)), notes...)
-				c.Tags = append(make([]string, 0, len(sp[1:])), sp[1:]...)
-				config[space] = c
+			if c, ok = config[space]; !ok {
+				c = Space{Space: space}
 			}
 
+			c.Notes = append(make([]string, 0, len(notes)), notes...)
+			c.Tags = append(make([]string, 0, len(sp[1:])), sp[1:]...)
+
+			config[space] = c
 			notes = notes[:0]
 			tags = tags[:0]
 
@@ -65,14 +63,15 @@ func parseText(body io.Reader) (config SpaceMap, err error) {
 		}
 
 		if strings.TrimSpace(sp[0]) == "" {
-			if c, ok := config[space]; !ok {
+			var c Space
+			var ok bool
+
+			if c, ok = config[space]; !ok {
 				c = Space{Space: space}
-				c.List[len(c.List)-1].Values = append(c.List[len(c.List)-1].Values, sp[1])
-				config[space] = c
-			} else {
-				c.List[len(c.List)-1].Values = append(c.List[len(c.List)-1].Values, sp[1])
-				config[space] = c
 			}
+
+			c.List[len(c.List)-1].Values = append(c.List[len(c.List)-1].Values, sp[1])
+			config[space] = c
 
 			continue
 		}
@@ -83,141 +82,31 @@ func parseText(body io.Reader) (config SpaceMap, err error) {
 			tags = fields[1:]
 		}
 
-		log.Debugs("FIELD", "value", sp[1], "name", name, "tags", tags)
+		var c Space
+		var ok bool
 
-		if c, ok := config[space]; !ok {
+		if c, ok = config[space]; !ok {
 			c = Space{Space: space}
-			seq++
-			c.List = append(
-				c.List,
-				Value{
-					Seq:    seq,
-					Name:   name,
-					Tags:   append(make([]string, 0, len(tags)), tags...),
-					Notes:  append(make([]string, 0, len(notes)), notes...),
-					Values: []string{sp[1]},
-				})
-			config[space] = c
-		} else {
-			seq++
-			c.List = append(
-				c.List,
-				Value{
-					Seq:    seq,
-					Name:   name,
-					Tags:   append(make([]string, 0, len(tags)), tags...),
-					Notes:  append(make([]string, 0, len(notes)), notes...),
-					Values: []string{sp[1]},
-				})
-			config[space] = c
 		}
+
+		seq++
+		c.List = append(
+			c.List,
+			Value{
+				Seq:    seq,
+				Name:   name,
+				Tags:   append(make([]string, 0, len(tags)), tags...),
+				Notes:  append(make([]string, 0, len(notes)), notes...),
+				Values: []string{sp[1]},
+			},
+		)
+		config[space] = c
 
 		notes = notes[:0]
 		tags = tags[:0]
 	}
 
 	log.Debug(config.ToArray().String())
-
-	if err = scanner.Err(); err != nil {
-		log.Error("reading standard input:", err)
-	}
-
-	return
-}
-
-func parseOldText(body io.Reader) (config SpaceMap, err error) {
-	config = make(SpaceMap)
-	var space string
-	var name string
-	var tags []string
-	var notes []string
-	var seq uint64
-
-	scanner := bufio.NewScanner(body)
-	for scanner.Scan() {
-		line := scanner.Text()
-		if len(line) == 0 {
-			continue
-		}
-
-		if line[0] == '#' {
-
-			if strings.HasPrefix(line, "# @") {
-				sp := strings.Fields(strings.TrimPrefix(line, "# @"))
-				space = sp[0]
-				if c, ok := config[space]; !ok {
-					c = Space{
-						Space: space,
-						Notes: append(make([]string, 0, len(notes)), notes...),
-						Tags:  append(make([]string, 0, len(sp[1:])), sp[1:]...),
-					}
-					config[space] = c
-				} else {
-					c.Notes = append(make([]string, 0, len(notes)), notes...)
-					c.Tags = append(make([]string, 0, len(sp[1:])), sp[1:]...)
-					config[space] = c
-				}
-				notes = notes[:0]
-				tags = tags[:0]
-				continue
-			}
-
-			notes = append(notes, strings.TrimPrefix(line, "# "))
-			continue
-		}
-
-		sp := strings.SplitN(line, ":", 2)
-		if len(sp) < 2 {
-			continue
-		}
-
-		fields := strings.Fields(sp[0])
-
-		if len(fields) > 1 {
-			space, name = fields[0], fields[len(fields)-1]
-			if len(fields) > 2 {
-				tags = fields[1 : len(fields)-1]
-			}
-			if c, ok := config[space]; !ok {
-				c = Space{Space: space}
-				seq++
-				c.List = append(
-					c.List,
-					Value{
-						Seq:    seq,
-						Name:   name,
-						Tags:   append(make([]string, 0, len(tags)), tags...),
-						Notes:  append(make([]string, 0, len(notes)), notes...),
-						Values: []string{sp[1]},
-					})
-				config[space] = c
-			} else {
-				seq++
-				c.List = append(
-					c.List,
-					Value{
-						Seq:    seq,
-						Name:   name,
-						Tags:   append(make([]string, 0, len(tags)), tags...),
-						Notes:  append(make([]string, 0, len(notes)), notes...),
-						Values: []string{sp[1]},
-					})
-				config[space] = c
-			}
-
-			notes = notes[:0]
-			tags = tags[:0]
-		} else if space != "" {
-			if c, ok := config[space]; !ok {
-				c = Space{Space: space}
-				c.List[len(c.List)-1].Values = append(c.List[len(c.List)-1].Values, sp[1])
-				config[space] = c
-			} else {
-				c.List[len(c.List)-1].Values = append(c.List[len(c.List)-1].Values, sp[1])
-				config[space] = c
-			}
-		}
-	}
 
 	if err = scanner.Err(); err != nil {
 		log.Error("reading standard input:", err)

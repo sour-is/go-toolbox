@@ -1,12 +1,9 @@
 package uuid // import "sour.is/x/toolbox/uuid"
 
 import (
-	"crypto/rand"
 	"fmt"
 	"strings"
 	"testing"
-
-	"github.com/bouk/monkey"
 
 	. "github.com/smartystreets/goconvey/convey"
 )
@@ -21,10 +18,9 @@ func TestV4(t *testing.T) {
 		So(v4[19], ShouldBeIn, CHECK)
 	})
 
+	randFn = func(p []byte) (n int, err error) { return 0, fmt.Errorf("something Broke") }
 	Convey("Given randomness runs out", t, func() {
-		monkey.Patch(rand.Read, func(p []byte) (n int, err error) {
-			return 0, fmt.Errorf("Something Broke!")
-		})
+
 		v4 := V4()
 		So(v4, ShouldEqual, NilUUID)
 	})
@@ -61,6 +57,7 @@ func TestBytes(t *testing.T) {
 }
 
 const hextable = "0123456789abcdef"
+
 func TestFromHexChar(t *testing.T) {
 	Convey("Test conversion of hex values to bytes", t, func() {
 		for i, c := range hextable {
