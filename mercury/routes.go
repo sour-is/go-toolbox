@@ -63,7 +63,7 @@ func getConfig(w httpsrv.ResponseWriter, r *http.Request, id ident.Ident) {
 	case "application/ini":
 		content = lis.IniString()
 	case "application/json":
-		w.WriteObject(200, lis.ToSpaceMap())
+		w.WriteObject(200, lis)
 	case "application/toml":
 		w.WriteText(200, "")
 		m := make(map[string]map[string][]string)
@@ -173,5 +173,4 @@ func getSpace(w httpsrv.ResponseWriter, r *http.Request, id ident.Ident) {
 	case "application/json":
 		w.WriteObject(200, lis)
 	}
-
 }

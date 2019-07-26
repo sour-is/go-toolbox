@@ -9,11 +9,11 @@ import (
 
 // Space stores a registry of spaces
 type Space struct {
-	ID    uint64
-	Space string
-	Tags  []string
-	Notes []string
-	List  []Value
+	ID    uint64   `json:"-"`
+	Space string   `json:"space"`
+	Tags  []string `json:"tags"`
+	Notes []string `json:"notes"`
+	List  []Value  `json:"list"`
 }
 
 // SpaceMap generic map of space values
@@ -356,9 +356,9 @@ func (m SpaceMap) ToArray() ArraySpace {
 
 // Value stores the attributes for space values
 type Value struct {
-	Seq    uint64
-	Name   string
-	Values []string
-	Notes  []string
-	Tags   []string
+	Seq    uint64   `json:"-"`
+	Name   string   `json:"name"`
+	Values []string `json:"values"`
+	Notes  []string `json:"notes"`
+	Tags   []string `json:"tags"`
 }
