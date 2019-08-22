@@ -7,7 +7,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/vektah/gqlgen/graphql"
+	"github.com/99designs/gqlgen/graphql"
 )
 
 // MarshalUint implements a Uint value

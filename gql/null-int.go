@@ -8,7 +8,7 @@ import (
 	"io"
 	"strconv"
 
-	"github.com/vektah/gqlgen/graphql"
+	"github.com/99designs/gqlgen/graphql"
 	"sour.is/x/toolbox/log"
 )
 

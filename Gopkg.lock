@@ -2,9 +2,10 @@
 
 
 [[projects]]
-  digest = "1:ed6824940ee2db6fa5f2b8e5a1f48d29bef0b25dc460ab480028120ecadfb8aa"
+  digest = "1:b18ef88bf370f5bda5fd7009713ee894a263c4576b3861dcc2e9a924ad6ae84f"
   name = "github.com/99designs/gqlgen"
   packages = [
+    ".",
     "api",
     "cmd",
     "codegen",
@@ -329,17 +330,6 @@
   revision = "2aeb42363e48356f9680bf05ce2957b0a44ca8bd"
 
 [[projects]]
-  digest = "1:ae6784e531aeb7189d622ec2500aacb78a657778857c64222882dda53b35d0fe"
-  name = "github.com/vektah/gqlgen"
-  packages = [
-    ".",
-    "graphql",
-  ]
-  pruneopts = "UT"
-  revision = "a7bc468ca1b184a5ce1b07ea331e0121fc56ae82"
-  version = "v0.9.3"
-
-[[projects]]
   digest = "1:b4e8aaca88f799355f4ac560bce4293fb85ff21003dd0d5741ca503f7a788e91"
   name = "github.com/vektah/gqlparser"
   packages = [
@@ -423,6 +413,8 @@
   analyzer-name = "dep"
   analyzer-version = 1
   input-imports = [
+    "github.com/99designs/gqlgen",
+    "github.com/99designs/gqlgen/graphql",
     "github.com/BurntSushi/toml",
     "github.com/DATA-DOG/go-sqlmock",
     "github.com/Masterminds/squirrel",
@@ -437,8 +429,6 @@
     "github.com/spf13/viper",
     "github.com/vektah/dataloaden",
     "github.com/vektah/gorunpkg",
-    "github.com/vektah/gqlgen",
-    "github.com/vektah/gqlgen/graphql",
     "github.com/yosssi/gmq/mqtt",
     "github.com/yosssi/gmq/mqtt/client",
   ]

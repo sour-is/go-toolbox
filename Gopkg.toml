@@ -25,7 +25,7 @@
 #   unused-packages = true
 
 required = [
-    "github.com/vektah/gqlgen",
+    "github.com/99designs/gqlgen",
     "github.com/vektah/dataloaden",
     "github.com/vektah/gorunpkg"
 ]
@@ -53,3 +53,4 @@ required = [
 [[constraint]]
   branch = "v1"
   name = "github.com/Masterminds/squirrel"
+  
