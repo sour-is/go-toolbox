@@ -2,7 +2,7 @@
 
 
 [[projects]]
-  digest = "1:ecbcc5f2c6b45a565d5bdc316317671a308f56adb202e0f762d91e42aa9e2060"
+  digest = "1:ed6824940ee2db6fa5f2b8e5a1f48d29bef0b25dc460ab480028120ecadfb8aa"
   name = "github.com/99designs/gqlgen"
   packages = [
     "api",
@@ -23,8 +23,8 @@
     "plugin/servergen",
   ]
   pruneopts = "UT"
-  revision = "b128a29122e8ca8ada5f34cc18338fa7c10fc5b4"
-  version = "v0.9.1"
+  revision = "a7bc468ca1b184a5ce1b07ea331e0121fc56ae82"
+  version = "v0.9.3"
 
 [[projects]]
   digest = "1:9f3b30d9f8e0d7040f729b82dcbc8f0dead820a133b3147ce355fc451f32d761"
@@ -91,7 +91,7 @@
     "httputil/header",
   ]
   pruneopts = "UT"
-  revision = "af0f2af80721261f4d211b2c9563f7b46b2aab06"
+  revision = "287de01127eff824e82d565b37fdaa1118da5a4d"
 
 [[projects]]
   branch = "master"
@@ -99,7 +99,7 @@
   name = "github.com/gopherjs/gopherjs"
   packages = ["js"]
   pruneopts = "UT"
-  revision = "3e4dfb77656c424b6d1196a4d5fed0fcf63677cc"
+  revision = "5d271430af9f3def750dcd7d6fc19eecfead4d2c"
 
 [[projects]]
   digest = "1:cbec35fe4d5a4fba369a656a8cd65e244ea2c743007d8f6c1ccb132acf9d1296"
@@ -118,15 +118,15 @@
   version = "v1.4.0"
 
 [[projects]]
-  digest = "1:d15ee511aa0f56baacc1eb4c6b922fa1c03b38413b6be18166b996d82a0156ea"
+  digest = "1:c77361e611524ec8f2ad37c408c3c916111a70b6acf806a1200855696bf8fa4d"
   name = "github.com/hashicorp/golang-lru"
   packages = [
     ".",
     "simplelru",
   ]
   pruneopts = "UT"
-  revision = "7087cb70de9f7a8bc0a10c375cb0d2280a8edf9c"
-  version = "v0.5.1"
+  revision = "7f827b33c0f158ec5dfbba01bb0b14a4541fd81d"
+  version = "v0.5.3"
 
 [[projects]]
   digest = "1:c0d19ab64b32ce9fe5cf4ddceba78d5bc9807f0016db6b1183599da3dcc24d10"
@@ -302,12 +302,12 @@
   version = "v1.4.0"
 
 [[projects]]
-  digest = "1:b24d38b282bacf9791408a080f606370efa3d364e4b5fd9ba0f7b87786d3b679"
+  digest = "1:ca4df663ad76879ad38dbd736493679cbb1aa596c6d479fd9fc5e959e5ceb4fb"
   name = "github.com/urfave/cli"
   packages = ["."]
   pruneopts = "UT"
-  revision = "cfb38830724cc34fedffe9a2a29fb54fa9169cd1"
-  version = "v1.20.0"
+  revision = "e6cf83ec39f6e1158ced1927d4ed14578fda8edb"
+  version = "v1.21.0"
 
 [[projects]]
   digest = "1:b2d8120b145f79e1a476946b24c29e30f8d861f3c5928708adaf4fdaba755379"
@@ -329,15 +329,15 @@
   revision = "2aeb42363e48356f9680bf05ce2957b0a44ca8bd"
 
 [[projects]]
-  digest = "1:296786efe769e8617a1e4c29e504526d9c6caa0906cf5ed333e6c5e354e76362"
+  digest = "1:ae6784e531aeb7189d622ec2500aacb78a657778857c64222882dda53b35d0fe"
   name = "github.com/vektah/gqlgen"
   packages = [
     ".",
     "graphql",
   ]
   pruneopts = "UT"
-  revision = "b128a29122e8ca8ada5f34cc18338fa7c10fc5b4"
-  version = "v0.9.1"
+  revision = "a7bc468ca1b184a5ce1b07ea331e0121fc56ae82"
+  version = "v0.9.3"
 
 [[projects]]
   digest = "1:b4e8aaca88f799355f4ac560bce4293fb85ff21003dd0d5741ca503f7a788e91"
@@ -369,11 +369,11 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:5632b0c4d972da51b5914f09fc5c1a8535e9d8d5d937e95ef83c423a0dd67f13"
+  digest = "1:47844666be86089349a441f5f0ece22f42a87a8cb8c9a31294c593f43209ad19"
   name = "golang.org/x/sys"
   packages = ["unix"]
   pruneopts = "UT"
-  revision = "fae7ac547cb717d141c433a2a173315e216b64c4"
+  revision = "fde4db37ae7ad8191b03d30d27f258b5291ae4e3"
 
 [[projects]]
   digest = "1:1093f2eb4b344996604f7d8b29a16c5b22ab9e1b25652140d3fede39f640d5cd"
@@ -392,7 +392,7 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:59988b91533530837bdec96e34fefa9df629d8ee89f3603387c57763b9fed432"
+  digest = "1:6dc625899eddfebb23c8f2d38f8007ac52d473cd01193cac3810cd14e83324c9"
   name = "golang.org/x/tools"
   packages = [
     "go/ast/astutil",
@@ -409,7 +409,7 @@
     "internal/semver",
   ]
   pruneopts = "UT"
-  revision = "9e48ab1d90cd1149871596a85c24cc0c6376e013"
+  revision = "fc82fb2afd64396b05ea9aa0bccd6e8f2257b154"
 
 [[projects]]
   digest = "1:4d2e5a73dc1500038e504a8d78b986630e3626dc027bc030ba5c75da257cdb96"
