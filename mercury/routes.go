@@ -23,6 +23,43 @@ func init() {
 	})
 }
 
+// swagger:operation GET /v1/mercury-config mercury get-mercury-config
+//
+// Get Mercury Config
+//
+// ---
+// parameters:
+//   - name: space
+//     in: query
+//     description: Space
+//     required: false
+//     type: string
+//     format: string
+// consumes:
+//   - "application/json"
+// produces:
+//   - "text/plain"
+//   - "application/environ"
+//   - "application/ini"
+//   - "application/json"
+//   - "application/toml"
+// responses:
+//   "200":
+//     description: Success
+//     schema:
+//       type: object
+//       allOf:
+//       - "$ref": "#/definitions/Space"
+//       - type: object
+//         properties:
+//           items:
+//             type: array
+//             items:
+//               "$ref": "#/definitions/Audience"
+//   "5xx":
+//     description: unexpected error
+//     schema:
+//       "$ref": "#/definitions/ResultError"
 func getConfig(w httpsrv.ResponseWriter, r *http.Request, id ident.Ident) {
 	if !id.IsActive() {
 		w.WriteError(401, "NO_AUTH")
@@ -84,6 +121,31 @@ func getConfig(w httpsrv.ResponseWriter, r *http.Request, id ident.Ident) {
 	w.WriteText(200, content)
 }
 
+// swagger:operation POST /v1/mercury-config mercury post-mercury-config
+//
+// Get Mercury
+//
+// ---
+// parameters:
+//   - name: payload
+//     in: post
+//     description: Payload
+//     required: true
+//     type: string
+//     format: string
+// consumes:
+//   - "application/json"
+// produces:
+//   - "application/json"
+// responses:
+//   "200":
+//     description: Success
+//     schema:
+//       type: string
+//   "5xx":
+//     description: unexpected error
+//     schema:
+//       "$ref": "#/definitions/ResultError"
 func postConfig(w httpsrv.ResponseWriter, r *http.Request, id ident.Ident) {
 	if !id.IsActive() {
 		w.WriteError(401, "NO_AUTH")
@@ -142,6 +204,41 @@ func postConfig(w httpsrv.ResponseWriter, r *http.Request, id ident.Ident) {
 
 	w.WriteText(202, "OK")
 }
+
+// swagger:operation GET /v1/mercury-spaces mercury get-mercury-spaces
+//
+// Get Mercury Space List
+//
+// ---
+// parameters:
+//   - name: space
+//     in: query
+//     description: Space
+//     required: false
+//     type: string
+//     format: string
+// consumes:
+//   - "application/json"
+// produces:
+//   - "text/plain"
+//   - "application/json"
+// responses:
+//   "200":
+//     description: Success
+//     schema:
+//       type: object
+//       allOf:
+//       - "$ref": "#/definitions/Space"
+//       - type: object
+//         properties:
+//           items:
+//             type: array
+//             items:
+//               "$ref": "#/definitions/Audience"
+//   "5xx":
+//     description: unexpected error
+//     schema:
+//       "$ref": "#/definitions/ResultError"
 
 func getSpace(w httpsrv.ResponseWriter, r *http.Request, id ident.Ident) {
 	if !id.IsActive() {

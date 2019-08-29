@@ -13,7 +13,7 @@ import (
 type GraphMercury struct{}
 
 // Config returns a list of config items
-func (GraphMercury) Config(ctx context.Context, search *string, query *gql.QueryInput) ([]Space, error) {
+func (GraphMercury) Config(ctx context.Context, search *string, query *gql.QueryInput) (lis []*Space, err error) {
 	user := ident.GetContextIdent(ctx)
 
 	rules := Registry.GetRules(user)
@@ -28,29 +28,45 @@ func (GraphMercury) Config(ctx context.Context, search *string, query *gql.Query
 	ns := ParseNamespace(space)
 	ns = rules.ReduceSearch(ns)
 
-	lis := Registry.GetObjects(ns.String(), "", "")
+	var arr []Space
+	arr = Registry.GetObjects(ns.String(), "", "")
+	for i := range arr {
+		lis = append(lis, &arr[i])
+	}
 
 	return lis, nil
 }
 
 // WriteConfigText saves a config set formated in text
-func (g GraphMercury) WriteConfigText(ctx context.Context, config string) (string, error) {
+func (g GraphMercury) WriteConfigText(ctx context.Context, config string) (result string, err error) {
 	r := strings.NewReader(config)
 	c, err := parseText(r)
 	if err != nil {
 		return "ERR", err
 	}
-	return g.WriteConfig(ctx, c.ToArray())
+	var arr []*Space
+	lis := c.ToArray()
+	for i := range lis {
+		arr = append(arr, &lis[i])
+	}
+	return g.WriteConfig(ctx, arr)
 }
 
 // WriteConfig saves a space and attributes to database
-func (GraphMercury) WriteConfig(ctx context.Context, config []Space) (result string, err error) {
+func (GraphMercury) WriteConfig(ctx context.Context, lis []*Space) (result string, err error) {
 	user := ident.GetContextIdent(ctx)
 	rules := Registry.GetRules(user)
 
 	notify, err := Registry.GetNotify("updated")
 	if err != nil {
 		log.Error(err)
+	}
+
+	var config []Space
+	for _, o := range lis {
+		if o != nil {
+			config = append(config, *o)
+		}
 	}
 
 	var notifyActive = make(map[string]struct{})
