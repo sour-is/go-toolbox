@@ -1,26 +1,29 @@
-package stats
+package http
 
 import (
-	"net/http"
+	"fmt"
+	net_http "net/http"
 	"time"
 
 	"sour.is/x/toolbox/httpsrv"
 	"sour.is/x/toolbox/ident"
 	"sour.is/x/toolbox/log"
+	"sour.is/x/toolbox/stats"
 	"sour.is/x/toolbox/stats/exposition"
 )
 
 var httpPipe chan httpData
 
 func init() {
+	fmt.Println("http register")
 	httpPipe = make(chan httpData)
 	go recordStats(httpPipe)
 	httpsrv.NewMiddleware("gather-stats", doStats).Register(httpsrv.EventComplete)
 
-	Register("http", getHTTPstats)
+	stats.Register("http", getHTTPstats)
 }
 
-func doStats(_ string, w httpsrv.ResponseWriter, r *http.Request, id ident.Ident) bool {
+func doStats(_ string, w httpsrv.ResponseWriter, r *net_http.Request, id ident.Ident) bool {
 	httpPipe <- httpData{w, r, id}
 	return true
 }
@@ -134,7 +137,7 @@ func (s httpReqs) Exposition() (lis exposition.Expositions) {
 
 type httpData struct {
 	W  httpsrv.ResponseWriter
-	R  *http.Request
+	R  *net_http.Request
 	ID ident.Ident
 }
 

@@ -1,4 +1,4 @@
-package stats
+package db
 
 import (
 	"database/sql"
@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"github.com/cgilling/dbstats"
+	"sour.is/x/toolbox/stats"
 	"sour.is/x/toolbox/stats/exposition"
 )
 
@@ -55,7 +56,7 @@ func WrapDB(name string, fn dbstats.OpenFunc) {
 	s := dbstats.New(fn)
 	s.AddHook(h.Hook)
 	sql.Register(name, s)
-	Register("db."+name, h.getDBstats)
+	stats.Register("db."+name, h.getDBstats)
 	dbHooks[name] = h
 }
 

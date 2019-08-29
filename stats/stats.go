@@ -1,6 +1,7 @@
 package stats
 
 import (
+	"fmt"
 	"strings"
 	"time"
 
@@ -42,6 +43,7 @@ var statRegistry map[string]StatFn
 
 // Register a new stats handler
 func Register(name string, fn StatFn) {
+	fmt.Println("stats register", name)
 	statRegistry[name] = fn
 }
 
@@ -51,6 +53,8 @@ func GetRegistry() map[string]StatFn {
 }
 
 func init() {
+	fmt.Println("stats init")
+	statRegistry = make(map[string]StatFn)
 	Register("app", getStats)
 }
 

@@ -1,10 +1,11 @@
-package stats
+package runtime
 
 import (
 	"fmt"
 	"reflect"
-	"runtime"
+	std_runtime "runtime"
 
+	"sour.is/x/toolbox/stats"
 	"sour.is/x/toolbox/stats/exposition"
 )
 
@@ -46,11 +47,11 @@ type runtimeStats struct {
 
 func getRuntime() exposition.Expositioner {
 	var s runtimeStats
-	s.NumCPU = runtime.NumCPU()
-	s.GoRoutines = runtime.NumGoroutine()
+	s.NumCPU = std_runtime.NumCPU()
+	s.GoRoutines = std_runtime.NumGoroutine()
 
-	var m runtime.MemStats
-	runtime.ReadMemStats(&m)
+	var m std_runtime.MemStats
+	std_runtime.ReadMemStats(&m)
 
 	s.Alloc = m.Alloc
 	s.TotalAlloc = m.TotalAlloc
@@ -105,5 +106,5 @@ func (s runtimeStats) String() string {
 }
 
 func init() {
-	Register("runtime", getRuntime)
+	stats.Register("runtime", getRuntime)
 }
