@@ -22,7 +22,7 @@ func TestIdentWrapper(t *testing.T) {
 		fn := identWrapper("TEST", stdWrapper(doNothing))
 		fn.ServeHTTP(w, r)
 
-		So(r.Header.Get(sessionId), ShouldNotBeEmpty)
+		So(r.Header.Get(sessionID), ShouldNotBeEmpty)
 	})
 
 	monkey.Patch(viper.GetString, func(str string) string {
@@ -46,7 +46,7 @@ func TestIdentWrapper(t *testing.T) {
 		fn := identWrapper("TEST", doHello)
 		fn.ServeHTTP(w, r)
 
-		So(r.Header.Get(sessionId), ShouldNotBeEmpty)
+		So(r.Header.Get(sessionID), ShouldNotBeEmpty)
 		So(w.Header().Get("x-user-ident"), ShouldEqual, "IDENT")
 		So(w.Header().Get("x-user-aspect"), ShouldEqual, "ASPECT")
 		So(w.Header().Get("x-user-name"), ShouldEqual, "NAME")

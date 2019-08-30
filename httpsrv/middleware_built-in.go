@@ -10,17 +10,17 @@ import (
 	stdlog "log"
 )
 
-var sessionId = "session-id"
+var sessionID = "session-id"
 
 func doSessionID(_ string, w ResponseWriter, r *http.Request, _ ident.Ident) bool {
 	var seq string
-	if seq = r.URL.Query().Get(sessionId); seq == "" {
-		if seq = r.Header.Get(sessionId); seq == "" {
+	if seq = r.URL.Query().Get(sessionID); seq == "" {
+		if seq = r.Header.Get(sessionID); seq == "" {
 			seq = uuid.V4() + "::"
-			r.Header.Set(sessionId, seq)
+			r.Header.Set(sessionID, seq)
 		}
 	}
-	w.Header().Add(sessionId, seq)
+	w.Header().Add(sessionID, seq)
 
 	return true
 }
@@ -33,7 +33,7 @@ func doAccessLog(name string, w ResponseWriter, r *http.Request, id ident.Ident)
 	if id.IsActive() {
 		user = id.GetAspect() + "/" + id.GetIdentity()
 	}
-	header := r.Header.Get(sessionId)
+	header := r.Header.Get(sessionID)
 	if len(header) < 20 {
 		header = uuid.NilUUID
 	}

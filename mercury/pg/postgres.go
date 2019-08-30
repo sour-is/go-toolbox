@@ -333,13 +333,21 @@ const (
 func WriteConfig(tx *dbm.Tx, config mercury.ArraySpace) (err error) {
 	d := dbm.GetDbInfo(Space{})
 
+	// Delete spaces that are completely empty.
+	var deleteIDs []uint64
+	deleteSpaces := make(map[string]struct{})
+
 	// convert to map
 	spaceMap := config.ToSpaceMap()
 
 	// get names of each space
 	var names []string
-	for k := range spaceMap {
+	for k, v := range spaceMap {
 		names = append(names, k)
+
+		if len(v.Tags) == 0 && len(v.Notes) == 0 && len(v.List) == 0 {
+			deleteSpaces[v.Space] = struct{}{}
+		}
 	}
 
 	// get current spaces
@@ -351,9 +359,16 @@ func WriteConfig(tx *dbm.Tx, config mercury.ArraySpace) (err error) {
 	// determine which are being updated
 	var updateSpaces []Space
 	ids := make(map[string]uint64)
-	for _, n := range lis {
-		ids[n.Space] = n.ID
-		updateSpaces = append(updateSpaces, n)
+	for _, s := range lis {
+		ids[s.Space] = s.ID
+
+		// Skip empty spaces.
+		if _, ok := deleteSpaces[s.Space]; ok {
+			deleteIDs = append(deleteIDs, s.ID)
+			continue
+		}
+
+		updateSpaces = append(updateSpaces, s)
 	}
 
 	// update spaces
@@ -380,6 +395,10 @@ func WriteConfig(tx *dbm.Tx, config mercury.ArraySpace) (err error) {
 	var newNames []string
 	var curIDs []uint64
 	for _, n := range names {
+		if _, ok := deleteSpaces[n]; ok {
+			continue
+		}
+
 		if id, ok := ids[n]; !ok {
 			newNames = append(newNames, n)
 			s := spaceMap[n]
@@ -418,14 +437,14 @@ func WriteConfig(tx *dbm.Tx, config mercury.ArraySpace) (err error) {
 		if err != nil {
 			return
 		}
-
-		// write new spaces
-		err = WriteSpaces(tx, newSpaces)
-		if err != nil {
-			return
-		}
-		log.Debugf("WROTE %d NEW SPACES", len(newSpaces))
 	}
+
+	// write new spaces
+	err = WriteSpaces(tx, squirrel.Eq{dbm.GetDbInfo(Space{}).ColPanic("ID"): deleteIDs}, newSpaces)
+	if err != nil {
+		return
+	}
+	log.Debugf("WROTE %d NEW SPACES", len(newSpaces))
 
 	// extract all values
 	var attrs []Value
@@ -451,8 +470,14 @@ func WriteConfig(tx *dbm.Tx, config mercury.ArraySpace) (err error) {
 }
 
 // WriteSpaces writes the spaces to db
-func WriteSpaces(tx *dbm.Tx, lis []Space) (err error) {
+func WriteSpaces(tx *dbm.Tx, delete squirrel.Sqlizer, lis []Space) (err error) {
 	d := dbm.GetDbInfo(Space{})
+
+	log.Debugs("Writing Spaces", "table", d.Table, "len(lis)", len(lis), "delete", delete)
+	_, err = tx.Delete(d.Table).Where(delete).Exec()
+	if err != nil {
+		return
+	}
 
 	if len(lis) == 0 {
 		return nil
@@ -507,12 +532,11 @@ func WriteSpaces(tx *dbm.Tx, lis []Space) (err error) {
 func WriteValues(tx *dbm.Tx, delete squirrel.Sqlizer, lis []Value) (err error) {
 	d := dbm.GetDbInfo(Value{})
 
-	log.Debug("DELETE ", delete)
+	log.Debugs("Writing Spaces", "table", d.Table, "len(lis)", len(lis), "delete", delete)
 	_, err = tx.Delete(d.Table).Where(delete).Exec()
 	if err != nil {
 		return
 	}
-	log.Debug(d.Table, len(lis))
 
 	if len(lis) == 0 {
 		return nil

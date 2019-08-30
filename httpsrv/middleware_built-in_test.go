@@ -5,8 +5,9 @@ import (
 
 	"bufio"
 	"bytes"
-	. "github.com/smartystreets/goconvey/convey"
 	"net/http/httptest"
+
+	. "github.com/smartystreets/goconvey/convey"
 	"sour.is/x/toolbox/ident"
 )
 
@@ -17,23 +18,23 @@ func TestDoSession(t *testing.T) {
 
 		doSessionID("", w, r, ident.NullUser{})
 
-		So(r.Header.Get(sessionId), ShouldNotBeEmpty)
-		So(w.Header().Get(sessionId), ShouldNotBeEmpty)
+		So(r.Header.Get(sessionID), ShouldNotBeEmpty)
+		So(w.Header().Get(sessionID), ShouldNotBeEmpty)
 	})
 
 	Convey("Given a HTTP Request validate session-id passes received header", t, func() {
 		r := httptest.NewRequest("GET", "/", nil)
-		r.Header.Set(sessionId, "SOMEVALUE")
+		r.Header.Set(sessionID, "SOMEVALUE")
 
 		w := WrapResponseWriter(httptest.NewRecorder())
 
 		doSessionID("", w, r, ident.NullUser{})
 
-		So(r.Header.Get(sessionId), ShouldNotBeEmpty)
-		So(r.Header.Get(sessionId), ShouldEqual, "SOMEVALUE")
+		So(r.Header.Get(sessionID), ShouldNotBeEmpty)
+		So(r.Header.Get(sessionID), ShouldEqual, "SOMEVALUE")
 
-		So(w.Header().Get(sessionId), ShouldNotBeEmpty)
-		So(w.Header().Get(sessionId), ShouldEqual, "SOMEVALUE")
+		So(w.Header().Get(sessionID), ShouldNotBeEmpty)
+		So(w.Header().Get(sessionID), ShouldEqual, "SOMEVALUE")
 	})
 }
 

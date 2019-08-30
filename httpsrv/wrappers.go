@@ -1,8 +1,9 @@
 package httpsrv
 
 import (
-	"github.com/spf13/viper"
 	"net/http"
+
+	"github.com/spf13/viper"
 	"sour.is/x/toolbox/ident"
 	"sour.is/x/toolbox/log"
 )
@@ -10,7 +11,6 @@ import (
 func identWrapper(name string, hdlr HandlerFunc) http.HandlerFunc {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		var nw = WrapResponseWriter(w)
-
 
 		var id ident.Ident = ident.NullUser{}
 

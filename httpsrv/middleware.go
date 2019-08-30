@@ -2,11 +2,14 @@ package httpsrv
 
 import (
 	"net/http"
+
 	"sour.is/x/toolbox/ident"
 )
 
+// Event lifecycle state
 type Event int
 
+// Event lifecycle states
 const (
 	EventPreAuth Event = iota
 	EventPreHandle
@@ -32,16 +35,21 @@ func (e Event) String() string {
 	}
 }
 
+// MiddlewareFunc is a function that handles a request/response through request lifecycle
 type MiddlewareFunc func(name string, w ResponseWriter, r *http.Request, id ident.Ident) bool
 
+// Middleware defines when middleware should be executed in event lifecycle
 type Middleware struct {
 	Name        string
 	Whitelist   map[string]bool
 	Blacklist   map[string]bool
 	ProcessHTTP MiddlewareFunc
 }
+
+// MiddlewareList is a list of registered middlewares
 type MiddlewareList []Middleware
 
+// MiddlewareSet is a set of middlewares grouped by Event lifecycle
 var MiddlewareSet = make(map[Event][]Middleware)
 
 func runMiddleware(e Event, name string, w ResponseWriter, r *http.Request, id ident.Ident) (ok bool) {
@@ -91,6 +99,7 @@ func runMiddleware(e Event, name string, w ResponseWriter, r *http.Request, id i
 	return
 }
 
+// NewMiddleware defines a new middleware
 func NewMiddleware(name string, hdlr MiddlewareFunc) (m Middleware) {
 	m.Name = name
 	m.ProcessHTTP = hdlr
@@ -99,6 +108,7 @@ func NewMiddleware(name string, hdlr MiddlewareFunc) (m Middleware) {
 	return m
 }
 
+// SetWhitelist sets the events names to target
 func (m Middleware) SetWhitelist(whitelist []string) Middleware {
 	for _, s := range whitelist {
 		m.Whitelist[s] = true
@@ -107,6 +117,7 @@ func (m Middleware) SetWhitelist(whitelist []string) Middleware {
 	return m
 }
 
+// SetBlacklist sets the events to avoid
 func (m Middleware) SetBlacklist(whitelist []string) Middleware {
 	for _, s := range whitelist {
 		m.Blacklist[s] = true
@@ -115,6 +126,7 @@ func (m Middleware) SetBlacklist(whitelist []string) Middleware {
 	return m
 }
 
+// Register inserts the middleware into the lifecycle map
 func (m Middleware) Register(event Event) {
 	MiddlewareSet[event] = append(MiddlewareSet[event], m)
 }
