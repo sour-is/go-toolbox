@@ -20,7 +20,7 @@ type GraphMessage struct {
 }
 
 // Mqtt subscribes to a given topic
-func (GraphMqtt) Mqtt(ctx context.Context, topic string, qos *int) (out <-chan GraphMessage, err error) {
+func (GraphMqtt) Mqtt(ctx context.Context, topic string, qos *int) (out <-chan *GraphMessage, err error) {
 	var unsub func()
 	var in <-chan Message
 	if qos == nil {
@@ -33,7 +33,7 @@ func (GraphMqtt) Mqtt(ctx context.Context, topic string, qos *int) (out <-chan G
 		return
 	}
 
-	ch := make(chan GraphMessage)
+	ch := make(chan *GraphMessage)
 	out = ch
 
 	go func() {
@@ -55,7 +55,7 @@ func (GraphMqtt) Mqtt(ctx context.Context, topic string, qos *int) (out <-chan G
 				case <-ctx.Done():
 
 					return
-				case ch <- pm:
+				case ch <- &pm:
 				}
 			}
 		}
