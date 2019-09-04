@@ -130,8 +130,16 @@ func (lis ArraySpace) EnvString() string {
 	for _, o := range lis {
 		for _, v := range o.List {
 			buf.WriteString(o.Space)
+			for _, t := range o.Tags {
+				buf.WriteRune(' ')
+				buf.WriteString(t)
+			}
 			buf.WriteRune(':')
 			buf.WriteString(v.Name)
+			for _, t := range v.Tags {
+				buf.WriteRune(' ')
+				buf.WriteString(t)
+			}
 			switch len(v.Values) {
 			case 0:
 				buf.WriteRune('=')
