@@ -2,6 +2,7 @@ package db
 
 import (
 	"database/sql"
+	"database/sql/driver"
 	"fmt"
 	"reflect"
 	"strings"
@@ -47,7 +48,7 @@ type dbStats struct {
 }
 
 // WrapDB wraps up a db connection to trace stats.
-func WrapDB(name string, fn dbstats.OpenFunc) {
+func WrapDB(name string, fn dbstats.OpenFunc) driver.Driver {
 	h := hook{
 		Name: name,
 		Hook: &dbstats.CounterHook{},
@@ -58,6 +59,8 @@ func WrapDB(name string, fn dbstats.OpenFunc) {
 	sql.Register(name, s)
 	stats.Register("db."+name, h.getDBstats)
 	dbHooks[name] = h
+
+	return s
 }
 
 // GetDBlist get a list of wrapped dbs
