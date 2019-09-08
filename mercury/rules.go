@@ -48,6 +48,7 @@ func (r Rules) CheckNamespace(search NamespaceSearch) bool {
 func (r Rules) ReduceSearch(search NamespaceSearch) (out NamespaceSearch) {
 	rules := r.GetNamespaceSearch()
 	skip := make(map[string]struct{})
+	out = make(NamespaceSearch, 0, len(rules))
 
 	for _, rule := range rules {
 		if _, ok := skip[rule.Raw()]; ok {
@@ -73,7 +74,6 @@ type Roles map[string]struct{}
 
 // GetRoles returns a list of Roles
 func (r Rules) GetRoles(typ, name string) (lis Roles) {
-	lis = make(Roles)
 	for _, o := range r {
 		if typ == o.Type && o.Check(name) {
 			lis[o.Role] = struct{}{}
@@ -84,9 +84,7 @@ func (r Rules) GetRoles(typ, name string) (lis Roles) {
 
 // HasRole is a valid role
 func (r Roles) HasRole(roles ...string) bool {
-	// log.Debug(r, roles)
 	for _, role := range roles {
-		//	log.Debug("CHECK ", role)
 		if _, ok := r[role]; ok {
 			return true
 		}

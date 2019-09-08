@@ -8,8 +8,8 @@ import (
 	"net/http"
 	"path/filepath"
 
-	"sour.is/x/toolbox/mqtt"
 	"sour.is/x/toolbox/log"
+	"sour.is/x/toolbox/mqtt"
 )
 
 func (n Notify) sendNotify() (err error) {
@@ -85,6 +85,7 @@ type ListNotify []Notify
 
 // Find returns list of notify that match name.
 func (ln ListNotify) Find(name string) (lis ListNotify) {
+	lis = make(ListNotify, 0, len(ln))
 	for _, o := range ln {
 		if o.Check(name) {
 			lis = append(lis, o)

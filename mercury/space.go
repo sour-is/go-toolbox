@@ -16,6 +16,73 @@ type Space struct {
 	List  []Value  `json:"list"`
 }
 
+// HasTag returns true if needle is found
+// If the needle ends with a / it will be treated
+// as a prefix for tag meta data.
+func (s Space) HasTag(needle string) bool {
+	isPrefix := strings.HasSuffix(needle, "/")
+	for i := range s.Tags {
+		switch isPrefix {
+		case true:
+			if strings.HasPrefix(s.Tags[i], needle) {
+				return true
+			}
+		case false:
+			if s.Tags[i] == needle {
+				return true
+			}
+		}
+	}
+	return false
+}
+
+// GetTagMeta retuns the value after a '/' in a tag.
+// Tags are in the format 'name' or 'name/value'
+// This function returns the value.
+func (s Space) GetTagMeta(needle string, offset int) string {
+	if !strings.HasSuffix(needle, "/") {
+		needle += "/"
+	}
+
+	for i := range s.Tags {
+		if strings.HasPrefix(s.Tags[i], needle) {
+			if offset > 0 {
+				offset--
+				continue
+			}
+
+			return strings.TrimPrefix(s.Tags[i], needle)
+		}
+	}
+
+	return ""
+}
+
+// FirstTagMeta returns the first meta tag value.
+func (s Space) FirstTagMeta(needle string) string {
+	return s.GetTagMeta(needle, 0)
+}
+
+// GetValues that match name
+func (s Space) GetValues(name string) (lis []Value) {
+	for i := range s.List {
+		if s.List[i].Name == name {
+			lis = append(lis, s.List[i])
+		}
+	}
+	return
+}
+
+// FirstValue that matches name
+func (s Space) FirstValue(name string) Value {
+	for i := range s.List {
+		if s.List[i].Name == name {
+			return s.List[i]
+		}
+	}
+	return Value{}
+}
+
 // SpaceMap generic map of space values
 type SpaceMap map[string]Space
 
@@ -248,7 +315,7 @@ func (rules Rules) filterSpace(lis ArraySpace) (out ArraySpace, err error) {
 }
 
 func (lis ArraySpace) stringArray() []string {
-	var out []string
+	out := make([]string, 0, len(lis))
 	for _, o := range lis {
 		out = append(out, o.Space)
 	}
@@ -266,7 +333,7 @@ func (lis ArraySpace) ToSpaceMap() SpaceMap {
 
 // ToArray converts SpaceMap to ArraySpace
 func (m SpaceMap) ToArray() ArraySpace {
-	var a ArraySpace
+	a := make(ArraySpace, 0, len(m))
 	for _, s := range m {
 		a = append(a, s)
 	}
@@ -280,4 +347,65 @@ type Value struct {
 	Values []string `json:"values"`
 	Notes  []string `json:"notes"`
 	Tags   []string `json:"tags"`
+}
+
+// HasTag returns true if needle is found
+// If the needle ends with a / it will be treated
+// as a prefix for tag meta data.
+func (v Value) HasTag(needle string) bool {
+	isPrefix := strings.HasSuffix(needle, "/")
+	for i := range v.Tags {
+		switch isPrefix {
+		case true:
+			if strings.HasPrefix(v.Tags[i], needle) {
+				return true
+			}
+		case false:
+			if v.Tags[i] == needle {
+				return true
+			}
+		}
+	}
+	return false
+}
+
+// GetTagMeta retuns the value after a '/' in a tag.
+// Tags are in the format 'name' or 'name/value'
+// This function returns the value.
+func (v Value) GetTagMeta(needle string, offset int) string {
+	if !strings.HasSuffix(needle, "/") {
+		needle += "/"
+	}
+
+	for i := range v.Tags {
+		if strings.HasPrefix(v.Tags[i], needle) {
+			if offset > 0 {
+				offset--
+				continue
+			}
+
+			return strings.TrimPrefix(v.Tags[i], needle)
+		}
+	}
+
+	return ""
+}
+
+// FirstTagMeta returns the first meta tag value.
+func (v Value) FirstTagMeta(needle string) string {
+	return v.GetTagMeta(needle, 0)
+}
+
+// First value in array.
+func (v Value) First() string {
+	if len(v.Values) < 1 {
+		return ""
+	}
+
+	return v.Values[0]
+}
+
+// Join values with newlines.
+func (v Value) Join() string {
+	return strings.Join(v.Values, "\n")
 }

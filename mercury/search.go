@@ -23,7 +23,8 @@ const (
 
 // String output string value
 func (n NamespaceSearch) String() string {
-	var lis []string
+	lis := make([]string, 0, len(n))
+
 	for _, v := range n {
 		lis = append(lis, v.String())
 	}
