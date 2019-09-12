@@ -74,6 +74,7 @@ type Roles map[string]struct{}
 
 // GetRoles returns a list of Roles
 func (r Rules) GetRoles(typ, name string) (lis Roles) {
+	lis = make(Roles)
 	for _, o := range r {
 		if typ == o.Type && o.Check(name) {
 			lis[o.Role] = struct{}{}
