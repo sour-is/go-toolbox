@@ -21,17 +21,17 @@ type User struct {
 // NewUser reads user info from http request
 func NewUser(r *http.Request) ident.Ident {
 
-	config := ident.Config["header"]
+	c := ident.GetConfigs()["header"]
 
-	hIdent := config["ident"]
+	hIdent := c["ident"]
 	if hIdent == "" {
 		hIdent = "user_ident"
 	}
-	hAspect := config["aspect"]
+	hAspect := c["aspect"]
 	if hAspect == "" {
 		hAspect = "user_aspect"
 	}
-	hName := config["name"]
+	hName := c["name"]
 	if hName == "" {
 		hName = "user_name"
 	}
@@ -94,4 +94,19 @@ func (m User) IsActive() bool {
 // GetDisplay returns human friendly name
 func (m User) GetDisplay() string {
 	return m.name
+}
+
+// GetGroups returns empty list
+func (m User) GetGroups() []string {
+	return []string{}
+}
+
+// GetRoles returns empty list
+func (m User) GetRoles() []string {
+	return []string{}
+}
+
+// GetMeta returns empty list
+func (m User) GetMeta() map[string]string {
+	return make(map[string]string)
 }

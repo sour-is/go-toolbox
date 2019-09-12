@@ -29,7 +29,7 @@ func TestSession(t *testing.T) {
 	req := httptest.NewRequest("GET", "/some-url", nil)
 
 	Convey("On session should register itself.", t, func() {
-		So(ident.IdentSet, ShouldContainKey, "session")
+		So(ident.GetHandlers(), ShouldContainKey, "session")
 	})
 
 	sess := NewSession("ident", "aspect", "display name", nil, nil, nil)

@@ -10,7 +10,7 @@ import (
 
 func TestHeaderIdent(t *testing.T) {
 	Convey("On init header should register itself.", t, func() {
-		So(ident.IdentSet, ShouldContainKey, "header")
+		So(ident.GetHandlers(), ShouldContainKey, "header")
 	})
 
 	Convey("Given a valid request", t, func() {

@@ -28,7 +28,7 @@ type User struct {
 
 // IdmUser is the responce from rubicon api
 type IdmUser struct {
-	UserId    int    `json:"userId"`
+	UserID    int    `json:"userId"`
 	UserName  string `json:"userName"`
 	Email     string `json:"email"`
 	FirstName string `json:"firstName"`
@@ -37,7 +37,7 @@ type IdmUser struct {
 
 // NewRubicon checks requests and returns an ident.Ident
 func NewRubicon(r *http.Request) ident.Ident {
-	c := ident.Config["rubicon"]
+	c := ident.GetConfig("rubicon")
 
 	var id string
 
@@ -126,4 +126,19 @@ func (u User) IsActive() bool {
 // GetDisplay returns human friendly name
 func (u User) GetDisplay() string {
 	return u.name
+}
+
+// GetGroups returns empty list
+func (u User) GetGroups() []string {
+	return []string{}
+}
+
+// GetRoles returns empty list
+func (u User) GetRoles() []string {
+	return []string{}
+}
+
+// GetMeta returns empty list
+func (u User) GetMeta() map[string]string {
+	return make(map[string]string)
 }

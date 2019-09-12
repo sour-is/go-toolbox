@@ -35,6 +35,21 @@ func (m NullUser) HasGroup(g ...string) bool {
 	return m.Active
 }
 
+// GetGroups returns empty list
+func (m NullUser) GetGroups() []string {
+	return []string{}
+}
+
+// GetRoles returns empty list
+func (m NullUser) GetRoles() []string {
+	return []string{}
+}
+
+// GetMeta returns empty list
+func (m NullUser) GetMeta() map[string]string {
+	return make(map[string]string)
+}
+
 // IsActive returns true if active
 func (m NullUser) IsActive() bool {
 	return m.Active

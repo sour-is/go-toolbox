@@ -31,7 +31,7 @@ func TestRubicon(t *testing.T) {
 	defer monkey.UnpatchAll()
 
 	Convey("On rubicon mock should register itself.", t, func() {
-		So(ident.IdentSet, ShouldContainKey, "rubicon")
+		So(ident.GetHandlers(), ShouldContainKey, "rubicon")
 	})
 
 	Convey("Given a valid request with config options", t, func() {

@@ -12,7 +12,7 @@ import (
 func TestMock(t *testing.T) {
 
 	Convey("On init mock should register itself.", t, func() {
-		So(ident.IdentSet, ShouldContainKey, "mock")
+		So(ident.GetHandlers(), ShouldContainKey, "mock")
 	})
 
 	Convey("Given a valid request with config options", t, func() {
@@ -32,8 +32,8 @@ func TestMock(t *testing.T) {
 			So(u.GetDisplay(), ShouldContainSubstring, "name")
 			So(u.GetDisplay(), ShouldContainSubstring, req.RemoteAddr)
 			So(u.IsActive(), ShouldBeTrue)
-			So(u.HasRole("any"), ShouldBeTrue)
-			So(u.HasGroup("any"), ShouldBeTrue)
+			So(u.HasRole("any"), ShouldBeFalse)
+			So(u.HasGroup("any"), ShouldBeFalse)
 		})
 	})
 }

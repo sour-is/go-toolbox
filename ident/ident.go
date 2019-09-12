@@ -23,57 +23,73 @@ import (
 type Ident interface {
 	GetIdentity() string
 	GetAspect() string
+	GetDisplay() string
+
+	GetGroups() []string
+	GetRoles() []string
+	GetMeta() map[string]string
 
 	HasRole(r ...string) bool
 	HasGroup(g ...string) bool
 
 	IsActive() bool
-	GetDisplay() string
 }
 
 // Anonymous is a logged out user
 var Anonymous = NewNullUser("anon", "none", "Guest User", false)
 
-// IdentConfig key values to pass to an ident handler
-type IdentConfig map[string]string
+// Config key values to pass to an ident handler
+type Config map[string]string
 
-// IdentConfigs configs for each handler
-type IdentConfigs map[string]IdentConfig
+// Configs configs for each handler
+type Configs map[string]Config
 
-// IdentHandler handler function to read ident from HTTP request
-type IdentHandler func(r *http.Request) Ident
+// Handler handler function to read ident from HTTP request
+type Handler func(r *http.Request) Ident
 
-// IdentSet set of handlers for ident
-var IdentSet = make(map[string]IdentHandler)
-
-// Config configs for handlers
-var Config = IdentConfigs{}
+var handlers = make(map[string]Handler)
+var configs = Configs{}
 
 // Register a ident handler
-func Register(name string, fn IdentHandler) {
+func Register(name string, fn Handler) {
 	name = strings.ToLower(name)
-	IdentSet[name] = fn
+	handlers[name] = fn
+}
+
+// GetConfigs that have been registered
+func GetConfigs() Configs {
+	return configs
+}
+
+// GetConfig that matches name
+func GetConfig(name string) Config {
+	return configs[name]
+}
+
+// GetHandlers get handlers that are registered
+func GetHandlers() map[string]Handler {
+	return handlers
 }
 
 // RegisterConfig for an ident handler
 func RegisterConfig(name string, config map[string]string) {
-	if _, ok := IdentSet[name]; !ok {
-		log.Fatalf("IDENT: No handler registered for %s", name)
+	if _, ok := handlers[name]; !ok {
+		log.Fatals("IDENT: No handler registered", "name", name)
 	}
 
-	log.Infof("IDENT: Registered config for %s.", name)
+	log.Infos("IDENT: Registered config", "name", name)
 
 	name = strings.ToLower(name)
-	Config[name] = config
+	configs[name] = config
 }
 
 // GetIdent read ident from a list of ident handlers
 func GetIdent(authList string, r *http.Request) Ident {
 	for _, name := range strings.Fields(authList) {
-		var i IdentHandler
+		var i Handler
 		var ok bool
 
-		if i, ok = IdentSet[name]; !ok {
+		if i, ok = handlers[name]; !ok {
 			log.Errorf("GetIdentity Plugin [%s] does not exist!", name)
 			panic("GetIdentity Plugin does not exist!")
 		}

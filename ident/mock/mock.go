@@ -9,22 +9,34 @@ func init() {
 	ident.Register("mock", CheckMock)
 }
 
-// MockUser implements ident.Ident
-type MockUser struct {
+// User implements ident.Ident
+type User struct {
 	ident  string
 	aspect string
 	name   string
+	groups map[string]struct{}
+	roles  map[string]struct{}
+	meta   map[string]string
 	active bool
 }
 
 // NewMock returns a new MockUser
-func NewMock(ident, aspect, name string, active bool) ident.Ident {
-	return MockUser{ident, aspect, name, active}
+func NewMock(ident, aspect, name string, groups []string, roles []string, meta map[string]string, active bool) ident.Ident {
+	r := make(map[string]struct{}, len(roles))
+	for _, name := range roles {
+		r[name] = struct{}{}
+	}
+	g := make(map[string]struct{}, len(groups))
+	for _, name := range groups {
+		g[name] = struct{}{}
+	}
+
+	return User{ident, aspect, name, g, r, meta, active}
 }
 
 // CheckMock checks the http request for mock username
 func CheckMock(r *http.Request) ident.Ident {
-	c := ident.Config["mock"]
+	c := ident.GetConfigs()["mock"]
 
 	crc := crc32.ChecksumIEEE([]byte(r.RemoteAddr))
 
@@ -36,35 +48,81 @@ func CheckMock(r *http.Request) ident.Ident {
 			r.RemoteAddr,
 			crc,
 		),
+		nil,
+		nil,
+		nil,
 		true)
 }
 
 // GetIdentity returns username
-func (m MockUser) GetIdentity() string {
+func (m User) GetIdentity() string {
 	return m.ident
 }
 
 // GetAspect returns aspect
-func (m MockUser) GetAspect() string {
+func (m User) GetAspect() string {
 	return m.aspect
 }
 
 // HasRole returns bool for tested roles
-func (m MockUser) HasRole(r ...string) bool {
-	return m.active
+func (m User) HasRole(lis ...string) bool {
+	if !m.active {
+		return false
+	}
+
+	for _, name := range lis {
+		if _, ok := m.roles[name]; ok {
+			return true
+		}
+	}
+
+	return false
 }
 
 // HasGroup returns bool for tested groups
-func (m MockUser) HasGroup(g ...string) bool {
-	return m.active
+func (m User) HasGroup(lis ...string) bool {
+	if !m.active {
+		return false
+	}
+
+	for _, name := range lis {
+		if _, ok := m.groups[name]; ok {
+			return true
+		}
+	}
+
+	return false
 }
 
 // IsActive returns bool for logged in state
-func (m MockUser) IsActive() bool {
+func (m User) IsActive() bool {
 	return m.active
 }
 
 // GetDisplay returns human friendly name
-func (m MockUser) GetDisplay() string {
+func (m User) GetDisplay() string {
 	return m.name
+}
+
+// GetGroups returns empty list
+func (m User) GetGroups() []string {
+	lis := make([]string, 0, len(m.roles))
+	for i := range m.roles {
+		lis = append(lis, i)
+	}
+	return lis
+}
+
+// GetRoles returns empty list
+func (m User) GetRoles() []string {
+	lis := make([]string, 0, len(m.groups))
+	for i := range m.roles {
+		lis = append(lis, i)
+	}
+	return lis
+}
+
+// GetMeta returns empty list
+func (m User) GetMeta() map[string]string {
+	return m.meta
 }

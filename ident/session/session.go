@@ -116,18 +116,6 @@ func NewSession(ident, aspect, display string, groups []string, roles []string, 
 		meta = make(map[string]string)
 	}
 
-	u := User{
-		Ident:  ident,
-		Aspect: aspect,
-		Name:   display,
-		Active: true,
-		Groups: make(map[string]struct{}),
-		Roles:  make(map[string]struct{}),
-		Meta:   meta,
-	}
-	u.Meta["session"] = "S" + uuid.V4()
-	u.Meta["cookie"] = "C" + uuid.V4()
-
 	if g, ok := userGroups[ident]; ok {
 		groups = append(groups, g...)
 	}
@@ -141,6 +129,18 @@ func NewSession(ident, aspect, display string, groups []string, roles []string, 
 			roles = append(roles, r...)
 		}
 	}
+
+	u := User{
+		Ident:  ident,
+		Aspect: aspect,
+		Name:   display,
+		Active: true,
+		Groups: make(map[string]struct{}, len(groups)),
+		Roles:  make(map[string]struct{}, len(roles)),
+		Meta:   meta,
+	}
+	u.Meta["session"] = "S" + uuid.V4()
+	u.Meta["cookie"] = "C" + uuid.V4()
 
 	for i := range groups {
 		u.Groups[groups[i]] = struct{}{}
@@ -188,11 +188,12 @@ func (u User) HasRole(r ...string) bool {
 }
 
 // GetRoles returns list of roles
-func (u User) GetRoles() (lis []string) {
+func (u User) GetRoles() []string {
+	lis := make([]string, 0, len(u.Roles))
 	for r := range u.Roles {
 		lis = append(lis, r)
 	}
-	return
+	return lis
 }
 
 // HasGroup returns true if any groups match
@@ -206,11 +207,17 @@ func (u User) HasGroup(g ...string) bool {
 }
 
 // GetGroups returns list of groups
-func (u User) GetGroups() (lis []string) {
+func (u User) GetGroups() []string {
+	lis := make([]string, 0, len(u.Groups))
 	for g := range u.Groups {
 		lis = append(lis, g)
 	}
-	return
+	return lis
+}
+
+// GetMeta returns additional meta info for user
+func (u User) GetMeta() map[string]string {
+	return u.Meta
 }
 
 // IsActive returns true if user is active

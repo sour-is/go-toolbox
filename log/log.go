@@ -220,6 +220,12 @@ func Errors(msg string, tags ...interface{}) { Outputs(logger, 1, event.VerbErro
 // Criticals structured debug message
 func Criticals(msg string, tags ...interface{}) { Outputs(logger, 1, event.VerbCritical, msg, tags...) }
 
+// Fatals structured debug message
+func Fatals(msg string, tags ...interface{}) {
+	Outputs(logger, 1, event.VerbCritical, msg, tags...)
+	os.Exit(1)
+}
+
 // These functions do nothing. It makes it easy to comment out
 // debug lines without having to remove the import.
 
@@ -285,3 +291,33 @@ func NilCriticalf(_ string, _ ...interface{}) {}
 
 // NilCriticalw does nothing.
 func NilCriticalw(_ io.Reader) {}
+
+// NilFatal does nothing.
+func NilFatal(_ ...interface{}) {}
+
+// NilFatalf does nothing.
+func NilFatalf(_ string, _ ...interface{}) {}
+
+// NilFatalw does nothing.
+func NilFatalw(_ io.Reader) {}
+
+// NilDebugs structured debug message
+func NilDebugs(msg string, tags ...interface{}) {}
+
+// NilInfos structured debug message
+func NilInfos(msg string, tags ...interface{}) {}
+
+// NilNotices structured debug message
+func NilNotices(msg string, tags ...interface{}) {}
+
+// NilWarnings structured debug message
+func NilWarnings(msg string, tags ...interface{}) {}
+
+// NilErrors structured debug message
+func NilErrors(msg string, tags ...interface{}) {}
+
+// NilCriticals structured debug message
+func NilCriticals(msg string, tags ...interface{}) {}
+
+// NilFatals structured debug message
+func NilFatals(msg string, tags ...interface{}) {}
