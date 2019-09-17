@@ -1,20 +1,4 @@
 ## merucry config
-type MercurySpace {
-    id:         ID!
-    space:      String!
-    tags:       [String!]!
-    notes:      [String!]!
-    list:       [MercuryValue!]!
-}
-
-type MercuryValue {
-    name:       String!
-    seq:        ID!
-    tags:       [String!]!
-    notes:      [String!]!
-    values:     [String!]!
-    value:      String!
-}
 
 extend type Query {
     config(space: String query: QueryInput): [MercurySpace!]!
@@ -25,14 +9,31 @@ extend type Mutation {
     writeConfigText(payload: String!): String!
 }
 
-input MercurySpaceInput {
+type MercurySpace @goModel(model: "sour.is/x/toolbox/mercury.Space") {
+    id:         ID!
+    space:      String!
+    tags:       [String!]!
+    notes:      [String!]!
+    list:       [MercuryValue!]!
+}
+
+type MercuryValue @goModel(model: "sour.is/x/toolbox/mercury.Value") {
+    name:       String!
+    seq:        ID!
+    tags:       [String!]!
+    notes:      [String!]!
+    values:     [String!]!
+    value:      String!
+}
+
+input MercurySpaceInput @goModel(model: "sour.is/x/toolbox/mercury.Space") {
     space:      String!
     tags:       [String!]!
     notes:      [String!]!
     list:       [MercuryValueInput!]!
 }
 
-input MercuryValueInput {
+input MercuryValueInput @goModel(model: "sour.is/x/toolbox/mercury.Value") {
     name:       String!
     tags:       [String!]!
     notes:      [String!]!

@@ -10,7 +10,7 @@ extend type Subscription {
     mqtt(topic: String! qos: Int = 0): MQTTMessage!
 }
 
-type MQTTMessage {
+type MQTTMessage @goModel(model: "sour.is/x/toolbox/mqtt.GraphMessage") {
     topic: String!
     message: String!
 }

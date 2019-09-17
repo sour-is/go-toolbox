@@ -1,0 +1,63 @@
+directive @goModel(model: String, models: [String!]) on OBJECT 
+    | INPUT_OBJECT 
+    | SCALAR 
+    | ENUM 
+    | INTERFACE 
+    | UNION
+
+directive @goField(forceResolver: Boolean, name: String) on INPUT_FIELD_DEFINITION 
+    | FIELD_DEFINITION
+
+"""Integers"""
+scalar Int @goModel(model: "sour.is/x/toolbox/gql.Int64")
+scalar Int64 @goModel(model: "sour.is/x/toolbox/gql.Int64")
+scalar Int32 @goModel(model: "sour.is/x/toolbox/gql.Int32")
+
+"""Unsigned Integers"""
+scalar Uint @goModel(model: "sour.is/x/toolbox/gql.Uint64")
+scalar Uint64 @goModel(model: "sour.is/x/toolbox/gql.Uint64")
+scalar Uint32 @goModel(model: "sour.is/x/toolbox/gql.Uint32")
+
+"""Null Integers"""
+scalar NullInt  @goModel(model: "sour.is/x/toolbox/gql.NullInt64")
+scalar NullInt64  @goModel(model: "sour.is/x/toolbox/gql.NullInt64")
+
+"""Null Timestamp"""
+scalar Timestamp  @goModel(model: "sour.is/x/toolbox/gql.NullTime")
+
+"""QueryInput allows you to filter and page the search."""
+input QueryInput @goModel(model: "sour.is/x/toolbox/gql.QueryInput") {
+
+    """
+    Composed of a rsql filter
+
+    example: `field==value;other!=something`
+
+    | Operator   | Description |
+    | :--------: | :---------- |
+    |  ;   and   | Logical AND |
+    |  ,   or    | Logical OR  |
+    |  ==  =eq=  | Equals      |
+    |  !=  =neq= | Not Equals  |
+    |  >   =gt=  | Greater     |
+    |  <   =lt=  | Less        |
+    |  >=  =ge=  | Greater or Equal |
+    |  <=  =le=  | Less or Equal    |
+    |  [  ]      | Lists of values `[ 1, 2, 3 ]` |
+    |  (  )      | Overide op order |
+    """
+    
+    search: String
+
+    """Limit the number of results to at most `limit`"""
+
+    limit:  Uint
+
+    """Where to start `limit`"""
+
+    offset: Uint
+
+    """Sort by `column asc` or `column desc`"""
+
+    sort:   [String!]
+}
