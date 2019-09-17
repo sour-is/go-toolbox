@@ -9,7 +9,7 @@ directive @goField(forceResolver: Boolean, name: String) on INPUT_FIELD_DEFINITI
     | FIELD_DEFINITION
 
 """Integers"""
-scalar Int @goModel(model: "sour.is/x/toolbox/gql.Int64")
+#scalar Int @goModel(model: "sour.is/x/toolbox/gql.Int64")
 scalar Int64 @goModel(model: "sour.is/x/toolbox/gql.Int64")
 scalar Int32 @goModel(model: "sour.is/x/toolbox/gql.Int32")
 
@@ -24,6 +24,7 @@ scalar NullInt64  @goModel(model: "sour.is/x/toolbox/gql.NullInt64")
 
 """Null Timestamp"""
 scalar Timestamp  @goModel(model: "sour.is/x/toolbox/gql.NullTime")
+scalar Date  @goModel(model: "sour.is/x/toolbox/gql.NullTime")
 
 """QueryInput allows you to filter and page the search."""
 input QueryInput @goModel(model: "sour.is/x/toolbox/gql.QueryInput") {
