@@ -62,3 +62,13 @@ input QueryInput @goModel(model: "sour.is/x/toolbox/gql.QueryInput") {
 
     sort:   [String!]
 }
+
+"""Info about running server"""
+type AppInfo @goModel(model: "sour.is/x/toolbox/gql.AppInfo") {
+    """Application Name"""
+    name:    String!
+    """Version number"""
+    version: String!
+    """Build information"""
+    build:   String!
+}
