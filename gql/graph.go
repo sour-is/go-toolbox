@@ -6,11 +6,11 @@ import (
 	"github.com/spf13/viper"
 )
 
-// GraphGql Implements the AppInfo method for query
-type GraphGql struct{}
+// GraphGQL Implements the AppInfo method for query
+type GraphGQL struct{}
 
 // AppInfo returns app information
-func (GraphGql) AppInfo(ctx context.Context) (s *AppInfo, err error) {
+func (GraphGQL) AppInfo(ctx context.Context) (s *AppInfo, err error) {
 	return getAppInfo()
 }
 
