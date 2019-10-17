@@ -72,3 +72,7 @@ type AppInfo @goModel(model: "sour.is/x/toolbox/gql.AppInfo") {
     """Build information"""
     build:   String!
 }
+
+extend type Query {
+    appInfo: AppInfo!
+}
