@@ -1,8 +1,9 @@
 package mb
 
 import (
-	"fmt"
 	"testing"
+
+	. "github.com/smartystreets/goconvey/convey"
 )
 
 func TestBuilder(t *testing.T) {
@@ -24,6 +25,16 @@ func TestBuilder(t *testing.T) {
 			),
 		),
 	)
+	result := `# This is a Space Note
+@is.sour.registry meta
+# Key note about such and such
+key-name meta-key  :green
+# Key note about such and such
+key-name meta-key  :blue
 
-	fmt.Println(tt.String())
+`
+
+	Convey("Evaluate Mercury Builder", t, func() {
+		So(tt.String(), ShouldEqual, result)
+	})
 }
