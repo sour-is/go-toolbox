@@ -83,6 +83,60 @@ func (s Space) FirstValue(name string) Value {
 	return Value{}
 }
 
+type Config []*Space
+
+func NewConfig(spaces ...*Space) Config {
+	return spaces
+}
+func (c Config) ArraySpace() (arr ArraySpace) {
+	for i := range c {
+		arr = append(arr, *c[i])
+	}
+
+	return
+}
+func (c *Config) AddSpace(spaces ...*Space) *Config {
+	*c = append(*c, spaces...)
+	return c
+}
+func NewSpace(space string) *Space {
+	return &Space{Space: space}
+}
+func (s *Space) SetTags(tags ...string) *Space {
+	s.Tags = tags
+	return s
+}
+func (s *Space) AddTags(tags ...string) *Space {
+	s.Tags = append(s.Tags, tags...)
+	return s
+}
+func (s *Space) SetNotes(notes ...string) *Space {
+	s.Notes = notes
+	return s
+}
+func (s *Space) AddNotes(notes ...string) *Space {
+	s.Notes = append(s.Notes, notes...)
+	return s
+}
+func (s *Space) SetKeys(keys ...*Value) *Space {
+	for i := range keys {
+		k := *keys[i]
+		k.Seq = uint64(i)
+		s.List = append(s.List, k)
+	}
+
+	return s
+}
+func (s *Space) AddKeys(keys ...*Value) *Space {
+	l := uint64(len(s.List))
+	for i := range keys {
+		k := *keys[i]
+		k.Seq = uint64(i) + l
+		s.List = append(s.List, k)
+	}
+	return s
+}
+
 // SpaceMap generic map of space values
 type SpaceMap map[string]Space
 
@@ -408,4 +462,32 @@ func (v Value) First() string {
 // Join values with newlines.
 func (v Value) Join() string {
 	return strings.Join(v.Values, "\n")
+}
+
+func NewValue(name string) *Value {
+	return &Value{Name: name}
+}
+func (v *Value) SetTags(tags ...string) *Value {
+	v.Tags = tags
+	return v
+}
+func (v *Value) AddTags(tags ...string) *Value {
+	v.Tags = append(v.Tags, tags...)
+	return v
+}
+func (v *Value) SetNotes(notes ...string) *Value {
+	v.Notes = notes
+	return v
+}
+func (v *Value) AddNotes(notes ...string) *Value {
+	v.Notes = append(v.Notes, notes...)
+	return v
+}
+func (v *Value) SetValues(values ...string) *Value {
+	v.Values = values
+	return v
+}
+func (v *Value) AddValues(values ...string) *Value {
+	v.Values = append(v.Values, values...)
+	return v
 }

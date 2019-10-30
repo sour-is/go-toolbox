@@ -86,3 +86,23 @@ func TestArraySpace_String(t *testing.T) {
 		}
 	})
 }
+
+func TestCreateSpace(t *testing.T) {
+	c := NewConfig(
+		NewSpace("net.dn42.registry").
+			SetNotes(
+				"This is a note",
+				"More notes here",
+			).
+			SetTags("tag1").
+			SetKeys(
+				NewValue("key1").AddNotes("notes about value").AddTags("tag2"),
+			),
+	)
+
+	c.AddSpace(
+		NewSpace("test").AddTags("tag"),
+	)
+
+	t.Log(c.ArraySpace().String())
+}
