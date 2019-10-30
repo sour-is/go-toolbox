@@ -69,7 +69,7 @@ func Test_appConfig_GetIndex(t *testing.T) {
 	tests := []struct {
 		name    string
 		args    args
-		wantLis mercury.ArraySpace
+		wantLis mercury.Config
 	}{
 		{"nil", args{
 			nil,
@@ -79,7 +79,7 @@ func Test_appConfig_GetIndex(t *testing.T) {
 		{"app.settings", args{
 			mercury.ParseNamespace("app.settings"),
 			nil,
-		}, mercury.ArraySpace{mercury.Space{Space: "app.settings"}}},
+		}, mercury.Config{&mercury.Space{Space: "app.settings"}}},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -100,7 +100,7 @@ func Test_appConfig_GetObjects(t *testing.T) {
 	tests := []struct {
 		name    string
 		args    args
-		wantLis mercury.ArraySpace
+		wantLis mercury.Config
 	}{
 		{"nil", args{
 			nil,
@@ -112,7 +112,7 @@ func Test_appConfig_GetObjects(t *testing.T) {
 			mercury.ParseNamespace("app.settings"),
 			nil,
 			nil,
-		}, mercury.ArraySpace{mercury.Space{Space: "app.settings", List: []mercury.Value{{Name: "app.setting", Values: []string{"TRUE"}}}}}},
+		}, mercury.Config{&mercury.Space{Space: "app.settings", List: []mercury.Value{{Name: "app.setting", Values: []string{"TRUE"}}}}}},
 	}
 	for _, tt := range tests {
 		viper.Set("app.setting", "TRUE")

@@ -32,25 +32,25 @@ type appConfig struct {
 }
 
 // Index returns nil
-func (appConfig) GetIndex(search mercury.NamespaceSearch, _ *rsql.Program) (lis mercury.ArraySpace) {
+func (appConfig) GetIndex(search mercury.NamespaceSearch, _ *rsql.Program) (lis mercury.Config) {
 
 	if search.Match(appDotSettings) {
-		lis = append(lis, mercury.Space{Space: appDotSettings})
+		lis = append(lis, &mercury.Space{Space: appDotSettings})
 	}
 
 	if search.Match(appDotPriority) {
-		lis = append(lis, mercury.Space{Space: appDotPriority})
+		lis = append(lis, &mercury.Space{Space: appDotPriority})
 	}
 
 	if search.Match(appDotHost) {
-		lis = append(lis, mercury.Space{Space: appDotHost})
+		lis = append(lis, &mercury.Space{Space: appDotHost})
 	}
 
 	return
 }
 
 // Objects returns nil
-func (appConfig) GetObjects(search mercury.NamespaceSearch, _ *rsql.Program, _ []string) (lis mercury.ArraySpace) {
+func (appConfig) GetObjects(search mercury.NamespaceSearch, _ *rsql.Program, _ []string) (lis mercury.Config) {
 
 	if search.Match(appDotSettings) {
 		space := mercury.Space{
@@ -83,7 +83,7 @@ func (appConfig) GetObjects(search mercury.NamespaceSearch, _ *rsql.Program, _ [
 			})
 		}
 
-		lis = append(lis, space)
+		lis = append(lis, &space)
 	}
 
 	if search.Match(appDotPriority) {
@@ -99,7 +99,7 @@ func (appConfig) GetObjects(search mercury.NamespaceSearch, _ *rsql.Program, _ [
 			})
 		}
 
-		lis = append(lis, space)
+		lis = append(lis, &space)
 	}
 
 	if search.Match(appDotHost) {
@@ -164,7 +164,7 @@ func (appConfig) GetObjects(search mercury.NamespaceSearch, _ *rsql.Program, _ [
 				},
 			}
 
-			lis = append(lis, space)
+			lis = append(lis, &space)
 		}
 	}
 

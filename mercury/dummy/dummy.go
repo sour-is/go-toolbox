@@ -10,13 +10,13 @@ import (
 type IndexDummy struct{}
 
 // GetIndex returns nil
-func (IndexDummy) GetIndex(mercury.NamespaceSearch, *rsql.Program) mercury.ArraySpace { return nil }
+func (IndexDummy) GetIndex(mercury.NamespaceSearch, *rsql.Program) mercury.Config { return nil }
 
 // ObjectsDummy implements Handler.Objects
 type ObjectsDummy struct{}
 
 // GetObjects returns nil
-func (ObjectsDummy) GetObjects(mercury.NamespaceSearch, *rsql.Program, []string) mercury.ArraySpace {
+func (ObjectsDummy) GetObjects(mercury.NamespaceSearch, *rsql.Program, []string) mercury.Config {
 	return nil
 }
 
@@ -24,7 +24,7 @@ func (ObjectsDummy) GetObjects(mercury.NamespaceSearch, *rsql.Program, []string)
 type WriteDummy struct{}
 
 // WriteObjects returns nil
-func (WriteDummy) WriteObjects(mercury.ArraySpace) error { return nil }
+func (WriteDummy) WriteObjects(mercury.Config) error { return nil }
 
 // RulesDummy implements Handler.Rules
 type RulesDummy struct{}

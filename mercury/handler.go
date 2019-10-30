@@ -13,9 +13,9 @@ import (
 
 // Handler interface for backends
 type Handler interface {
-	GetIndex(NamespaceSearch, *rsql.Program) ArraySpace
-	GetObjects(NamespaceSearch, *rsql.Program, []string) ArraySpace
-	WriteObjects(ArraySpace) error
+	GetIndex(NamespaceSearch, *rsql.Program) Config
+	GetObjects(NamespaceSearch, *rsql.Program, []string) Config
+	WriteObjects(Config) error
 	GetRules(ident.Ident) Rules
 	GetNotify(string) ListNotify
 }
@@ -68,7 +68,7 @@ func (hl HandlerList) Less(i, j int) bool {
 func (hl HandlerList) Swap(i, j int) { hl[i], hl[j] = hl[j], hl[i] }
 
 // GetIndex query each handler that match namespace.
-func (hl HandlerList) GetIndex(match, search string) (lis ArraySpace) {
+func (hl HandlerList) GetIndex(match, search string) (lis Config) {
 	spec := ParseNamespace(match)
 	pgm := rsql.DefaultParse(search)
 	matches := make([]NamespaceSearch, len(hl))
@@ -98,7 +98,7 @@ func (hl HandlerList) GetIndex(match, search string) (lis ArraySpace) {
 // Search query each handler with a key=value search
 
 // GetObjects query each handler that match for fully qualified namespaces.
-func (hl HandlerList) GetObjects(match, search, fields string) (out ArraySpace) {
+func (hl HandlerList) GetObjects(match, search, fields string) (out Config) {
 	spec := ParseNamespace(match)
 	pgm := rsql.DefaultParse(search)
 	flds := strings.Split(fields, ",")
@@ -127,8 +127,8 @@ func (hl HandlerList) GetObjects(match, search, fields string) (out ArraySpace) 
 }
 
 // WriteObjects write objects to backends
-func (hl HandlerList) WriteObjects(spaces ArraySpace) error {
-	matches := make([]ArraySpace, len(hl))
+func (hl HandlerList) WriteObjects(spaces Config) error {
+	matches := make([]Config, len(hl))
 
 	for _, s := range spaces {
 		for i, hldr := range hl {

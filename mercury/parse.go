@@ -32,7 +32,7 @@ func parseText(body io.Reader) (config SpaceMap, err error) {
 		}
 
 		if strings.HasPrefix(line, "@") {
-			var c Space
+			var c *Space
 			var ok bool
 
 			sp := strings.Fields(strings.TrimPrefix(line, "@"))
@@ -40,7 +40,7 @@ func parseText(body io.Reader) (config SpaceMap, err error) {
 			space = sp[0]
 
 			if c, ok = config[space]; !ok {
-				c = Space{Space: space}
+				c = &Space{Space: space}
 			}
 
 			c.Notes = append(make([]string, 0, len(notes)), notes...)
@@ -63,11 +63,11 @@ func parseText(body io.Reader) (config SpaceMap, err error) {
 		}
 
 		if strings.TrimSpace(sp[0]) == "" {
-			var c Space
+			var c *Space
 			var ok bool
 
 			if c, ok = config[space]; !ok {
-				c = Space{Space: space}
+				c = &Space{Space: space}
 			}
 
 			c.List[len(c.List)-1].Values = append(c.List[len(c.List)-1].Values, sp[1])
@@ -82,11 +82,11 @@ func parseText(body io.Reader) (config SpaceMap, err error) {
 			tags = fields[1:]
 		}
 
-		var c Space
+		var c *Space
 		var ok bool
 
 		if c, ok = config[space]; !ok {
-			c = Space{Space: space}
+			c = &Space{Space: space}
 		}
 
 		seq++

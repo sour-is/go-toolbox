@@ -19,21 +19,21 @@ type config struct {
 	dummy.NotifyDummy
 }
 
-func (config) GetIndex(search mercury.NamespaceSearch, _ *rsql.Program) (lis mercury.ArraySpace) {
+func (config) GetIndex(search mercury.NamespaceSearch, _ *rsql.Program) (lis mercury.Config) {
 	registry := stats.GetRegistry()
 	for k := range registry {
 		name := "stats." + k
 		if search.Match(name) {
 			space := mercury.Space{}
 			space.Space = name
-			lis = append(lis, space)
+			lis = append(lis, &space)
 		}
 	}
 
 	return
 }
 
-func (config) GetObjects(search mercury.NamespaceSearch, _ *rsql.Program, _ []string) (lis mercury.ArraySpace) {
+func (config) GetObjects(search mercury.NamespaceSearch, _ *rsql.Program, _ []string) (lis mercury.Config) {
 	registry := stats.GetRegistry()
 
 	for k, fn := range registry {
@@ -43,7 +43,7 @@ func (config) GetObjects(search mercury.NamespaceSearch, _ *rsql.Program, _ []st
 			space := mercury.Space{}
 			space.Space = name
 			space.List = exp.Exposition().ToSpaceValues()
-			lis = append(lis, space)
+			lis = append(lis, &space)
 		}
 	}
 

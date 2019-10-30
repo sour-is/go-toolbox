@@ -330,7 +330,7 @@ const (
 )
 
 // WriteConfig writes a config map to database
-func WriteConfig(tx *dbm.Tx, config mercury.ArraySpace) (err error) {
+func WriteConfig(tx *dbm.Tx, config mercury.Config) (err error) {
 	d := dbm.GetDbInfo(Space{})
 
 	// Delete spaces that are completely empty.

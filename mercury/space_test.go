@@ -7,14 +7,14 @@ import (
 	. "github.com/smartystreets/goconvey/convey"
 )
 
-func TestArraySpace_String(t *testing.T) {
+func TestConfig_String(t *testing.T) {
 	tests := []struct {
-		value ArraySpace
+		value Config
 		want  string
 	}{
 		{
-			[]Space{
-				{
+			[]*Space{
+				&Space{
 					Space: "space",
 					Tags:  []string{},
 					Notes: []string{},
@@ -33,8 +33,8 @@ func TestArraySpace_String(t *testing.T) {
 		},
 
 		{
-			[]Space{
-				{
+			[]*Space{
+				&Space{
 					Space: "space",
 					Tags:  []string{},
 					Notes: []string{},
@@ -53,8 +53,8 @@ func TestArraySpace_String(t *testing.T) {
 		},
 
 		{
-			[]Space{
-				{
+			[]*Space{
+				&Space{
 					Space: "space",
 					Notes: []string{"notes"},
 					Tags:  []string{},
@@ -64,8 +64,8 @@ func TestArraySpace_String(t *testing.T) {
 		},
 
 		{
-			[]Space{
-				{
+			[]*Space{
+				&Space{
 					Space: "space",
 					Notes: []string{"notes"},
 					Tags:  []string{"tag"},
@@ -104,5 +104,5 @@ func TestCreateSpace(t *testing.T) {
 		NewSpace("test").AddTags("tag"),
 	)
 
-	t.Log(c.ArraySpace().String())
+	t.Log(c.String())
 }

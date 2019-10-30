@@ -170,7 +170,7 @@ func postConfig(w httpsrv.ResponseWriter, r *http.Request, id ident.Ident) {
 		}
 		_ = rules
 		var notifyActive = make(map[string]struct{})
-		filteredConfigs := make(ArraySpace, 0)
+		var filteredConfigs Config
 		for ns, c := range config {
 			if !rules.GetRoles("NS", ns).HasRole("write") {
 				log.Debug("SKIP", ns)

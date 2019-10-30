@@ -17,7 +17,7 @@ func TestIndexDummy_GetIndex(t *testing.T) {
 	tests := []struct {
 		name string
 		args args
-		want mercury.ArraySpace
+		want mercury.Config
 	}{
 		{"default", args{nil, nil}, nil},
 	}
@@ -40,7 +40,7 @@ func TestObjectsDummy_GetObjects(t *testing.T) {
 	tests := []struct {
 		name string
 		args args
-		want mercury.ArraySpace
+		want mercury.Config
 	}{
 		{"default", args{nil, nil, nil}, nil},
 	}
@@ -56,7 +56,7 @@ func TestObjectsDummy_GetObjects(t *testing.T) {
 
 func TestWriteDummy_WriteObjects(t *testing.T) {
 	type args struct {
-		in0 mercury.ArraySpace
+		in0 mercury.Config
 	}
 	tests := []struct {
 		name    string

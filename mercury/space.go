@@ -88,13 +88,6 @@ type Config []*Space
 func NewConfig(spaces ...*Space) Config {
 	return spaces
 }
-func (c Config) ArraySpace() (arr ArraySpace) {
-	for i := range c {
-		arr = append(arr, *c[i])
-	}
-
-	return
-}
 func (c *Config) AddSpace(spaces ...*Space) *Config {
 	*c = append(*c, spaces...)
 	return c
@@ -138,26 +131,23 @@ func (s *Space) AddKeys(keys ...*Value) *Space {
 }
 
 // SpaceMap generic map of space values
-type SpaceMap map[string]Space
-
-// ArraySpace is a list of config spaces
-type ArraySpace []Space
+type SpaceMap map[string]*Space
 
 // Len implements Len for sort.interface
-func (lis ArraySpace) Len() int {
+func (lis Config) Len() int {
 	return len(lis)
 }
 
 // Less implements Less for sort.interface
-func (lis ArraySpace) Less(i, j int) bool {
+func (lis Config) Less(i, j int) bool {
 	return lis[i].Space < lis[j].Space
 }
 
 // Swap implements Swap for sort.interface
-func (lis ArraySpace) Swap(i, j int) { lis[i], lis[j] = lis[j], lis[i] }
+func (lis Config) Swap(i, j int) { lis[i], lis[j] = lis[j], lis[i] }
 
 // StringList returns the space names as a list
-func (lis ArraySpace) StringList() string {
+func (lis Config) StringList() string {
 	var buf strings.Builder
 	for _, o := range lis {
 		buf.WriteString(o.Space)
@@ -167,7 +157,7 @@ func (lis ArraySpace) StringList() string {
 }
 
 // String format config as string
-func (lis ArraySpace) String() string {
+func (lis Config) String() string {
 	attLen := 0
 	tagLen := 0
 
@@ -246,7 +236,7 @@ func (lis ArraySpace) String() string {
 }
 
 // EnvString format config as environ
-func (lis ArraySpace) EnvString() string {
+func (lis Config) EnvString() string {
 	var buf strings.Builder
 	for _, o := range lis {
 		for _, v := range o.List {
@@ -291,7 +281,7 @@ func (lis ArraySpace) EnvString() string {
 }
 
 // IniString format config as ini
-func (lis ArraySpace) IniString() string {
+func (lis Config) IniString() string {
 	var buf strings.Builder
 	for _, o := range lis {
 		buf.WriteRune('[')
@@ -332,7 +322,7 @@ func (lis ArraySpace) IniString() string {
 	return buf.String()
 }
 
-func (lis ArraySpace) accessFilter(id ident.Ident) (out ArraySpace, err error) {
+func (lis Config) accessFilter(id ident.Ident) (out Config, err error) {
 	rules := Registry.GetRules(id)
 
 	accessList := make(map[string]struct{})
@@ -351,7 +341,7 @@ func (lis ArraySpace) accessFilter(id ident.Ident) (out ArraySpace, err error) {
 	return
 }
 
-func (rules Rules) filterSpace(lis ArraySpace) (out ArraySpace, err error) {
+func (rules Rules) filterSpace(lis Config) (out Config, err error) {
 	accessList := make(map[string]struct{})
 	for _, o := range lis {
 		if _, ok := accessList[o.Space]; ok {
@@ -368,7 +358,7 @@ func (rules Rules) filterSpace(lis ArraySpace) (out ArraySpace, err error) {
 	return
 }
 
-func (lis ArraySpace) stringArray() []string {
+func (lis Config) stringArray() []string {
 	out := make([]string, 0, len(lis))
 	for _, o := range lis {
 		out = append(out, o.Space)
@@ -377,7 +367,7 @@ func (lis ArraySpace) stringArray() []string {
 }
 
 // ToSpaceMap formats as SpaceMap
-func (lis ArraySpace) ToSpaceMap() SpaceMap {
+func (lis Config) ToSpaceMap() SpaceMap {
 	out := make(SpaceMap)
 	for _, c := range lis {
 		out[c.Space] = c
@@ -386,8 +376,8 @@ func (lis ArraySpace) ToSpaceMap() SpaceMap {
 }
 
 // ToArray converts SpaceMap to ArraySpace
-func (m SpaceMap) ToArray() ArraySpace {
-	a := make(ArraySpace, 0, len(m))
+func (m SpaceMap) ToArray() Config {
+	a := make(Config, 0, len(m))
 	for _, s := range m {
 		a = append(a, s)
 	}

@@ -19,7 +19,7 @@ func TestParseText(t *testing.T) {
 			"space",
 			`@space`,
 			SpaceMap{
-				"space": Space{Space: "space", Tags: []string{}, Notes: []string{}},
+				"space": &Space{Space: "space", Tags: []string{}, Notes: []string{}},
 			},
 			false,
 		},
@@ -27,7 +27,7 @@ func TestParseText(t *testing.T) {
 			"space tag",
 			`@space tag`,
 			SpaceMap{
-				"space": Space{Space: "space", Tags: []string{"tag"}, Notes: []string{}},
+				"space": &Space{Space: "space", Tags: []string{"tag"}, Notes: []string{}},
 			},
 			false,
 		},
@@ -35,7 +35,7 @@ func TestParseText(t *testing.T) {
 			"space tag note",
 			"# note\n@space tag",
 			SpaceMap{
-				"space": Space{Space: "space", Tags: []string{"tag"}, Notes: []string{"note"}},
+				"space": &Space{Space: "space", Tags: []string{"tag"}, Notes: []string{"note"}},
 			},
 			false,
 		},
@@ -43,7 +43,7 @@ func TestParseText(t *testing.T) {
 			"space tag note value",
 			"# note\n@space tag\n\nname :value",
 			SpaceMap{
-				"space": Space{
+				"space": &Space{
 					Space: "space",
 					Tags:  []string{"tag"},
 					Notes: []string{"note"},
@@ -58,7 +58,7 @@ func TestParseText(t *testing.T) {
 			"space tag note value tag note",
 			"# note1\n@space tag1\n\n# note2\nname tag2 :value",
 			SpaceMap{
-				"space": Space{
+				"space": &Space{
 					Space: "space",
 					Tags:  []string{"tag1"},
 					Notes: []string{"note1"},
@@ -73,7 +73,7 @@ func TestParseText(t *testing.T) {
 			"space tag note value tag note x2",
 			"# note1\n@space tag1\n\n# note2\nname tag2 :value\nname2 :value1\n:value2\n    :value3",
 			SpaceMap{
-				"space": Space{
+				"space": &Space{
 					Space: "space",
 					Tags:  []string{"tag1"},
 					Notes: []string{"note1"},

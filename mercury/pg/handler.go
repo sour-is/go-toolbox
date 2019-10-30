@@ -17,7 +17,7 @@ func init() {
 	mercury.Register("*", 1, postgresHandler{})
 }
 
-func (postgresHandler) GetIndex(search mercury.NamespaceSearch, pgm *rsql.Program) (lis mercury.ArraySpace) {
+func (postgresHandler) GetIndex(search mercury.NamespaceSearch, pgm *rsql.Program) (lis mercury.Config) {
 	where := getWhere(search, dbm.GetDbInfo(Space{}))
 	spaces, err := ListSpace(where, 0, 0, []string{"space asc"})
 	if err != nil {
@@ -26,7 +26,7 @@ func (postgresHandler) GetIndex(search mercury.NamespaceSearch, pgm *rsql.Progra
 	}
 
 	for _, s := range spaces {
-		lis = append(lis, mercury.Space{
+		lis = append(lis, &mercury.Space{
 			ID:    s.ID,
 			Space: s.Space,
 			Tags:  s.Tags,
@@ -37,7 +37,7 @@ func (postgresHandler) GetIndex(search mercury.NamespaceSearch, pgm *rsql.Progra
 	return
 }
 
-func (p postgresHandler) GetObjects(search mercury.NamespaceSearch, pgm *rsql.Program, fields []string) mercury.ArraySpace {
+func (p postgresHandler) GetObjects(search mercury.NamespaceSearch, pgm *rsql.Program, fields []string) mercury.Config {
 	idx := p.GetIndex(search, pgm)
 	spaceMap := make(map[uint64]int, len(idx))
 	for u, s := range idx {
@@ -79,7 +79,7 @@ func (postgresHandler) GetNotify(event string) mercury.ListNotify {
 	return GetNotify(event)
 }
 
-func (postgresHandler) WriteObjects(lis mercury.ArraySpace) error {
+func (postgresHandler) WriteObjects(lis mercury.Config) error {
 	err := dbm.Transaction(func(tx *dbm.Tx) error {
 		return WriteConfig(tx, lis)
 	})
