@@ -16,7 +16,7 @@ type NullTime struct {
 	Valid bool // Valid is true if String is not NULL
 }
 
-// Scan implements the Scanner interface for NullTime.
+// Scan implements the SQL Scanner interface for NullTime.
 func (n *NullTime) Scan(value interface{}) (err error) {
 	n.Valid = true
 
@@ -30,7 +30,7 @@ func (n *NullTime) Scan(value interface{}) (err error) {
 	return
 }
 
-// Value implements the driver Valuer interface.
+// Value implements the SQL driver Valuer interface.
 func (n NullTime) Value() (driver.Value, error) {
 	if !n.Valid {
 		return nil, nil
