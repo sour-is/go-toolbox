@@ -22,6 +22,7 @@ type model struct {
 
 type structMap struct {
 	Name   string
+	ID     string
 	Fields []structField
 	Table  bool
 	View   bool
@@ -76,7 +77,7 @@ func main() {
 				continue
 			}
 
-			smap.Table, smap.View, smap.Fields, smap.HasID = procStruct(st)
+			smap.Table, smap.View, smap.Fields, smap.HasID, smap.ID = procStruct(st)
 
 			if smap.Table == false && smap.View == false {
 				// No Table or View == Do not generate.
@@ -124,10 +125,11 @@ func main() {
 	}
 }
 
-func procStruct(st *ast.StructType) (table, view bool, fields []structField, hasID bool) {
+func procStruct(st *ast.StructType) (table, view bool, fields []structField, hasID bool, ID string) {
 	for _, field := range st.Fields.List {
 		for _, name := range field.Names {
 			if name.Name == "ID" {
+				ID = name.Name
 				hasID = true
 			}
 
@@ -137,10 +139,17 @@ func procStruct(st *ast.StructType) (table, view bool, fields []structField, has
 			if db := tag.Get("db"); strings.Contains(db, ",AUTO") {
 				auto = true
 			}
+
 			readonly := false
 			if db := tag.Get("db"); strings.Contains(db, ",RO") {
 				readonly = true
 			}
+
+			if db := tag.Get("db"); strings.Contains(db, ",ID") {
+				hasID = true
+				ID = name.Name
+			}
+
 			if tab := tag.Get("table"); tab != "" {
 				table = true
 			}
