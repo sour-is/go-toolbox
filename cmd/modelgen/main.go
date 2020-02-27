@@ -79,11 +79,11 @@ func main() {
 
 			smap.Table, smap.View, smap.Fields, smap.HasID, smap.ID = procStruct(st)
 
-			if smap.Table == false && smap.View == false {
+			if !smap.Table && !smap.View {
 				// No Table or View == Do not generate.
 				continue
 			}
-			if smap.Table == false && smap.View == true {
+			if !smap.Table && smap.View {
 				// View only == Only generate read items.
 				smap.ROnly = true
 			}
