@@ -9,7 +9,7 @@ extend type Mutation {
     writeConfigText(payload: String!): String!
 }
 
-type MercurySpace @goModel(model: "sour.is/x/toolbox/mercury.Space") {
+type MercurySpace implements Node @goModel(model: "sour.is/x/toolbox/mercury.Space") {
     id:         ID!
     space:      String!
     tags:       [String!]!
