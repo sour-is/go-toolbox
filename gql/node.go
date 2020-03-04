@@ -27,7 +27,7 @@ func SplitID(id string) ([]string, error) {
 }
 
 // NodeFn handles a Node request for ID
-type NodeFn func(ctx context.Context, id []string) (*Node, error)
+type NodeFn func(ctx context.Context, id []string) (Node, error)
 
 // GraphNode implements the node interface for Graphql
 type GraphNode struct {
@@ -49,7 +49,7 @@ func (nh *GraphNode) Register(name string, fn NodeFn) {
 }
 
 // Node handles request from graphql
-func (nh *GraphNode) Node(ctx context.Context, id string) (*Node, error) {
+func (nh *GraphNode) Node(ctx context.Context, id string) (Node, error) {
 	ids, err := SplitID(id)
 	if err != nil {
 		return nil, err
