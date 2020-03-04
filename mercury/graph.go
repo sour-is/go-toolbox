@@ -109,7 +109,7 @@ func (GraphMercury) Value(ctx context.Context, value *Value) (string, error) {
 	return strings.Join(value.Values, "\n"), nil
 }
 
-func NodeMercury(ctx context.Context, id []string) (gql.NodeInterface, error) {
+func NodeMercury(ctx context.Context, id []string) (gql.Node, error) {
 	switch id[0] {
 	case "MercurySpace":
 		if len(id) != 2 {

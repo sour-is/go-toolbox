@@ -1,11 +1,11 @@
-directive @goModel(model: String, models: [String!]) on OBJECT 
-    | INPUT_OBJECT 
-    | SCALAR 
-    | ENUM 
-    | INTERFACE 
+directive @goModel(model: String, models: [String!]) on OBJECT
+    | INPUT_OBJECT
+    | SCALAR
+    | ENUM
+    | INTERFACE
     | UNION
 
-directive @goField(forceResolver: Boolean, name: String) on INPUT_FIELD_DEFINITION 
+directive @goField(forceResolver: Boolean, name: String) on INPUT_FIELD_DEFINITION
     | FIELD_DEFINITION
 
 """Integers"""
@@ -47,7 +47,7 @@ input QueryInput @goModel(model: "sour.is/x/toolbox/gql.QueryInput") {
     |  [  ]      | Lists of values `[ 1, 2, 3 ]` |
     |  (  )      | Overide op order |
     """
-    
+
     search: String
 
     """Limit the number of results to at most `limit`"""
@@ -75,4 +75,15 @@ type AppInfo @goModel(model: "sour.is/x/toolbox/gql.AppInfo") {
 
 extend type Query {
     appInfo: AppInfo!
+}
+
+extend type Query {
+    node(id: ID!): Node
+}
+
+"""Node allows for this graphql instance to be federated with other instances
+    See: https://itnext.io/a-guide-to-graphql-schema-federation-part-1-995b639ac035
+"""
+interface Node @goModel(model: "sour.is/x/toolbox/gql.Node"){
+    id: ID!
 }
