@@ -27,7 +27,6 @@ func (postgresHandler) GetIndex(search mercury.NamespaceSearch, pgm *rsql.Progra
 
 	for _, s := range spaces {
 		lis = append(lis, &mercury.Space{
-			ID:    s.ID,
 			Space: s.Space,
 			Tags:  s.Tags,
 			Notes: s.Notes,
@@ -39,9 +38,9 @@ func (postgresHandler) GetIndex(search mercury.NamespaceSearch, pgm *rsql.Progra
 
 func (p postgresHandler) GetObjects(search mercury.NamespaceSearch, pgm *rsql.Program, fields []string) mercury.Config {
 	idx := p.GetIndex(search, pgm)
-	spaceMap := make(map[uint64]int, len(idx))
+	spaceMap := make(map[string]int, len(idx))
 	for u, s := range idx {
-		spaceMap[s.ID] = u
+		spaceMap[s.Space] = u
 	}
 
 	where := getWhere(search, dbm.GetDbInfo(Config{}))
@@ -52,8 +51,9 @@ func (p postgresHandler) GetObjects(search mercury.NamespaceSearch, pgm *rsql.Pr
 	}
 
 	for _, v := range values {
-		if u, ok := spaceMap[v.ID]; ok {
+		if u, ok := spaceMap[v.Space]; ok {
 			idx[u].List = append(idx[u].List, mercury.Value{
+				Space:  v.Space,
 				Name:   v.Name,
 				Seq:    v.Seq,
 				Notes:  v.Notes,

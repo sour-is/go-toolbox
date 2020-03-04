@@ -112,7 +112,7 @@ func Test_appConfig_GetObjects(t *testing.T) {
 			mercury.ParseNamespace("app.settings"),
 			nil,
 			nil,
-		}, mercury.Config{&mercury.Space{Space: "app.settings", List: []mercury.Value{{Name: "app.setting", Values: []string{"TRUE"}}}}}},
+		}, mercury.Config{&mercury.Space{Space: "app.settings", List: []mercury.Value{{Space: "app.settings", Name: "app.setting", Values: []string{"TRUE"}}}}}},
 	}
 	for _, tt := range tests {
 		viper.Set("app.setting", "TRUE")

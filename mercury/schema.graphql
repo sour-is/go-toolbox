@@ -18,8 +18,9 @@ type MercurySpace @goModel(model: "sour.is/x/toolbox/mercury.Space") {
 }
 
 type MercuryValue @goModel(model: "sour.is/x/toolbox/mercury.Value") {
+    id:         ID!
     name:       String!
-    seq:        ID!
+    seq:        Uint!
     tags:       [String!]!
     notes:      [String!]!
     values:     [String!]!

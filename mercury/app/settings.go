@@ -77,6 +77,7 @@ func (appConfig) GetObjects(search mercury.NamespaceSearch, _ *rsql.Program, _ [
 			}
 
 			space.List = append(space.List, mercury.Value{
+				Space:  appDotSettings,
 				Seq:    uint64(i),
 				Name:   key,
 				Values: val,
@@ -93,6 +94,7 @@ func (appConfig) GetObjects(search mercury.NamespaceSearch, _ *rsql.Program, _ [
 
 		for i, key := range mercury.Registry {
 			space.List = append(space.List, mercury.Value{
+				Space:  appDotPriority,
 				Seq:    uint64(i),
 				Name:   key.Match,
 				Values: []string{fmt.Sprint(key.Priority)},
@@ -113,51 +115,61 @@ func (appConfig) GetObjects(search mercury.NamespaceSearch, _ *rsql.Program, _ [
 			grp, _ := usr.GroupIds()
 			space.List = []mercury.Value{
 				{
+					Space:  appDotHost,
 					Seq:    1,
 					Name:   "hostname",
 					Values: []string{hostname},
 				},
 				{
+					Space:  appDotHost,
 					Seq:    2,
 					Name:   "username",
 					Values: []string{usr.Username},
 				},
 				{
+					Space:  appDotHost,
 					Seq:    3,
 					Name:   "uid",
 					Values: []string{usr.Uid},
 				},
 				{
+					Space:  appDotHost,
 					Seq:    4,
 					Name:   "gid",
 					Values: []string{usr.Gid},
 				},
 				{
+					Space:  appDotHost,
 					Seq:    5,
 					Name:   "display",
 					Values: []string{usr.Name},
 				},
 				{
+					Space:  appDotHost,
 					Seq:    6,
 					Name:   "home",
 					Values: []string{usr.HomeDir},
 				},
 				{
+					Space:  appDotHost,
 					Seq:    7,
 					Name:   "groups",
 					Values: grp,
 				},
 				{
+					Space:  appDotHost,
 					Seq:    8,
 					Name:   "pid",
 					Values: []string{fmt.Sprintf("%v", os.Getpid())},
 				},
 				{
+					Space:  appDotHost,
 					Seq:    9,
 					Name:   "wd",
 					Values: []string{wd},
 				},
 				{
+					Space:  appDotHost,
 					Seq:    10,
 					Name:   "environ",
 					Values: os.Environ(),

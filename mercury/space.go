@@ -9,11 +9,14 @@ import (
 
 // Space stores a registry of spaces
 type Space struct {
-	ID    uint64   `json:"-"`
 	Space string   `json:"space"`
 	Tags  []string `json:"tags"`
 	Notes []string `json:"notes"`
 	List  []Value  `json:"list"`
+}
+
+func (s *Space) ID() string {
+	return fmtID("MercurySpace:%v", s.Space)
 }
 
 // HasTag returns true if needle is found
@@ -386,11 +389,16 @@ func (m SpaceMap) ToArray() Config {
 
 // Value stores the attributes for space values
 type Value struct {
+	Space  string   `json:"-"`
 	Seq    uint64   `json:"-"`
 	Name   string   `json:"name"`
 	Values []string `json:"values"`
 	Notes  []string `json:"notes"`
 	Tags   []string `json:"tags"`
+}
+
+func (v *Value) ID() string {
+	return fmtID("MercurySpace:%v:%v", v.Space, v.Seq)
 }
 
 // HasTag returns true if needle is found

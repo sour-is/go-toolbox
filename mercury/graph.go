@@ -2,6 +2,9 @@ package mercury
 
 import (
 	"context"
+	"encoding/base64"
+	"fmt"
+	"strconv"
 	"strings"
 
 	"sour.is/x/toolbox/gql"
@@ -104,4 +107,53 @@ func (GraphMercury) Value(ctx context.Context, value *Value) (string, error) {
 		return "", nil
 	}
 	return strings.Join(value.Values, "\n"), nil
+}
+
+func fmtID(format string, args ...interface{}) string {
+	s := fmt.Sprintf(format, args...)
+
+	return base64.RawURLEncoding.EncodeToString([]byte(s))
+}
+
+func spaceFromID(id string) (string, error) {
+	s, err := base64.RawURLEncoding.DecodeString(id)
+	if err != nil {
+		return "", err
+	}
+	sp := strings.Split(string(s), ":")
+	switch len(sp) {
+	case 2:
+		if sp[0] != "MercurySpace" {
+			return "", fmt.Errorf("Invalid ID: %s", s)
+		}
+
+		return sp[1], nil
+
+	default:
+		return "", fmt.Errorf("Invalid ID: %s", s)
+	}
+}
+
+func valueFromID(id string) (string, uint64, error) {
+	s, err := base64.RawURLEncoding.DecodeString(id)
+	if err != nil {
+		return "", 0, err
+	}
+	sp := strings.Split(string(s), ":")
+	switch len(sp) {
+	case 3:
+		if sp[0] != "MercurySpace" {
+			return "", 0, fmt.Errorf("Invalid ID: %s", s)
+		}
+
+		var seq uint64
+		if seq, err = strconv.ParseUint(sp[2], 10, 64); err != nil {
+			return "", 0, fmt.Errorf("invalid ID: %s", s)
+		}
+
+		return sp[1], seq, nil
+
+	default:
+		return "", 0, fmt.Errorf("Invalid ID: %s", s)
+	}
 }
