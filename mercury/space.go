@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"strings"
 
+	"sour.is/x/toolbox/gql"
 	"sour.is/x/toolbox/ident"
 )
 
@@ -16,8 +17,10 @@ type Space struct {
 }
 
 func (s *Space) ID() string {
-	return fmtID("MercurySpace:%v", s.Space)
+	return gql.FmtID("MercurySpace:%v", s.Space)
 }
+
+func (s *Space) IsNode() {}
 
 // HasTag returns true if needle is found
 // If the needle ends with a / it will be treated
@@ -398,7 +401,7 @@ type Value struct {
 }
 
 func (v *Value) ID() string {
-	return fmtID("MercurySpace:%v:%v", v.Space, v.Seq)
+	return gql.FmtID("MercurySpace:%v:%v", v.Space, v.Seq)
 }
 
 // HasTag returns true if needle is found

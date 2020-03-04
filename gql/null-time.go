@@ -20,9 +20,9 @@ type NullTime struct {
 func (n *NullTime) Scan(value interface{}) (err error) {
 	n.Valid = true
 
-	switch value.(type) {
+	switch value := value.(type) {
 	case time.Time:
-		n.Time = value.(time.Time)
+		n.Time = value
 	default:
 		n.Time, n.Valid = time.Time{}, false
 	}

@@ -35,7 +35,6 @@ func (n Notify) sendNotify() (err error) {
 		RootCAs: caCertPool,
 	}
 
-	tlsConfig.BuildNameToCertificate()
 	transport := &http.Transport{TLSClientConfig: tlsConfig}
 
 	cl.Transport = transport

@@ -2,9 +2,7 @@ package mercury
 
 import (
 	"context"
-	"encoding/base64"
 	"fmt"
-	"strconv"
 	"strings"
 
 	"sour.is/x/toolbox/gql"
@@ -15,11 +13,20 @@ import (
 // GraphMercury implements the resolvers for gqlgen
 type GraphMercury struct{}
 
+func doConfig(user ident.Ident, space string) ([]*Space, error) {
+	rules := Registry.GetRules(user)
+
+	ns := ParseNamespace(space)
+	ns = rules.ReduceSearch(ns)
+
+	cfg := Registry.GetObjects(ns.String(), "", "")
+	return cfg, nil
+}
+
 // Config returns a list of config items
 func (GraphMercury) Config(ctx context.Context, search *string, query *gql.QueryInput) (lis []*Space, err error) {
 	user := ident.GetContextIdent(ctx)
 
-	rules := Registry.GetRules(user)
 	space := ""
 	if search != nil {
 		space = *search
@@ -28,12 +35,7 @@ func (GraphMercury) Config(ctx context.Context, search *string, query *gql.Query
 		space = "*"
 	}
 
-	ns := ParseNamespace(space)
-	ns = rules.ReduceSearch(ns)
-
-	cfg := Registry.GetObjects(ns.String(), "", "")
-
-	return cfg, nil
+	return doConfig(user, space)
 }
 
 // WriteConfigText saves a config set formated in text
@@ -64,7 +66,6 @@ func (GraphMercury) WriteConfig(ctx context.Context, config []*Space) (result st
 	var notifyActive = make(map[string]struct{})
 	var filteredConfigs Config
 	for _, c := range config {
-
 		log.Debug("CHECK ", c.Space, rules)
 		if !rules.GetRoles("NS", c.Space).HasRole("write") {
 			log.Debug("SKIP ", c.Space)
@@ -98,7 +99,6 @@ func (GraphMercury) WriteConfig(ctx context.Context, config []*Space) (result st
 	log.Debug("DONE!")
 
 	return "OK", nil
-
 }
 
 // Value returns a joined value
@@ -109,51 +109,25 @@ func (GraphMercury) Value(ctx context.Context, value *Value) (string, error) {
 	return strings.Join(value.Values, "\n"), nil
 }
 
-func fmtID(format string, args ...interface{}) string {
-	s := fmt.Sprintf(format, args...)
-
-	return base64.RawURLEncoding.EncodeToString([]byte(s))
-}
-
-func spaceFromID(id string) (string, error) {
-	s, err := base64.RawURLEncoding.DecodeString(id)
-	if err != nil {
-		return "", err
-	}
-	sp := strings.Split(string(s), ":")
-	switch len(sp) {
-	case 2:
-		if sp[0] != "MercurySpace" {
-			return "", fmt.Errorf("Invalid ID: %s", s)
+func NodeMercury(ctx context.Context, id []string) (gql.NodeInterface, error) {
+	switch id[0] {
+	case "MercurySpace":
+		if len(id) != 2 {
+			return nil, fmt.Errorf("ID missing space: %v", id)
 		}
 
-		return sp[1], nil
+		user := ident.GetContextIdent(ctx)
+		c, err := doConfig(user, id[1])
+		if err != nil {
+			return nil, err
+		}
 
+		if len(c) < 1 {
+			return nil, fmt.Errorf("Not Found: %v", id)
+		}
+
+		return c[0], nil
 	default:
-		return "", fmt.Errorf("Invalid ID: %s", s)
-	}
-}
-
-func valueFromID(id string) (string, uint64, error) {
-	s, err := base64.RawURLEncoding.DecodeString(id)
-	if err != nil {
-		return "", 0, err
-	}
-	sp := strings.Split(string(s), ":")
-	switch len(sp) {
-	case 3:
-		if sp[0] != "MercurySpace" {
-			return "", 0, fmt.Errorf("Invalid ID: %s", s)
-		}
-
-		var seq uint64
-		if seq, err = strconv.ParseUint(sp[2], 10, 64); err != nil {
-			return "", 0, fmt.Errorf("invalid ID: %s", s)
-		}
-
-		return sp[1], seq, nil
-
-	default:
-		return "", 0, fmt.Errorf("Invalid ID: %s", s)
+		return nil, fmt.Errorf("Unsupported Node Type: %v", id[0])
 	}
 }
