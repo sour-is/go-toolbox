@@ -16,6 +16,9 @@ type DbInfo struct {
 	GCols []string
 	index map[string]int
 	Auto  []string
+	ID    string
+	HasID bool
+	ROnly []string
 }
 
 // SCol returns the struct column names
@@ -82,12 +85,22 @@ func GetDbInfo(o interface{}) (d DbInfo) {
 			d.View = view
 		}
 
-		sp := append(strings.SplitN(field.Tag.Get("db"), ",", 2), "")
+		dbField := field.Tag.Get("db")
+		sp := append(strings.SplitN(dbField, ",", 2), "")
 
-		tag, opt := sp[0], sp[1]
+		tag := sp[0]
 
-		if opt == "AUTO" {
+		if strings.Contains(dbField, ",AUTO") {
 			d.Auto = append(d.Auto, field.Name)
+		}
+
+		if strings.Contains(dbField, ",RO") {
+			d.ROnly = append(d.ROnly, field.Name)
+		}
+
+		if strings.Contains(dbField, ",ID") {
+			d.HasID = true
+			d.ID = field.Name
 		}
 
 		json := field.Tag.Get("json")
