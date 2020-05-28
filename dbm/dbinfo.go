@@ -23,7 +23,7 @@ type DbInfo struct {
 }
 
 // SCol returns the struct column names
-func (d *DbInfo) SCol(column string) (s string, err error) {
+func (d DbInfo) SCol(column string) (s string, err error) {
 	idx, ok := d.Index(column)
 	if !ok {
 		err = fmt.Errorf("column not found on table: %v", column)
@@ -33,7 +33,7 @@ func (d *DbInfo) SCol(column string) (s string, err error) {
 }
 
 // GCol returns the graphql column names
-func (d *DbInfo) GCol(column string) (s string, err error) {
+func (d DbInfo) GCol(column string) (s string, err error) {
 	idx, ok := d.Index(column)
 	if !ok {
 		err = fmt.Errorf("column not found on table: %v", column)
@@ -43,7 +43,7 @@ func (d *DbInfo) GCol(column string) (s string, err error) {
 }
 
 // Col returns the mapped column names
-func (d *DbInfo) Col(column string) (s string, err error) {
+func (d DbInfo) Col(column string) (s string, err error) {
 	idx, ok := d.Index(column)
 	if !ok {
 		err = fmt.Errorf("column not found on table: %v", column)
@@ -53,7 +53,7 @@ func (d *DbInfo) Col(column string) (s string, err error) {
 }
 
 // ColPanic returns the mapped column names will panic if col does not exist
-func (d *DbInfo) ColPanic(column string) string {
+func (d DbInfo) ColPanic(column string) string {
 	idx, ok := d.Index(column)
 	if !ok {
 		err := fmt.Errorf("column not found on table: %v", column)
@@ -63,7 +63,7 @@ func (d *DbInfo) ColPanic(column string) string {
 }
 
 // Index returns the column number
-func (d *DbInfo) Index(column string) (idx int, ok bool) {
+func (d DbInfo) Index(column string) (idx int, ok bool) {
 	idx, ok = d.index[column]
 	return
 }
@@ -153,7 +153,7 @@ func GetDbInfo(o interface{}) DbInfo {
 }
 
 // StructMap accepts a struct and the columns to be set and returns a []interface{} that can be passed to a query scan
-func (d *DbInfo) StructMap(o interface{}, cols []string) (fields []string, targets []interface{}, err error) {
+func (d DbInfo) StructMap(o interface{}, cols []string) (fields []string, targets []interface{}, err error) {
 	if cols == nil {
 		cols = d.SCols
 	}
