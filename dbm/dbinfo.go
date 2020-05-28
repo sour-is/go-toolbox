@@ -69,8 +69,8 @@ func (d *DbInfo) Index(column string) (idx int, ok bool) {
 }
 
 // GetDbInfo builds a metadata struct
-func GetDbInfo(o interface{}) *DbInfo {
-	d := &DbInfo{}
+func GetDbInfo(o interface{}) DbInfo {
+	d := DbInfo{}
 	t := reflect.TypeOf(o)
 
 	d.Table = t.Name()
