@@ -13,7 +13,7 @@ ANSIBLE_HOST="phoenix"
 
 release: inc-patch
 	git commit -am "release version $(shell cat VERSION)"
-	git tag -a "v$(VERSION)" -m "tag version $(shell cat VERSION)"
+	git tag -a "v$(shell cat VERSION)" -m "tag version $(shell cat VERSION)"
 	git push
 	git push --tags
 
