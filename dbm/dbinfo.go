@@ -87,7 +87,7 @@ func GetDbInfo(o interface{}) DbInfo {
 			d.View = view
 		}
 
-		sp := append(strings.SplitN(field.Tag.Get("db"), ",", 2), "")
+		sp := append(strings.Split(field.Tag.Get("db"), ","), "")
 
 		tag := sp[0]
 
