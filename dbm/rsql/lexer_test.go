@@ -38,7 +38,7 @@ func TestReservedToken(t *testing.T) {
 	})
 }
 func TestNextToken(t *testing.T) {
-	input := `director=='name\'s';actor=eq="name's";Year=le=2000,Year>=2010;(one <= -1.0, two != true),three=in=(1,2,3)`
+	input := `director=='name\'s';actor=eq="name's";Year=le=2000,Year>=2010;(one <= -1.0, two != true),three=in=(1,2,3);c4==5`
 	tests := []struct {
 		expectedType    TokenType
 		expectedLiteral string
@@ -78,6 +78,10 @@ func TestNextToken(t *testing.T) {
 		{TokOR, ","},
 		{TokInteger, "3"},
 		{TokRParen, ")"},
+		{TokAND, ";"},
+		{TokIdent, "c4"},
+		{TokEQ, "=="},
+		{TokInteger, "5"},
 	}
 
 	Convey("Next Token Parsing", t, func() {

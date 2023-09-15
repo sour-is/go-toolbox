@@ -7,17 +7,19 @@ import (
 
 // Lexer reads tokens from input
 type Lexer struct {
-	input string
-	position int
+	input        string
+	position     int
 	readPosition int
-	rune rune
+	rune         rune
 }
+
 // NewLexer returns a new lexing generator
 func NewLexer(in string) *Lexer {
 	l := &Lexer{input: in}
 	l.readRune()
 	return l
 }
+
 // NextToken returns the next token from lexer
 func (l *Lexer) NextToken() Token {
 	var tok Token
@@ -60,22 +62,29 @@ func (l *Lexer) NextToken() Token {
 		} else {
 			tok = newToken(TokIllegal, l.rune)
 		}
-	case ';': tok = newToken(TokAND, l.rune)
-	case ',': tok = newToken(TokOR, l.rune)
-	case ')': tok = newToken(TokRParen, l.rune)
-	case '(': tok = newToken(TokLParen, l.rune)
-	case ']': tok = newToken(TokRBracket, l.rune)
-	case '[': tok = newToken(TokLBracket, l.rune)
-	case '~': tok = newToken(TokLIKE, l.rune)
+	case ';':
+		tok = newToken(TokAND, l.rune)
+	case ',':
+		tok = newToken(TokOR, l.rune)
+	case ')':
+		tok = newToken(TokRParen, l.rune)
+	case '(':
+		tok = newToken(TokLParen, l.rune)
+	case ']':
+		tok = newToken(TokRBracket, l.rune)
+	case '[':
+		tok = newToken(TokLBracket, l.rune)
+	case '~':
+		tok = newToken(TokLIKE, l.rune)
 	case '!':
 		if l.peekRune() == '=' {
 			r := l.rune
 			l.readRune()
-			tok.Type, tok.Literal = TokNEQ, string(r) + string(l.rune)
+			tok.Type, tok.Literal = TokNEQ, string(r)+string(l.rune)
 		} else if l.peekRune() == '~' {
 			r := l.rune
 			l.readRune()
-			tok.Type, tok.Literal = TokNLIKE, string(r) + string(l.rune)
+			tok.Type, tok.Literal = TokNLIKE, string(r)+string(l.rune)
 		} else {
 			tok = newToken(TokIllegal, l.rune)
 			return tok
@@ -84,7 +93,7 @@ func (l *Lexer) NextToken() Token {
 		if l.peekRune() == '=' {
 			r := l.rune
 			l.readRune()
-			tok.Type, tok.Literal = TokLE, string(r) + string(l.rune)
+			tok.Type, tok.Literal = TokLE, string(r)+string(l.rune)
 		} else {
 			tok = newToken(TokLT, l.rune)
 		}
@@ -92,14 +101,15 @@ func (l *Lexer) NextToken() Token {
 		if l.peekRune() == '=' {
 			r := l.rune
 			l.readRune()
-			tok.Type, tok.Literal = TokGE, string(r) + string(l.rune)
+			tok.Type, tok.Literal = TokGE, string(r)+string(l.rune)
 		} else {
 			tok = newToken(TokGT, l.rune)
 		}
 	case '"', '\'':
 		tok.Type = TokString
 		tok.Literal = l.readString(l.rune)
-	case 0: tok.Type, tok.Literal = TokEOF, ""
+	case 0:
+		tok.Type, tok.Literal = TokEOF, ""
 	default:
 		if isNumber(l.rune) {
 			var isFloat bool
@@ -153,7 +163,11 @@ func (l *Lexer) skipSpace() {
 
 func (l *Lexer) readIdentifier() string {
 	position := l.position
-	for isLetter(l.rune) {
+	if isLetter(l.rune) {
+		l.readRune()
+	}
+
+	for isLetter(l.rune) || isNumber(l.rune) {
 		l.readRune()
 	}
 
@@ -200,19 +214,25 @@ func (l *Lexer) readFIQL() Token {
 	l.readRune()
 	s := l.readIdentifier()
 	if l.rune != '=' {
-		return Token{TokIllegal, "=" + s }
+		return Token{TokIllegal, "=" + s}
 	}
 	l.readRune()
 
 	switch s {
-	case "eq": return Token{TokEQ, "=" + s + "="}
-	case "neq": return Token{TokNEQ, "=" + s + "="}
-	case "gt": return Token{TokGT, "=" + s + "="}
-	case "ge": return Token{TokGE, "=" + s + "="}
-	case "lt": return Token{TokLT, "=" + s + "="}
-	case "le": return Token{TokLE, "=" + s + "="}
+	case "eq":
+		return Token{TokEQ, "=" + s + "="}
+	case "neq":
+		return Token{TokNEQ, "=" + s + "="}
+	case "gt":
+		return Token{TokGT, "=" + s + "="}
+	case "ge":
+		return Token{TokGE, "=" + s + "="}
+	case "lt":
+		return Token{TokLT, "=" + s + "="}
+	case "le":
+		return Token{TokLE, "=" + s + "="}
 	default:
-		return Token{TokExtend, "=" + s + "=" }
+		return Token{TokExtend, "=" + s + "="}
 	}
 }
 
